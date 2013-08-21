@@ -1,24 +1,7 @@
 package com.harasoft.relaunch;
 
-import java.io.BufferedReader;
-import java.io.DataInputStream;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import android.app.Activity;
-import android.content.BroadcastReceiver;
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.SharedPreferences;
+import android.content.*;
 import android.graphics.Typeface;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
@@ -31,15 +14,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
-import android.widget.AbsListView;
-import android.widget.BaseAdapter;
-import android.widget.Button;
-import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ListView;
-import android.widget.TextView;
-import android.widget.Toast;
+import android.widget.*;
+
+import java.io.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Advanced extends Activity {
 	final static String TAG = "Advanced";
@@ -705,23 +687,31 @@ public class Advanced extends Activity {
 		wifiSetup.setOnClickListener(new View.OnClickListener() {
 
 			public void onClick(View v) {
-				if (DeviceInfo.EINK_NOOK) {
-					final Intent intent = new Intent(Intent.ACTION_MAIN, null);
-					intent.addCategory(Intent.CATEGORY_LAUNCHER);
-					// NOOK ST only!
-					final ComponentName cn = new ComponentName(
-							"com.android.settings",
-							"com.android.settings.wifi.Settings_Wifi_Settings");
-					intent.setComponent(cn);
-					intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-					startActivity(intent);
-				} else {
-					Toast.makeText(
-							Advanced.this,
-							getResources().getString(
-									R.string.jv_advanced_nook_only),
-							Toast.LENGTH_LONG).show();
-				}
+                if (DeviceInfo.EINK_SONY) {
+                    final Intent intent = new Intent(Intent.ACTION_MAIN, null);
+                    intent.addCategory(Intent.CATEGORY_LAUNCHER);
+                    // SONY PRS-Tx only!
+                    final ComponentName cn = new ComponentName(
+                            "com.sony.drbd.ebook.NetworkManagerSettings",
+                            "com.sony.drbd.ebook.NetworkManagerSettings.NMWirelessSetting");
+                    intent.setComponent(cn);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+                } else if (DeviceInfo.EINK_NOOK) {
+                    final Intent intent = new Intent(Intent.ACTION_MAIN, null);
+                    intent.addCategory(Intent.CATEGORY_LAUNCHER);
+                    // NOOK ST only!
+                    final ComponentName cn = new ComponentName(
+                            "com.android.settings",
+                            "com.android.settings.wifi.Settings_Wifi_Settings");
+                    intent.setComponent(cn);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+                } else {
+                    final Intent intent = new Intent(android.provider.Settings.ACTION_WIFI_SETTINGS);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(intent);
+                }
 			}
 		});
 
@@ -832,13 +822,8 @@ public class Advanced extends Activity {
 	@Override
 	protected void onDestroy() {
 		super.onDestroy();
-	}
-
-	@Override
-	protected void onStop() {
-		super.onStop();
-		unregisterReceiver(b1);
-		unregisterReceiver(b2);
+        unregisterReceiver(b1);
+        unregisterReceiver(b2);
 	}
 
 	@Override
