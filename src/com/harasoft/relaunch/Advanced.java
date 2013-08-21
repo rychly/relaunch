@@ -687,6 +687,7 @@ public class Advanced extends Activity {
 		wifiSetup.setOnClickListener(new View.OnClickListener() {
 
 			public void onClick(View v) {
+
                 if (DeviceInfo.EINK_SONY) {
                     final Intent intent = new Intent(Intent.ACTION_MAIN, null);
                     intent.addCategory(Intent.CATEGORY_LAUNCHER);
