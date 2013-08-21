@@ -57,7 +57,7 @@ public class DeviceInfo {
 		try {
 			return (String) Build.class.getField(fieldName).get(null);
 		} catch (Exception e) {
-			Log.d("cr3", "Exception while trying to check Build." + fieldName);
+			Log.d("relaunch", "Exception while trying to check Build." + fieldName);
 			return "";
 		}
 	}
