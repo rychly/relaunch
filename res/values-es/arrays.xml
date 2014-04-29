@@ -54,18 +54,6 @@
         <item>sysfs</item>
         <item>cgroup</item>
     </string-array>
-    <string-array name="GL16_modes_values">
-        <item>3</item>
-        <item>4</item>
-        <item>5</item>
-        <item>6</item>
-    </string-array>
-    <string-array name="GL16_modes_names">
-        <item>Calidad (CLEAR; mode 3)</item>
-        <item>Lento (ACTIVE_ALL; mode 4)</item>
-        <item>Rápido (ONESHOT_ALL; mode 5)</item>
-        <item>Calidad (CLEAR_ALL; mode 6)</item>
-    </string-array>
     <string-array name="einkUpdateMode_values">
         <item>-1</item>
         <item>0</item>
@@ -214,5 +202,16 @@
         <item>Fuerza a vertical</item>
         <item>Fuerza al paisaje</item>
     </string-array>
-
+    <string-array name="entries_lang">
+        <item>Sistema</item>
+        <item>English</item>
+        <item>Русский</item>
+        <item>Español</item>
+    </string-array> 
+    <string-array name="entryvalues_lang">
+        <item>default</item> 
+        <item>en</item>
+        <item>ru</item>
+        <item>es</item>
+    </string-array> 
 </resources>
