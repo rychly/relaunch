@@ -76,7 +76,7 @@
             android:layout_weight="1"
             android:background="@drawable/main_button"
             android:drawableLeft="@drawable/ci_ok"
-            android:text="@string/types_view_layout_ok" >
+            android:text="@string/app_ok" >
         </Button>
 
         <Button
@@ -100,7 +100,7 @@
             android:layout_weight="1"
             android:background="@drawable/main_button"
             android:drawableLeft="@drawable/ci_del"
-            android:text="@string/types_view_layout_cancel" >
+            android:text="@string/app_cancel" >
         </Button>
     </LinearLayout>
 

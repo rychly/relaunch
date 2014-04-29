@@ -54,18 +54,6 @@
         <item>sysfs</item>
         <item>cgroup</item>
     </string-array>
-    <string-array name="GL16_modes_values">
-        <item>3</item>
-        <item>4</item>
-        <item>5</item>
-        <item>6</item>
-    </string-array>
-    <string-array name="GL16_modes_names">
-        <item>CLEAR (mode 3)</item>
-        <item>ACTIVE_ALL (mode 4)</item>
-        <item>ONESHOT_ALL (mode 5)</item>
-        <item>CLEAR_ALL (mode 6)</item>
-    </string-array>
     <string-array name="einkUpdateMode_values">
         <item>-1</item>
         <item>0</item>
@@ -83,36 +71,48 @@
         <item>OPENN</item>
         <item>OPENMENU</item>
         <item>OPENSCREEN</item>
+        <item>DROPBOX</item>
+        <item>OPDS</item>
     </string-array>
     <string-array name="home_button_actions_names">
         <item>@string/arr_home_button_actions_names_1</item>
         <item>@string/arr_home_button_actions_names_2</item>
         <item>@string/arr_home_button_actions_names_3</item>
         <item>@string/arr_home_button_actions_names_4</item>
+        <item>@string/arr_home_button_actions_names_5</item>
+        <item>@string/arr_home_button_actions_names_6</item>
     </string-array>
     <string-array name="lru_button_actions_values">
         <item>NOTHING</item>
         <item>OPENN</item>
         <item>OPENMENU</item>
         <item>OPENSCREEN</item>
+        <item>DROPBOX</item>
+        <item>OPDS</item>
     </string-array>
     <string-array name="lru_button_actions_names">
         <item>@string/arr_lru_button_actions_names_1</item>
         <item>@string/arr_lru_button_actions_names_2</item>
         <item>@string/arr_lru_button_actions_names_3</item>
         <item>@string/arr_lru_button_actions_names_4</item>
+        <item>@string/arr_lru_button_actions_names_5</item>
+        <item>@string/arr_lru_button_actions_names_6</item>
     </string-array>
     <string-array name="fav_button_actions_values">
         <item>NOTHING</item>
         <item>OPENN</item>
         <item>OPENMENU</item>
         <item>OPENSCREEN</item>
+        <item>DROPBOX</item>
+        <item>OPDS</item>
     </string-array>
     <string-array name="fav_button_actions_names">
         <item>@string/arr_fav_button_actions_names_1</item>
         <item>@string/arr_fav_button_actions_names_2</item>
         <item>@string/arr_fav_button_actions_names_3</item>
         <item>@string/arr_fav_button_actions_names_4</item>
+        <item>@string/arr_fav_button_actions_names_5</item>
+        <item>@string/arr_fav_button_actions_names_6</item>
     </string-array>
     <string-array name="advanced_button_actions_values">
         <item>NOTHING</item>
@@ -121,6 +121,8 @@
         <item>POWEROFF</item>
         <item>SWITCHWIFI</item>
         <item>RUN</item>
+        <item>DROPBOX</item>
+        <item>OPDS</item>
     </string-array>
     <string-array name="advanced_button_actions_names">
         <item>@string/arr_advanced_button_actions_names_1</item>
@@ -129,6 +131,8 @@
         <item>@string/arr_advanced_button_actions_names_4</item>
         <item>@string/arr_advanced_button_actions_names_5</item>
         <item>@string/arr_advanced_button_actions_names_6</item>
+        <item>@string/arr_advanced_button_actions_names_7</item>
+        <item>@string/arr_advanced_button_actions_names_8</item>
     </string-array>
     <string-array name="settings_button_actions_values">
         <item>NOTHING</item>
@@ -137,6 +141,8 @@
         <item>POWEROFF</item>
         <item>SWITCHWIFI</item>
         <item>RUN</item>
+        <item>DROPBOX</item>
+        <item>OPDS</item>
     </string-array>
     <string-array name="settings_button_actions_names">
         <item>@string/arr_settings_button_actions_names_1</item>
@@ -145,6 +151,8 @@
         <item>@string/arr_settings_button_actions_names_4</item>
         <item>@string/arr_settings_button_actions_names_5</item>
         <item>@string/arr_settings_button_actions_names_6</item>
+        <item>@string/arr_settings_button_actions_names_7</item>
+        <item>@string/arr_settings_button_actions_names_8</item>
     </string-array>
     <string-array name="mem_button_actions_values">
         <item>NOTHING</item>
@@ -153,6 +161,8 @@
         <item>POWEROFF</item>
         <item>SWITCHWIFI</item>
         <item>RUN</item>
+        <item>DROPBOX</item>
+        <item>OPDS</item>
     </string-array>
     <string-array name="mem_button_actions_names">
         <item>@string/arr_mem_button_actions_names_1</item>
@@ -161,6 +171,8 @@
         <item>@string/arr_mem_button_actions_names_4</item>
         <item>@string/arr_mem_button_actions_names_5</item>
         <item>@string/arr_mem_button_actions_names_6</item>
+        <item>@string/arr_mem_button_actions_names_7</item>
+        <item>@string/arr_mem_button_actions_names_8</item>
     </string-array>
     <string-array name="bat_button_actions_values">
         <item>NOTHING</item>
@@ -169,6 +181,8 @@
         <item>POWEROFF</item>
         <item>SWITCHWIFI</item>
         <item>RUN</item>
+        <item>DROPBOX</item>
+        <item>OPDS</item>
     </string-array>
     <string-array name="bat_button_actions_names">
         <item>@string/arr_bat_button_actions_names_1</item>
@@ -177,6 +191,8 @@
         <item>@string/arr_bat_button_actions_names_4</item>
         <item>@string/arr_bat_button_actions_names_5</item>
         <item>@string/arr_bat_button_actions_names_6</item>
+        <item>@string/arr_bat_button_actions_names_7</item>
+        <item>@string/arr_bat_button_actions_names_8</item>
     </string-array>
     <string-array name="output_columns_values">
         <item>-1</item>
@@ -245,6 +261,50 @@
         <item>@string/arr_appfav_button_actions_names_2</item>
         <item>@string/arr_appfav_button_actions_names_3</item>
     </string-array>
-    
-    
+	<string-array name="entries_lang">
+        <item>System</item>
+        <item>English</item>
+        <item>Русский</item>
+        <item>Español</item>
+	</string-array> 
+	<string-array name="entryvalues_lang">
+		<item>default</item> 
+		<item>en</item>
+		<item>ru</item>
+		<item>es</item>
+	</string-array>
+    <string-array name="array_buttons_values">
+        <item>NOTHING</item>
+        <item>homeButtonDT</item>
+        <item>homeButtonLT</item>
+        <item>lruButtonDT</item>
+        <item>lruButtonLT</item>
+        <item>favButtonDT</item>
+        <item>favButtonLT</item>
+        <item>settingsButtonDT</item>
+        <item>settingsButtonLT</item>
+        <item>advancedButtonDT</item>
+        <item>advancedButtonLT</item>
+        <item>memButtonDT</item>
+        <item>memButtonLT</item>
+        <item>batButtonDT</item>
+        <item>batButtonLT</item>
+    </string-array>
+    <string-array name="array_buttons_names">
+        <item>@string/arr_einkUpdateMode_names_1</item>
+        <item>@string/pref_i_homeButtonDT_title</item>
+        <item>@string/pref_i_homeButtonLT_title</item>
+        <item>@string/pref_i_lruButtonDT_title</item>
+        <item>@string/pref_i_lruButtonLT_title</item>
+        <item>@string/pref_i_favButtonDT_title</item>
+        <item>@string/pref_i_favButtonLT_title</item>
+        <item>@string/pref_i_settingsButtonDT_title</item>
+        <item>@string/pref_i_settingsButtonLT_title</item>
+        <item>@string/pref_i_advancedButtonDT_title</item>
+        <item>@string/pref_i_advancedButtonLT_title</item>
+        <item>@string/pref_i_memButtonDT_title</item>
+        <item>@string/pref_i_memButtonLT_title</item>
+        <item>@string/pref_i_batButtonDT_title</item>
+        <item>@string/pref_i_batButtonLT_title</item>
+    </string-array>
 </resources>

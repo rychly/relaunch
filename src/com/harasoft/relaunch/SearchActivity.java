@@ -66,7 +66,7 @@ public class SearchActivity extends Activity {
 		pd.setCancelable(true);
 		// "Cancel"
 		pd.setButton(ProgressDialog.BUTTON_NEGATIVE,
-				getResources().getString(R.string.jv_search_cancel),
+				getResources().getString(R.string.app_cancel),
 				new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int which) {
 						stop_search = true;

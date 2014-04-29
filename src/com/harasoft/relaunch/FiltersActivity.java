@@ -43,8 +43,7 @@ public class FiltersActivity extends Activity {
 		public void onItemSelected(AdapterView<?> parent, View v1, int pos,
 				long row) {
 			if (position >= 0 && position < itemsArray.size()) {
-				itemsArray.set(position, new String[] { Integer.toString(pos),
-						itemsArray.get(position)[1] });
+				itemsArray.set(position, new String[] { Integer.toString(pos),itemsArray.get(position)[1] });
 				adapter.notifyDataSetChanged();
 			}
 		}
@@ -78,11 +77,9 @@ public class FiltersActivity extends Activity {
 			View v = vi.inflate(R.layout.filters_item, null);
 
 			Spinner methodSpn = (Spinner) v.findViewById(R.id.filters_method);
-			ImageButton rmBtn = (ImageButton) v
-					.findViewById(R.id.filters_delete);
+			ImageButton rmBtn = (ImageButton) v.findViewById(R.id.filters_delete);
 			Button valBtn = (Button) v.findViewById(R.id.filters_type);
-			TextView condTxt = (TextView) v
-					.findViewById(R.id.filters_condition);
+			TextView condTxt = (TextView) v.findViewById(R.id.filters_condition);
 
 			final String[] item = itemsArray.get(position);
 			if (item == null)
@@ -93,10 +90,10 @@ public class FiltersActivity extends Activity {
 			try {
 				spos = Integer.parseInt(item[0]);
 			} catch (NumberFormatException e) {
+                //
 			}
 
-			ArrayAdapter<CharSequence> sadapter = ArrayAdapter
-					.createFromResource(cntx, R.array.filter_values,
+			ArrayAdapter<CharSequence> sadapter = ArrayAdapter.createFromResource(cntx, R.array.filter_values,
 							android.R.layout.simple_spinner_item);
 			sadapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 			methodSpn.setAdapter(sadapter);
@@ -113,45 +110,37 @@ public class FiltersActivity extends Activity {
 			});
 
 			// Set value button
-			if (spos == app.FLT_SELECT || spos == app.FLT_NEW
-					|| spos == app.FLT_NEW_AND_READING) {
+			if (spos == app.FLT_SELECT) {
 				valBtn.setText("");
 				valBtn.setEnabled(false);
-			} else {
+			}else if(spos == app.FLT_NEW|| spos == app.FLT_NEW_AND_READING){
+                valBtn.setText("");
+                valBtn.setEnabled(false);
+                itemsArray.set(position,new String[] { item[0]," " });
+                adapter.notifyDataSetChanged();
+            }else{
 				valBtn.setText(item[1]);
 				valBtn.setEnabled(true);
+
 				valBtn.setOnClickListener(new View.OnClickListener() {
 					public void onClick(View v) {
-						AlertDialog.Builder builder = new AlertDialog.Builder(
-								cntx);
+						AlertDialog.Builder builder = new AlertDialog.Builder(cntx);
 						// "Filter value:"
-						builder.setTitle(getResources().getString(
-								R.string.jv_filters_value));
+						builder.setTitle(getResources().getString(R.string.jv_filters_value));
 						final EditText input = new EditText(cntx);
 						input.setText(item[1]);
 						builder.setView(input);
-
 						// "Ok"
-						builder.setPositiveButton(
-								getResources()
-										.getString(R.string.jv_filters_ok),
+						builder.setPositiveButton(getResources().getString(R.string.app_ok),
 								new DialogInterface.OnClickListener() {
 									public void onClick(DialogInterface dialog,
 											int whichButton) {
-										String value = input.getText()
-												.toString();
+										String value = input.getText().toString();
 										if (value.equals(""))
 											// "Can't be empty!"
-											Toast.makeText(
-													cntx,
-													getResources()
-															.getString(
-																	R.string.jv_filters_cant_be_empty),
-													Toast.LENGTH_LONG).show();
+											Toast.makeText(cntx,getResources().getString(R.string.jv_filters_cant_be_empty),Toast.LENGTH_LONG).show();
 										else {
-											itemsArray.set(position,
-													new String[] { item[0],
-															value });
+											itemsArray.set(position,new String[] { item[0],value });
 											adapter.notifyDataSetChanged();
 											dialog.dismiss();
 										}
@@ -159,21 +148,16 @@ public class FiltersActivity extends Activity {
 								});
 
 						// "Cancel"
-						builder.setNegativeButton(
-								getResources().getString(
-										R.string.jv_filters_cancel),
-								new DialogInterface.OnClickListener() {
+						builder.setNegativeButton(getResources().getString(R.string.app_cancel),new DialogInterface.OnClickListener() {
 									public void onClick(DialogInterface dialog,
 											int whichButton) {
 										dialog.dismiss();
 									}
 								});
-
 						builder.show();
 					}
 				});
-			}
-
+            }
 			// Set condition text
 			if (position >= itemsArray.size() - 1)
 				condTxt.setText("");
@@ -215,8 +199,7 @@ public class FiltersActivity extends Activity {
 				app.writeFile("filters", ReLaunch.FILT_FILE, 0, ":");
 
 				// Save and/or flag
-				SharedPreferences prefs = PreferenceManager
-						.getDefaultSharedPreferences(getBaseContext());
+				SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
 				SharedPreferences.Editor editor = prefs.edit();
 				editor.putBoolean("filtersAnd", app.filters_and);
 				editor.commit();

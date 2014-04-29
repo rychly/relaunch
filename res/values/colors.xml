@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
     <color name="normal_bg">#FFFFFFFF</color>
     <color name="normal_fg">#FF000000</color>
     <color name="normal_bg_gray">#FFD0D0D0</color>
@@ -25,5 +24,4 @@
     <color name="scrollbar_free">#FFFFFFFF</color>
     <color name="scrollbar_busy">#FF808080</color>
     <color name="scrollbar_outline">#FF000000</color>
-
 </resources>

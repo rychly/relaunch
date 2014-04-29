@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <resources>
 	<string name="app_name">ReLaunch</string>
-	<string name="model_warning">&lt;h2&gt;Esta aplicación está diseñada sólo para
+    <string name="app_ok">OK</string>
+    <string name="app_cancel">Cancelar</string>
+    <string name="app_yes">SÍ</string>
+    <string name="app_no">NO</string>
+    <string name="model_warning">&lt;h2&gt;Esta aplicación está diseñada sólo para
 		el Nook Simple Touch y el Sony
 		PRS-T1&lt;/h2&gt;&lt;br&gt;&lt;center&gt;&lt;b&gt;¿Desea
 		continuar?&lt;/b&gt;&lt;/center&gt;</string>
@@ -13,29 +17,18 @@
 	<string name="advanced_layout_poweroff">Apagar</string>
 	<string name="editor_layout_save">Guardar</string>
 	<string name="editor_layout_viewtitle">== EDICIÓN ==</string>
-	<string name="editor_layout_cancel">Cancelar</string>
 	<string name="filters_item_layout_rule">Condición:</string>
 	<string name="filters_item_layout_value">Valor:</string>
 	<string name="filters_item_layout_and">Y</string>
 	<string name="filters_view_layout_title">Filtrar ajustes</string>
-	<string name="filters_view_layout_ok">OK</string>
 	<string name="filters_view_layout_add_new">Añadir nuevo</string>
 	<string name="filters_view_layout_and">Y</string>
-	<string name="filters_view_layout_cancel">Cancelar</string>
 	<string name="main_launcher_nb_layout_go_one_level_up">Subir un nivel</string>
 	<string name="main_launcher_nb_layout_memory">Memoria</string>
 	<string name="main_launcher_nb_layout_mem">Mem:</string>
 	<string name="main_launcher_nb_layout_battery">Batería</string>
 	<string name="main_launcher_nb_layout_b">B</string>
 	<string name="prefs_layout_title">Ajustes</string>
-	<string name="prefs_layout_filter_setting">Personalizar: Filtros</string>
-	<string name="prefs_layout_associations">Personalizar: Asociaciones</string>
-	<string name="prefs_layout_cancel">Cancelar</string>
-	<string name="prefs_layout_ok">OK</string>
-	<string name="prefs_layout_save_restart">Guardar configuraciones y reiniciar ReLaunch
-		(algunos ajustes solo trabajan después de reiniciar)</string>
-	<string name="prefs_layout_revert_default">Revertir todas las configuraciones a los valores
-		por defecto</string>
 	<string name="search_layout_case_sensitive">Direfenciar mayusculas/minúsculas</string>
 	<string name="search_layout_search_known">Buscar sólo extensiones conocidas</string>
 	<string name="search_layout_sort_search">Ordenar resultados de búsquedas</string>
@@ -46,12 +39,11 @@
 		comas</string>
 	<string name="search_layout_search_string">Cadena de búsqueda</string>
 	<string name="search_layout_search">Búsqueda</string>
-	<string name="search_layout_cancel">Cancelar</string>
+
 	<string name="search_layout_show_all_books">Mostrar todos los libros(extensiones conocidas)
 		búsqueda desde root</string>
 	<string name="search_layout_title">Búsqueda</string>
 	<string name="service_details_layout_kill">Matar</string>
-	<string name="service_details_layout_ok">OK</string>
 	<string name="service_details_layout_piduid">PID/UID:</string>
 	<string name="service_details_layout_label">Etiqueta:</string>
 	<string name="service_details_layout_name">Nombre:</string>
@@ -69,18 +61,16 @@
 	<string name="taskmanager_layout_sort_by_alpha">Ordenar alfabéticamente</string>
 	<string name="taskmanager_layout_tasks">Tareas</string>
 	<string name="taskmanager_layout_services">Servicios</string>
-	<string name="taskmanager_layout_wait">Esperar...</string>
+	<string name="taskmanager_layout_wait">Esperar…</string>
 	<string name="types_layout_file_suffix">Archivo sufijo:</string>
 	<string name="types_layout_application">Aplicación:</string>
-	<string name="types_view_layout_ok">OK</string>
 	<string name="types_view_layout_add_new">Añadir nuevo</string>
-	<string name="types_view_layout_cancel">Cancelar</string>
 	<string name="types_view_layout_title">Ajustar Asociaciones</string>
 	<string name="viewer_layout_edit">Editar</string>
 	<string name="viewer_layout_title">-- Visualizador integrado --</string>
-	<string name="reboot_layout_text">REINICIAR\n\nEspere...</string>
+	<string name="reboot_layout_text">REINICIAR\n\nEspere…</string>
 	<string name="poweroff_layout_text">Dispositivo apagado\n\nUsar botón de encendido para
-		comenzar de nuevo...</string>
+		comenzar de nuevo…</string>
 	<string name="jv_advanced_connected">Conectado, IP:</string>
 	<string name="jv_advanced_level">Nivel:</string>
 	<string name="jv_advanced_notrange">No está en rango</string>
@@ -92,8 +82,6 @@
 	<string name="jv_advanced_title">Funciones avanzadas, info, etc.</string>
 	<string name="jv_advanced_reboot_confirm_title">Confirmar reinicio</string>
 	<string name="jv_advanced_reboot_confirm_text">¿Estás seguro de reiniciar el dispositivo? </string>
-	<string name="jv_advanced_yes">SÍ</string>
-	<string name="jv_advanced_no">NO</string>
 	<string name="jv_advanced_poweroff_confirm_title">Confirmación de apagado</string>
 	<string name="jv_advanced_poweroff_confirm_text">¿Estás seguro de que apagar el dispositivo?
 	</string>
@@ -106,27 +94,20 @@
 	<string name="jv_advanced_mount_rorw">RO/RW</string>
 	<string name="jv_advanced_mount_ro">Sólo lectura RO</string>
 	<string name="jv_advanced_mount_rw">Lectura/escritura RW</string>
-	<string name="jv_advanced_nook_only">Implementar en los NOOK Simple Touch.</string>
 	<string name="jv_advanced_root_only">Implementar en los dispositivos arraigados.
 	</string>
 	<string name="jv_allapp_move_up">Mover una posición hacia arriba</string>
 	<string name="jv_allapp_move_down">Mover una posición hacia abajo</string>
 	<string name="jv_allapp_remove">Borrar de favoritos</string>
 	<string name="jv_allapp_uninstall">Desinstalar</string>
-	<string name="jv_allapp_cancel">Cancelar</string>
 	<string name="jv_allapp_add">Añadir a favoritos</string>
 	<string name="jv_editor_file_too_big">Archivo demasiado grande</string>
 	<string name="jv_editor_file">Archivo</string>
 	<string name="jv_editor_too_big">es demasiado grande para editar</string>
 	<string name="jv_editor_bytes">bytes</string>
 	<string name="jv_editor_maximum">El tamaño máximo permitido es</string>
-	<string name="jv_editor_ok">OK</string>
 	<string name="jv_editor_save_title">Guardar cambios en alertas</string>
 	<string name="jv_editor_save_text">¿Quiere guardar los cambios?</string>
-	<string name="jv_editor_yes">SÍ</string>
-	<string name="jv_editor_no">NO</string>
-	<string name="jv_editor_back">Cancelar</string>
-	<string name="jv_editor_cancel">Cancelar</string>
 	<string name="jv_editor_openerr_title">Fallo de apertura</string>
 	<string name="jv_editor_openerr_text1">No se puede abrir el archivo</string>
 	<string name="jv_editor_openerr_text2">por escribir</string>
@@ -136,27 +117,19 @@
 	<string name="jv_editor_closerr_text">No se puede cerrar el archivo</string>
 	<string name="jv_filters_value">Valores de filtrado:</string>
 	<string name="jv_filters_cant_be_empty">¡No puede estar vacío!</string>
-	<string name="jv_filters_ok">OK</string>
-	<string name="jv_filters_cancel">Cancelar</string>
 	<string name="jv_filters_and">Y</string>
 	<string name="jv_filters_or">OR</string>
 	<string name="jv_prefs_select_number">Seleccione el número de</string>
 	<string name="jv_prefs_select_application">Seleccione la aplicación</string>
-	<string name="jv_prefs_ok">OK</string>
 	<string name="jv_prefs_decline_changes_title">Cambios disminución de alerta</string>
 	<string name="jv_prefs_decline_changes_text">¿Desea guardar los cambios de configuración de
 		todos los?</string>
 	<string name="jv_prefs_default_settings_title">Configuración por defecto de advertencia</string>
 	<string name="jv_prefs_default_settings_text">¿Está seguro de restaurar la configuración por
 		defecto?</string>
-	<string name="jv_prefs_yes">Sí</string>
-	<string name="jv_prefs_no">No</string>
-	<string name="jv_prefs_cancel">Cancelar</string>
 	<string name="jv_prefs_cleanup_database_title">Database operations</string>
 	<string name="jv_prefs_cleanup_database_text">Do you really want to cleanup cache?</string>
 	<string name="jv_relaunch_wrong_model">¡Modelo erroneo!</string>
-	<string name="jv_relaunch_yes">Sí</string>
-	<string name="jv_relaunch_no">NO</string>
 	<string name="jv_relaunch_m_free">M libre</string>
 	<string name="jv_relaunch_wifi_is_off">WiFi OFF</string>
 	<string name="jv_relaunch_wifi_is_on">WiFi ON</string>
@@ -165,20 +138,18 @@
 	<string name="jv_relaunch_all_a">Todas las aplicaciones</string>
 	<string name="jv_relaunch_fav_a">Aplicaciones favoritas</string>
 	<string name="jv_relaunch_whats_new">Lista de cambios</string>
-	<string name="jv_relaunch_ok">OK</string>
 	<string name="jv_relaunch_add">Añadir a favoritos</string>
 	<string name="jv_relaunch_mark">Marcar como leído</string>
 	<string name="jv_relaunch_unmark">Quitar marca de leído</string>
 	<string name="jv_relaunch_unmarkall">Olvidar todas las marcas</string>
-	<string name="jv_relaunch_openwith">Obrir con ...</string>
-	<string name="jv_relaunch_createintent">Crear cadena de eventos ...</string>
+	<string name="jv_relaunch_openwith">Obrir con …</string>
+	<string name="jv_relaunch_createintent">Crear cadena de eventos …</string>
 	<string name="jv_relaunch_copy">Copy</string>
 	<string name="jv_relaunch_move">Move</string>
 	<string name="jv_relaunch_paste">Paste</string>
 	<string name="jv_relaunch_delete">Eliminar</string>
 	<string name="jv_relaunch_delete_non_emp_dir">¡No eliminar carpetas vacías!</string>
 	<string name="jv_relaunch_delete_emp_dir">Eliminar carpetas vacías</string>
-	<string name="jv_relaunch_cancel">Cancelar</string>
 	<string name="jv_relaunch_select_intent_type">Seleccionar tipo de evento</string>
 	<string name="jv_relaunch_activity_not_found">Acción no encontrada</string>
 	<string name="jv_relaunch_activity_not_found_title">Acción no encontrada</string>
@@ -217,7 +188,6 @@
 		fuente: &lt;a
 		href=\"https://github.com/yiselieren/ReLaunch\"&gt;git://github.com/yiselieren/ReLaunch.git&lt;/a&gt;&lt;/center&gt;
 	</string>
-	<string name="jv_rla_ok">OK</string>
 	<string name="jv_rla_see_changelog">Ver histórico de cambios (changelog)</string>
 	<string name="jv_rla_whats_new_title">Histórico de cambios</string>
 	<string name="jv_allapp_activity">Acción</string>
@@ -227,7 +197,6 @@
 	<string name="jv_results_move_up">Subir</string>
 	<string name="jv_results_move_down">Bajar</string>
 	<string name="jv_results_delete_dir">Eliminar carpeta</string>
-	<string name="jv_results_cancel">Cancelar</string>
 	<string name="jv_results_delete_file">Eliminar archivo</string>
 	<string name="jv_results_mark">Marcar como leído</string>
 	<string name="jv_results_unmark">Eliminar marca de \"leído\"</string>
@@ -235,8 +204,6 @@
 	<string name="jv_results_delete_file_title">Eliminar advertencias de archivo</string>
 	<string name="jv_results_delete_file_text1">¿Estás seguro de eliminar el archivo</string>
 	<string name="jv_results_delete_file_text2">\?</string>
-	<string name="jv_results_yes">SÍ</string>
-	<string name="jv_results_no">NO</string>
 	<string name="jv_results_remove">Borrar de favoritos</string>
 	<string name="jv_results_delete_em_dir_title">Eliminar advertencias de carpeta vacía</string>
 	<string name="jv_results_delete_em_dir_text1">¿Estás seguro de eliminar la carpeta vacía</string>
@@ -247,7 +214,6 @@
 	<string name="jv_results_delete_ne_dir_text2">(acciones potencialmente peligrosas)</string>
 	<string name="jv_results_activity_not_found">Acción no encontrada</string>
 	<string name="jv_search_in_progress">Búsqueda en progreso</string>
-	<string name="jv_search_cancel">Cancelar</string>
 	<string name="jv_search_results">Buscar resultados</string>
 	<string name="jv_search_files_total">Archivos (encontrados / búsqueda completa)</string>
 	<string name="jv_taskman_total">Total:</string>
@@ -260,8 +226,6 @@
 	<string name="jv_taskman_mem">Mem:</string>
 	<string name="jv_types_suffix">Extensión</string>
 	<string name="jv_types_file_suffix">Extensión de archivo</string>
-	<string name="jv_types_ok">OK</string>
-	<string name="jv_types_cancel">Cancelar</string>
 	<string name="jv_types_cant_be_empty">¡Debe especificar la extensión!</string>
 	<string name="jv_types_app_or_int_title">¿Aplicación o acción general?</string>
 	<string name="jv_types_app_or_int_text">Cuando haces clic sobre un archivo con una
@@ -278,7 +242,6 @@
 	</string>
 	<string name="jv_viewer_bytes">bytes</string>
 	<string name="jv_viewer_maximum">El máximo tamaño de archivo permitido es</string>
-	<string name="jv_viewer_ok">OK</string>
 	<string name="pref_i_filterResults_title">Resultados filtrados</string>
 	<string name="pref_i_filterResults_on">Filtrar resultados de acuerdo a definiciones de
 		filtros</string>
@@ -321,18 +284,18 @@
 		de dir</string>
 	<string name="pref_i_hideKnownDirs_off">Mostrar los nombres de directorios completos
 		(incluso en los directorios de inicio)</string>
-	<string name="pref_i_openWith_title">Elemento de menú contextual \'Abrir con...\'
+	<string name="pref_i_openWith_title">Elemento de menú contextual \'Abrir con…\'
 	</string>
-	<string name="pref_i_openWith_on">Mostrar \'Abrir con...\' en menú contextual
+	<string name="pref_i_openWith_on">Mostrar \'Abrir con…\' en menú contextual
 	</string>
-	<string name="pref_i_openWith_off">No volver a mostrar \'Abrir con...\' en menú
+	<string name="pref_i_openWith_off">No volver a mostrar \'Abrir con…\' en menú
 		contextual de archivo</string>
-	<string name="pref_i_createIntent_title">Elemento de menú contextual \'Crear evento...\'
+	<string name="pref_i_createIntent_title">Elemento de menú contextual \'Crear evento…\'
 	</string>
-	<string name="pref_i_createIntent_on">Mostrar \'Crear evento...\' en menú contextual
-	</string>
-	<string name="pref_i_createIntent_off">Ocultar \'Crear evento...\' en menú contextual de
-		archivo</string>
+	<string name="pref_i_createIntent_on">Mostrar \'Crear evento…\' en menú contextual
+    </string>
+	<string name="pref_i_createIntent_off">Ocultar \'Crear evento…\' en menú contextual de
+        archivo</string>
 	<string name="pref_i_screenOrientation_title">Orientación de la pantalla</string>
 	<string name="pref_i_einkUpdateMode_title">Modo de refresco de pantalla eInk</string>
 	<string name="pref_i_einkUpdateInterval_title">Frecuencia de una completa actualización de la
@@ -342,15 +305,15 @@
 	<string name="pref_i_firstLineFontSizePx_title">Tamaño de fuente en nombres de archivos/carpetas
 	</string>
 	<string name="pref_i_firstLineFontSizePx_sum">Tamaño de fuente en nobres de archivos y
-		directorios de cualquer lista... px</string>
+        directorios de cualquer lista… px</string>
 	<string name="pref_i_secondLineFontSizePx_title">Tamaño de fuente para nombres de directorios
 		adicionales</string>
 	<string name="pref_i_secondLineFontSizePx_sum">Tamaño de fuente para de otros directorios como
-		Favoritos y otras listas... px</string>
+        Favoritos y otras listas… px</string>
 	<string name="pref_i_firstLineIconSizePx_title">Archivos y el tamaño de los iconos de directorios
 	</string>
-	<string name="pref_i_firstLineIconSizePx_sum">Icono de tamaño para los archivos y directorios ...
-		px (0 - desactivar el icono)</string>
+	<string name="pref_i_firstLineIconSizePx_sum">Icono de tamaño para los archivos y directorios …
+        px (0 - desactivar el icono)</string>
 	<string name="pref_i_columnsDirsFiles_title">Lista de archivos y carpetas (por defecto)</string>
 	<string name="pref_i_columnsHomeList_title">Lista de carpetas inicial</string>
 	<string name="pref_i_columnsLRU_title">Lista de reciente apertura</string>
@@ -427,8 +390,8 @@
 	<string name="pref_i_searchSize_sum">Tamaño máximo de resultado en la lista de búsqueda
 	</string>
 	<string name="pref_i_searchReport_title">Notificación del estado de la búsqueda</string>
-	<string name="pref_i_searchReport_sum">Informe sobre el estado de búsqueda cada ...
-		archivos</string>
+	<string name="pref_i_searchReport_sum">Informe sobre el estado de búsqueda cada …
+        archivos</string>
 	<string name="pref_i_searchRoot_title">Carpeta de búsqueda inicial</string>
 	<string name="pref_i_searchRoot_sum">Comenzar búsquedas desde aquí</string>
 	<string name="pref_i_viewerMaxSize_title">Tamaño máximo de archivo abierto con visor interno
@@ -467,4 +430,8 @@
 		carpetas no vacías</string>
 	<string name="pref_i_confirmNonEmptyDirDelete_off">Eliminar carpetas vacías recursivamente sin
 		confirmación (¡peligroso!)</string>
+
+	<string name="LangTitle">Idioma</string>
+	<string name="LangDialogTitle">Elija un idioma:</string>
+	<string name="LangSummary">Idioma app.\nReinicie Relaunch!.</string>
 </resources>

@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 	<string name="app_name">ReLaunch</string>
+    <string name="app_ok">OK</string>
+    <string name="app_cancel">Cancel</string>
+    <string name="app_yes">Yes</string>
+    <string name="app_no">No</string>
 	<string name="model_warning">&lt;h2&gt;The tool is for Nook Simple Touch or Sony
 		PRS-T1 only!&lt;/h2&gt;&lt;br&gt;&lt;center&gt;&lt;b&gt;Continue
 		anyway ?&lt;/b&gt;&lt;/center&gt;</string>
@@ -12,28 +16,18 @@
 	<string name="advanced_layout_poweroff">Power Off</string>
 	<string name="editor_layout_save">Save</string>
 	<string name="editor_layout_viewtitle">== EDITOR ==</string>
-	<string name="editor_layout_cancel">Cancel</string>
 	<string name="filters_item_layout_rule">Rule:</string>
 	<string name="filters_item_layout_value">Value:</string>
 	<string name="filters_item_layout_and">AND</string>
 	<string name="filters_view_layout_title">Filter Settings</string>
-	<string name="filters_view_layout_ok">OK</string>
 	<string name="filters_view_layout_add_new">Add new</string>
 	<string name="filters_view_layout_and">AND</string>
-	<string name="filters_view_layout_cancel">Cancel</string>
 	<string name="main_launcher_nb_layout_go_one_level_up">One level up</string>
 	<string name="main_launcher_nb_layout_memory">Memory</string>
 	<string name="main_launcher_nb_layout_mem">Mem:</string>
 	<string name="main_launcher_nb_layout_battery">Battery</string>
 	<string name="main_launcher_nb_layout_b">B</string>
 	<string name="prefs_layout_title">Settings</string>
-	<string name="prefs_layout_filter_setting">Filter setting</string>
-	<string name="prefs_layout_associations">Associations</string>
-	<string name="prefs_layout_cancel">Cancel</string>
-	<string name="prefs_layout_ok">OK</string>
-	<string name="prefs_layout_save_restart">Save settings and restart ReLaunch (some settings
-		work only after restart)</string>
-	<string name="prefs_layout_revert_default">Reset/Backup\n/Restore Settings</string>
 	<string name="search_layout_case_sensitive">Case sensitive</string>
 	<string name="search_layout_search_known">Search known extensions only</string>
 	<string name="search_layout_sort_search">Sort search results</string>
@@ -44,12 +38,10 @@
 		list</string>
 	<string name="search_layout_search_string">Search string</string>
 	<string name="search_layout_search">Search</string>
-	<string name="search_layout_cancel">Cancel</string>
 	<string name="search_layout_show_all_books">Show all books (known extensions) from search root
 	</string>
 	<string name="search_layout_title">Search</string>
 	<string name="service_details_layout_kill">Kill</string>
-	<string name="service_details_layout_ok">OK</string>
 	<string name="service_details_layout_piduid">PID/UID:</string>
 	<string name="service_details_layout_label">Label:</string>
 	<string name="service_details_layout_name">Name:</string>
@@ -67,31 +59,27 @@
 	<string name="taskmanager_layout_sort_by_alpha">Sort alphabetically</string>
 	<string name="taskmanager_layout_tasks">Tasks</string>
 	<string name="taskmanager_layout_services">Services</string>
-	<string name="taskmanager_layout_wait">Wait...</string>
+	<string name="taskmanager_layout_wait">Wait…</string>
 	<string name="types_layout_file_suffix">File suffix:</string>
 	<string name="types_layout_application">Application:</string>
-	<string name="types_view_layout_ok">OK</string>
 	<string name="types_view_layout_add_new">Add new</string>
-	<string name="types_view_layout_cancel">Cancel</string>
 	<string name="types_view_layout_title">Associations Settings</string>
 	<string name="viewer_layout_edit">Edit</string>
 	<string name="viewer_layout_title">-- VIEWER --</string>
-	<string name="reboot_layout_text">REBOOT\n\nWait...</string>
-	<string name="poweroff_layout_text">Powered Off\n\nUse Power button to start again...
-	</string>
+	<string name="reboot_layout_text">REBOOT\n\nWait…</string>
+	<string name="poweroff_layout_text">Powered Off\n\nUse Power button to start again…
+    </string>
 	<string name="jv_advanced_connected">Connected, IP:</string>
 	<string name="jv_advanced_level">Level:</string>
 	<string name="jv_advanced_notrange">Not in range</string>
 	<string name="jv_advanced_not_configured">not configured</string>
-	<string name="jv_advanced_turning_wifi_off">WiFi off...</string>
+	<string name="jv_advanced_turning_wifi_off">WiFi off…</string>
 	<string name="jv_advanced_turn_wifi_off">WiFi off</string>
-	<string name="jv_advanced_turning_wifi_on">WiFi on...</string>
+	<string name="jv_advanced_turning_wifi_on">WiFi on…</string>
 	<string name="jv_advanced_turn_wifi_on">WiFi on</string>
 	<string name="jv_advanced_title">Advanced functions, info, etc.</string>
 	<string name="jv_advanced_reboot_confirm_title">Reboot confirmation</string>
 	<string name="jv_advanced_reboot_confirm_text">Are you sure to reboot your device ? </string>
-	<string name="jv_advanced_yes">YES</string>
-	<string name="jv_advanced_no">NO</string>
 	<string name="jv_advanced_poweroff_confirm_title">Power Off confirmation</string>
 	<string name="jv_advanced_poweroff_confirm_text">Are you sure to power off your device ? </string>
 	<string name="jv_advanced_mount_diskspartitions">Disks/partitions</string>
@@ -103,26 +91,19 @@
 	<string name="jv_advanced_mount_rorw">RO/RW</string>
 	<string name="jv_advanced_mount_ro">RO</string>
 	<string name="jv_advanced_mount_rw">RW</string>
-	<string name="jv_advanced_nook_only">Implemented only on NOOK Simple Touch.</string>
 	<string name="jv_advanced_root_only">Implemented only on rooted device.</string>
 	<string name="jv_allapp_move_up">Move one position up</string>
 	<string name="jv_allapp_move_down">Move one position down</string>
 	<string name="jv_allapp_remove">Remove from favorites</string>
 	<string name="jv_allapp_uninstall">Uninstall</string>
-	<string name="jv_allapp_cancel">Cancel</string>
 	<string name="jv_allapp_add">Add to favorites</string>
 	<string name="jv_editor_file_too_big">File too big</string>
 	<string name="jv_editor_file">File</string>
 	<string name="jv_editor_too_big">is too big for editor</string>
 	<string name="jv_editor_bytes">kilobytes</string>
 	<string name="jv_editor_maximum">Maximal allowed size is</string>
-	<string name="jv_editor_ok">OK</string>
 	<string name="jv_editor_save_title">Save changes warning</string>
 	<string name="jv_editor_save_text">Do you want to save changes?</string>
-	<string name="jv_editor_yes">YES</string>
-	<string name="jv_editor_no">NO</string>
-	<string name="jv_editor_back">Cancel</string>
-	<string name="jv_editor_cancel">Cancel</string>
 	<string name="jv_editor_openerr_title">Open failure</string>
 	<string name="jv_editor_openerr_text1">Can\'t open file</string>
 	<string name="jv_editor_openerr_text2">for writting</string>
@@ -132,24 +113,15 @@
 	<string name="jv_editor_closerr_text">Can\'t close file</string>
 	<string name="jv_filters_value">Filter value:</string>
 	<string name="jv_filters_cant_be_empty">Can\'t be empty!</string>
-	<string name="jv_filters_ok">OK</string>
-	<string name="jv_filters_cancel">Cancel</string>
 	<string name="jv_filters_and">AND</string>
 	<string name="jv_filters_or">OR</string>
 	<string name="jv_prefs_select_number">Select number</string>
 	<string name="jv_prefs_select_application">Select application</string>
-	<string name="jv_prefs_ok">OK</string>
 	<string name="jv_prefs_decline_changes_title">Decline changes warning</string>
 	<string name="jv_prefs_decline_changes_text">Do you want to save all configuration\'s changes?
 	</string>
 	<string name="jv_prefs_default_settings_title">Default settings warning</string>
 	<string name="jv_prefs_default_settings_text">Are you sure to restore default settings?</string>
-	<string name="jv_prefs_yes">Yes</string>
-	<string name="jv_prefs_no">No</string>
-	<string name="jv_prefs_cancel">Cancel</string>
-	<string name="jv_prefs_rsr_reset">Revert all settings to default values</string>
-	<string name="jv_prefs_rsr_save">Save settings to SD Card</string>
-	<string name="jv_prefs_rsr_restore">Restore settings from SD Card</string>
 	<string name="jv_prefs_rsr_ok_title">Success!</string>
 	<string name="jv_prefs_rsr_ok_text">Operation finished successfully</string>
 	<string name="jv_prefs_rsr_okrst_text">Operation finished successfully\nProgram will be
@@ -164,8 +136,6 @@
 	<string name="jv_prefs_clear_favorites_text">Do you really want to clear Favorites list?
 	</string>
 	<string name="jv_relaunch_wrong_model">Wrong model!</string>
-	<string name="jv_relaunch_yes">YES</string>
-	<string name="jv_relaunch_no">NO</string>
 	<string name="jv_relaunch_m_free">M free</string>
 	<string name="jv_relaunch_wifi_is_off">WiFi is off</string>
 	<string name="jv_relaunch_wifi_is_on">WiFi is ON</string>
@@ -174,26 +144,25 @@
 	<string name="jv_relaunch_all_a">All applications</string>
 	<string name="jv_relaunch_fav_a">Favorite applications</string>
 	<string name="jv_relaunch_whats_new">What\'s new</string>
-	<string name="jv_relaunch_ok">OK</string>
 	<string name="jv_relaunch_add">Add to favorites</string>
 	<string name="jv_relaunch_mark">Mark as read</string>
 	<string name="jv_relaunch_unmark">Remove \"read\" mark</string>
 	<string name="jv_relaunch_unmarkall">Forget all marks</string>
-	<string name="jv_relaunch_openwith">Open with ...</string>
-	<string name="jv_relaunch_createintent">Create Intent ...</string>
+	<string name="jv_relaunch_openwith">Open with …</string>
+	<string name="jv_relaunch_createintent">Create Intent …</string>
 	<string name="jv_relaunch_copy">Copy</string>
+    <string name="jv_relaunch_copy_dir">Copy</string>
 	<string name="jv_relaunch_move">Move</string>
-	<string name="jv_relaunch_move_dir">Move</string>
 	<string name="jv_relaunch_paste">Paste</string>
-	<string name="jv_relaunch_rename">Rename...</string>
-	<string name="jv_relaunch_create_folder">Create new folder...</string>
+	<string name="jv_relaunch_rename">Rename…</string>
+	<string name="jv_relaunch_create_folder">Create new folder…</string>
 	<string name="jv_relaunch_create_folder_title">Enter the name of new folder</string>
 	<string name="jv_relaunch_create_folder_fail_text">Unable to create the folder</string>
 	<string name="jv_relaunch_rename_title">Enter new name of file</string>
 	<string name="jv_relaunch_delete">Delete</string>
 	<string name="jv_relaunch_delete_non_emp_dir">Delete NON-EMPTY directory!</string>
 	<string name="jv_relaunch_delete_emp_dir">Delete empty directory</string>
-	<string name="jv_relaunch_cancel">Cancel</string>
+    <string name="jv_relaunch_add_dir_Dropbox">Copy to dir of Dropbox</string>
 	<string name="jv_relaunch_select_intent_type">Select intent type</string>
 	<string name="jv_relaunch_activity_not_found">Activity not found</string>
 	<string name="jv_relaunch_activity_not_found_title">Activity not found</string>
@@ -225,9 +194,7 @@
 	<string name="jv_relaunch_turning_wifi_off">WiFi is off</string>
 	<string name="jv_relaunch_prev">prev</string>
 	<string name="jv_relaunch_next">next</string>
-	<string name="jv_relaunch_switch_titles_on">Show book titles</string>
-	<string name="jv_relaunch_switch_titles_off">Show file names</string>
-	<string name="jv_relaunch_tags_rename">Rename file with fb2/epub tags...</string>
+	<string name="jv_relaunch_tags_rename">Rename file with fb2/epub tags…</string>
 	<string name="jv_relaunch_sort_header">Sort the files in the order by</string>
 	<string name="jv_relaunch_sort_file_dir">filename A-Z</string>
 	<string name="jv_relaunch_sort_file_rev">filename Z-A</string>
@@ -235,7 +202,6 @@
 	<string name="jv_relaunch_sort_title_rev">by alphabetical order Z-A</string>
 	<string name="jv_relaunch_bookinfo">Show annotation</string>
 	<string name="jv_relaunch_fileinfo">Properties</string>
-	<string name="jv_relaunch_fileinfo_title">File Properties</string>
 	<string name="jv_relaunch_fileinfo_name">Name:</string>
 	<string name="jv_relaunch_fileinfo_size">Size:</string>
 	<string name="jv_relaunch_fileinfo_date">Date:</string>
@@ -251,7 +217,6 @@
 		code: &lt;a
 		href=\"https://github.com/yiselieren/ReLaunch\"&gt;git://github.com/yiselieren/ReLaunch.git&lt;/a&gt;&lt;/center&gt;
 	</string>
-	<string name="jv_rla_ok">OK</string>
 	<string name="jv_rla_see_changelog">Information</string>
 	<string name="jv_rla_whats_new_title">Information</string>
 	<string name="jv_allapp_activity">Activity</string>
@@ -261,7 +226,6 @@
 	<string name="jv_results_move_up">Move one position up</string>
 	<string name="jv_results_move_down">Move one position down</string>
 	<string name="jv_results_delete_dir">Delete directory</string>
-	<string name="jv_results_cancel">Cancel</string>
 	<string name="jv_results_delete_file">Delete file</string>
 	<string name="jv_results_mark">Mark as read</string>
 	<string name="jv_results_unmark">Remove \"read\" mark</string>
@@ -270,9 +234,6 @@
 	<string name="jv_results_delete_file_text1">Are you sure to delete file</string>
 	<string name="jv_results_delete_file_text2">\?</string>
 	<string name="jv_results_menu_title">Select file</string>
-	<string name="jv_results_menu_button">Cancel</string>
-	<string name="jv_results_yes">YES</string>
-	<string name="jv_results_no">NO</string>
 	<string name="jv_results_remove">Remove from favorites</string>
 	<string name="jv_results_delete_em_dir_title">Delete empty directory warning</string>
 	<string name="jv_results_delete_em_dir_text1">Are you sure to delete empty directory</string>
@@ -282,7 +243,6 @@
 	<string name="jv_results_delete_ne_dir_text2">(dangerous) \?</string>
 	<string name="jv_results_activity_not_found">Activity not found</string>
 	<string name="jv_search_in_progress">Search in progress</string>
-	<string name="jv_search_cancel">Cancel</string>
 	<string name="jv_search_results">Search results</string>
 	<string name="jv_search_files_total">Files (found / total searched)</string>
 	<string name="jv_taskman_total">Total:</string>
@@ -295,8 +255,6 @@
 	<string name="jv_taskman_mem">Mem:</string>
 	<string name="jv_types_suffix">Suffix</string>
 	<string name="jv_types_file_suffix">File suffix</string>
-	<string name="jv_types_ok">OK</string>
-	<string name="jv_types_cancel">Cancel</string>
 	<string name="jv_types_cant_be_empty">Can\'t be empty!</string>
 	<string name="jv_types_app_or_int_title">Explicit application or general intent?</string>
 	<string name="jv_types_app_or_int_text">When you tap on file with specified suffix ReLaunch
@@ -311,7 +269,6 @@
 	<string name="jv_viewer_too_big">is too big for viewer</string>
 	<string name="jv_viewer_bytes">kilobytes</string>
 	<string name="jv_viewer_maximum">Maximal allowed size is</string>
-	<string name="jv_viewer_ok">OK</string>
 	<string name="pref_i_filterResults_title">Filter results</string>
 	<string name="pref_i_filterResults_on">Filter results according to filter definitions
 	</string>
@@ -356,28 +313,28 @@
 	<string name="pref_i_hideKnownDirs_title">Hide known part of directories</string>
 	<string name="pref_i_hideKnownDirs_on">Hide known part (start dir) from dir name</string>
 	<string name="pref_i_hideKnownDirs_off">Hide known part of directories</string>
-	<string name="pref_i_openWith_title">\'Open with...\' context menu item</string>
-	<string name="pref_i_openWith_on">Show \'Open with...\' context menu item</string>
-	<string name="pref_i_openWith_off">Do not show \'Open with...\' context menu item
-	</string>
-	<string name="pref_i_createIntent_title">\'Create intent...\' context menu item</string>
-	<string name="pref_i_createIntent_on">Show \'Create intent...\' context menu item
-	</string>
-	<string name="pref_i_createIntent_off">Do not show \'Create intent...\' context menu item
-	</string>
+	<string name="pref_i_openWith_title">\'Open with…\' context menu item</string>
+	<string name="pref_i_openWith_on">Show \'Open with…\' context menu item</string>
+	<string name="pref_i_openWith_off">Do not show \'Open with…\' context menu item
+    </string>
+	<string name="pref_i_createIntent_title">\'Create intent…\' context menu item</string>
+	<string name="pref_i_createIntent_on">Show \'Create intent…\' context menu item
+    </string>
+	<string name="pref_i_createIntent_off">Do not show \'Create intent…\' context menu item
+    </string>
 	<string name="pref_i_screenOrientation_title">Screen Orientation</string>
 	<string name="pref_i_einkUpdateMode_title">EInk Screen Update Mode</string>
 	<string name="pref_i_einkUpdateInterval_title">EInk Screen Full Update Interval</string>
 	<string name="pref_i_einkUpdateInterval_sum">How often EInk will be fully updated</string>
 	<string name="pref_i_firstLineFontSizePx_title">Files and directories names font size</string>
 	<string name="pref_i_firstLineFontSizePx_sum">Font size for files and directories names in all
-		lists... px</string>
-	<string name="pref_i_secondLineFontSizePx_title">Additional font size for files... px
-	</string>
+        lists… px</string>
+	<string name="pref_i_secondLineFontSizePx_title">Additional font size for files… px
+    </string>
 	<string name="pref_i_secondLineFontSizePx_sum">Font size for additional line in file names</string>
 	<string name="pref_i_firstLineIconSizePx_title">Files and directories icons size</string>
-	<string name="pref_i_firstLineIconSizePx_sum">Icon size for files and directories... px (0 -
-		disable icon)</string>
+	<string name="pref_i_firstLineIconSizePx_sum">Icon size for files and directories… px (0 -
+        disable icon)</string>
 	<string name="pref_i_columnsDirsFiles_title">Files and directories list (default)</string>
 	<string name="pref_i_doNotHyph_off">Output filename in multi lines</string>
 	<string name="pref_i_doNotHyph_on">Output filename in single line</string>
@@ -458,7 +415,7 @@
 	<string name="pref_i_searchSize_title">Maximal amount of search results</string>
 	<string name="pref_i_searchSize_sum">Maximal size of search results list</string>
 	<string name="pref_i_searchReport_title">How often report search progress</string>
-	<string name="pref_i_searchReport_sum">Report search progress every ... files</string>
+	<string name="pref_i_searchReport_sum">Report search progress every … files</string>
 	<string name="pref_i_searchRoot_title">Root search directory</string>
 	<string name="pref_i_searchRoot_sum">Search always start here</string>
 	<string name="pref_i_viewerMaxSize_title">Maximal file size for viewer</string>
@@ -537,38 +494,52 @@
 	<string name="arr_home_button_actions_names_2">Open home directory #</string>
 	<string name="arr_home_button_actions_names_3">Open home directories menu</string>
 	<string name="arr_home_button_actions_names_4">Open home directories screen</string>
+    <string name="arr_home_button_actions_names_5">DropBox</string>
+    <string name="arr_home_button_actions_names_6">OPDS</string>
 	<string name="arr_lru_button_actions_names_1">Nothing</string>
 	<string name="arr_lru_button_actions_names_2">Open Last opened #</string>
 	<string name="arr_lru_button_actions_names_3">Open Last opened menu</string>
 	<string name="arr_lru_button_actions_names_4">Open Last opened screen</string>
+    <string name="arr_lru_button_actions_names_5">DropBox</string>
+    <string name="arr_lru_button_actions_names_6">OPDS</string>
 	<string name="arr_fav_button_actions_names_1">Nothing</string>
 	<string name="arr_fav_button_actions_names_2">Open Favorites #</string>
 	<string name="arr_fav_button_actions_names_3">Open Favorites menu</string>
 	<string name="arr_fav_button_actions_names_4">Open Favorites screen</string>
+    <string name="arr_fav_button_actions_names_5">DropBox</string>
+    <string name="arr_fav_button_actions_names_6">OPDS</string>
 	<string name="arr_advanced_button_actions_names_1">Nothing</string>
 	<string name="arr_advanced_button_actions_names_2">Open \"Advanced functions\" window</string>
 	<string name="arr_advanced_button_actions_names_3">Lock device</string>
 	<string name="arr_advanced_button_actions_names_4">Power Off device</string>
 	<string name="arr_advanced_button_actions_names_5">Switch WiFi state</string>
 	<string name="arr_advanced_button_actions_names_6">Run application</string>
+    <string name="arr_advanced_button_actions_names_7">DropBox</string>
+    <string name="arr_advanced_button_actions_names_8">OPDS</string>
 	<string name="arr_settings_button_actions_names_1">Nothing</string>
 	<string name="arr_settings_button_actions_names_2">Open \"Settings\" window</string>
 	<string name="arr_settings_button_actions_names_3">Lock device</string>
 	<string name="arr_settings_button_actions_names_4">Power Off device</string>
 	<string name="arr_settings_button_actions_names_5">Switch WiFi state</string>
 	<string name="arr_settings_button_actions_names_6">Run application</string>
+    <string name="arr_settings_button_actions_names_7">DropBox</string>
+    <string name="arr_settings_button_actions_names_8">OPDS</string>
 	<string name="arr_mem_button_actions_names_1">Nothing</string>
 	<string name="arr_mem_button_actions_names_2">Open \"Application manager\" window</string>
 	<string name="arr_mem_button_actions_names_3">Lock device</string>
 	<string name="arr_mem_button_actions_names_4">Power Off device</string>
 	<string name="arr_mem_button_actions_names_5">Switch WiFi state</string>
 	<string name="arr_mem_button_actions_names_6">Run application</string>
+    <string name="arr_mem_button_actions_names_7">DropBox</string>
+    <string name="arr_mem_button_actions_names_8">OPDS</string>
 	<string name="arr_bat_button_actions_names_1">Nothing</string>
 	<string name="arr_bat_button_actions_names_2">Open \"battery consumption\" window</string>
 	<string name="arr_bat_button_actions_names_3">Lock device</string>
 	<string name="arr_bat_button_actions_names_4">Power Off device</string>
 	<string name="arr_bat_button_actions_names_5">Switch WiFi state</string>
 	<string name="arr_bat_button_actions_names_6">Run application</string>
+    <string name="arr_bat_button_actions_names_7">DropBox</string>
+    <string name="arr_bat_button_actions_names_8">OPDS</string>
 	<string name="arr_output_columns_names_1">Detect automatically</string>
 	<string name="arr_output_columns_names_2">1 column</string>
 	<string name="arr_output_columns_names_3">2 columns</string>
@@ -600,5 +571,71 @@
 	<string name="bookinfo_authors">Authors:</string>
 	<string name="bookinfo_series">Series:</string>
 	<string name="bookinfo_title">Title:</string>
-			
+
+	<string name="LangTitle">Language</string>
+	<string name="LangDialogTitle">Select the language:</string>
+	<string name="LangSummary">Language app.\nRestart Relaunch!.</string>
+    <string name="db_link">Link Dropbox</string>
+    <string name="db_unlink">Unlink Dropbox</string>
+    <string name="str_download_btn">Download</string>
+    <string name="pref_s_screenDropBox_title">&gt; Dropbox settings</string>
+    <string name="pref_i_DropBox_folder">Dropbox folder</string>
+    <string name="pref_i_DropBox_folder_info">DropBox folder to download from</string>
+    <string name="pref_i_Local_folder_DropBox">Local folder</string>
+    <string name="pref_i_Local_folder_DropBox_info">Local folder for downloading.</string>
+    <string name="pref_s_screenOPDS_title">&gt; OPDS settings</string>
+    <string name="pref_i_OPDS_catalog_info">OPDS catalog to connect to</string>
+    <string name="pref_i_OPDS_catalog">OPDS catalog</string>
+    <string name="pref_i_Local_folder_OPDS_info">Local folder to download to</string>
+    <string name="pref_i_Local_folder_OPDS">Local folder</string>
+    <string name="str_book_info">Book info</string>
+    <string name="str_book_dowload_info_title">Download the book in the format:</string>
+    <string name="str_SelectAndDownload">Select and download</string>
+    <string name="str_uploadToDropbox">Upload</string>
+    <string name="pref_i_delLocFiles_off">Keep files not on server</string>
+    <string name="pref_i_delLocFiles_on">Remove files not on server</string>
+    <string name="pref_i_delLocFiles_title">Remove local files?</string>
+    <string name="pref_i_delDBFiles_off">Keep files not on reader</string>
+    <string name="pref_i_delDBFiles_on">Remove files not on reader</string>
+    <string name="pref_i_delDBFiles_title">Remove files on server?</string>
+    <string name="srt_dbactivity_warn_no_config">Attention! Configure before attempting to connect</string>
+    <string name="srt_dbactivity_err_authent">Error authenticating</string>
+    <string name="srt_dbactivity_err_con_dropbox">Error connecting</string>
+    <string name="srt_dbactivity_err_down_dropbox">Error downloading</string>
+    <string name="srt_dbactivity_err_upl_dropbox">Error uploading</string>
+    <string name="srt_dbactivity_file_down_title">Download</string>
+    <string name="srt_dbactivity_file_down_mess">Please wait until current download finishes!</string>
+    <string name="srt_dbactivity_file_down_mess_2">Download selected?</string>
+    <string name="srt_dbactivity_file_down">Downloaded &#160;</string>
+    <string name="srt_dbactivity_file_down2">&#160; files</string>
+    <string name="pref_i_OPDS_login_info">Введите имя пользователя</string>
+    <string name="pref_i_OPDS_login">Login</string>
+    <string name="pref_i_OPDS_password_info">Введите пароль для доступа к ресурсу</string>
+    <string name="pref_i_OPDS_password">Password</string>
+    <string name="jv_relaunch_add_Dropbox">Копировать в Dropbox</string>
+    <string name="pref_i_dropboxSetButton_title">Кнопка для запуска</string>
+    <string name="srt_btn_more_info_book">Больше</string>
+    <string name="srt_title_more_info_book">Расширенная информация</string>
+    <string name="srt_select_files">Выбор файла</string>
+    <string name="srt_info_book_title_info">- Данные о книге -\n</string>
+    <string name="srt_info_book_src_title_info">- Данные об исходнике книги -\n</string>
+    <string name="srt_info_book_document_info">- Информация об FB2-документе -\n</string>
+    <string name="srt_info_book_publish_info">- Сведения об издании книги -\n</string>
+    <string name="srt_info_book_sequence_info">Серия:\n</string>
+    <string name="srt_info_book_genre_info">Жанр:\n</string>
+    <string name="srt_info_book_book_title_info">Название произведения:\n</string>
+    <string name="srt_info_book_keywords_info">Список ключевых слов к книге:\n</string>
+    <string name="srt_info_book_data_info">Дата:\n</string>
+    <string name="srt_info_book_lang_info">Язык книги:\n</string>
+    <string name="srt_info_book_src_lang_info">Язык оригинала:\n</string>
+    <string name="srt_info_book_program_used_info">Программы использованные при подготовке:\n</string>
+    <string name="srt_info_book_src_url_info">Оригинальный документ:\n</string>
+    <string name="srt_info_book_src_ocr_info">Автор OCR или оригинального документа:\n</string>
+    <string name="srt_info_book_version_info">Версия FB2-документа:\n</string>
+    <string name="srt_info_book_publisher_info">Правообладатель:\n</string>
+    <string name="srt_info_book_year_info">Год издания:\n</string>
+    <string name="srt_info_book_author_info">Автор:\n</string>
+    <string name="srt_info_book_translator_info">Переводчик:\n</string>
+    <string name="jv_relaunch_rewrite">Rewrite…</string>
+    <string name="srt_dbactivity_file_del">Удалить выбранное?</string>
 </resources>

@@ -150,7 +150,7 @@ public class TypesActivity extends Activity {
 
 						// "Ok"
 						builder.setPositiveButton(
-								getResources().getString(R.string.jv_types_ok),
+								getResources().getString(R.string.app_ok),
 								new DialogInterface.OnClickListener() {
 									public void onClick(DialogInterface dialog,
 											int whichButton) {
@@ -176,7 +176,7 @@ public class TypesActivity extends Activity {
 						// "Cancel"
 						builder.setNegativeButton(
 								getResources().getString(
-										R.string.jv_types_cancel),
+										R.string.app_cancel),
 								new DialogInterface.OnClickListener() {
 									public void onClick(DialogInterface dialog,
 											int whichButton) {
@@ -274,7 +274,7 @@ public class TypesActivity extends Activity {
 										// "Ok"
 										builder3.setPositiveButton(
 												getResources().getString(
-														R.string.jv_types_ok),
+														R.string.app_ok),
 												new DialogInterface.OnClickListener() {
 													public void onClick(
 															DialogInterface dialog,
@@ -307,7 +307,7 @@ public class TypesActivity extends Activity {
 										builder3.setNegativeButton(
 												getResources()
 														.getString(
-																R.string.jv_types_cancel),
+																R.string.app_cancel),
 												new DialogInterface.OnClickListener() {
 													public void onClick(
 															DialogInterface dialog,
@@ -323,7 +323,7 @@ public class TypesActivity extends Activity {
 						// "Cancel"
 						builder1.setNegativeButton(
 								getResources().getString(
-										R.string.jv_types_cancel),
+										R.string.app_cancel),
 								new DialogInterface.OnClickListener() {
 									public void onClick(DialogInterface dialog,
 											int which) {

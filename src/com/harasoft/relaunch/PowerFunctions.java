@@ -58,7 +58,7 @@ public class PowerFunctions {
 			// "YES"
 			final Activity fact = act;
 			builder.setPositiveButton(
-					act.getResources().getString(R.string.jv_advanced_yes),
+					act.getResources().getString(R.string.app_yes),
 					new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog,
 								int whichButton) {
@@ -88,7 +88,7 @@ public class PowerFunctions {
 					});
 			// "NO"
 			builder.setNegativeButton(
-					act.getResources().getString(R.string.jv_advanced_no),
+					act.getResources().getString(R.string.app_no),
 					new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog,
 								int whichButton) {
@@ -118,7 +118,7 @@ public class PowerFunctions {
 			// "YES"
 			final Activity fact = act;
 			builder.setPositiveButton(
-					act.getResources().getString(R.string.jv_advanced_yes),
+					act.getResources().getString(R.string.app_yes),
 					new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog,
 								int whichButton) {
@@ -148,7 +148,7 @@ public class PowerFunctions {
 					});
 			// "NO"
 			builder.setNegativeButton(
-					act.getResources().getString(R.string.jv_advanced_no),
+					act.getResources().getString(R.string.app_no),
 					new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog,
 								int whichButton) {

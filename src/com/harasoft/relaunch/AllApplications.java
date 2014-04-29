@@ -1,9 +1,5 @@
 package com.harasoft.relaunch;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -15,24 +11,15 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.view.ContextMenu;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
+import android.view.*;
 import android.view.ContextMenu.ContextMenuInfo;
-import android.widget.AbsListView;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.GridView;
-import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
-import android.widget.Toast;
+import android.widget.*;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 public class AllApplications extends Activity {
 	final String TAG = "AllApps";
@@ -58,35 +45,6 @@ public class AllApplications extends Activity {
 	boolean addSView = true;
 	int gcols = 2;
 
-	private void setEinkController() {
-		if (prefs != null) {
-			Integer einkUpdateMode = 1;
-			try {
-				einkUpdateMode = Integer.parseInt(prefs.getString(
-						"einkUpdateMode", "1"));
-			} catch (Exception e) {
-				einkUpdateMode = 1;
-			}
-			if (einkUpdateMode < -1 || einkUpdateMode > 2)
-				einkUpdateMode = 1;
-			if (einkUpdateMode >= 0) {
-				EinkScreen.UpdateMode = einkUpdateMode;
-
-				Integer einkUpdateInterval = 10;
-				try {
-					einkUpdateInterval = Integer.parseInt(prefs.getString(
-							"einkUpdateInterval", "10"));
-				} catch (Exception e) {
-					einkUpdateInterval = 10;
-				}
-				if (einkUpdateInterval < 0 || einkUpdateInterval > 100)
-					einkUpdateInterval = 10;
-				EinkScreen.UpdateModeInterval = einkUpdateInterval;
-
-				EinkScreen.PrepareController(null, false);
-			}
-		}
-	}
 
 	static class ViewHolder {
 		TextView tv;
@@ -202,7 +160,6 @@ public class AllApplications extends Activity {
 		super.onCreate(savedInstanceState);
 
 		prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-		setEinkController();
 		app = ((ReLaunchApp) getApplicationContext());
 		app.setFullScreenIfNecessary(this);
 		setContentView(R.layout.all_applications);
@@ -289,8 +246,8 @@ public class AllApplications extends Activity {
 						sv.total = totalItemCount;
 						sv.count = visibleItemCount;
 						sv.first = firstVisibleItem;
-						setEinkController();
-						sv.invalidate();
+                        EinkScreen.PrepareController(null, false);
+                        sv.invalidate();
 					}
 
 					public void onScrollStateChanged(AbsListView view,
@@ -303,7 +260,7 @@ public class AllApplications extends Activity {
 			lv.setOnScrollListener(new AbsListView.OnScrollListener() {
 				public void onScroll(AbsListView view, int firstVisibleItem,
 						int visibleItemCount, int totalItemCount) {
-					setEinkController();
+                    EinkScreen.PrepareController(null, false);
 				}
 
 				public void onScrollStateChanged(AbsListView view,
@@ -362,17 +319,9 @@ public class AllApplications extends Activity {
 	}
 
 	@Override
-	protected void onRestart() {
-		super.onRestart();
-		setEinkController();
-		if (listName.equals("app_all"))
-			rereadAppList();
-	}
-
-	@Override
 	protected void onStart() {
 		super.onStart();
-		setEinkController();
+        EinkScreen.setEinkController(prefs);
 		if (listName.equals("app_all"))
 			rereadAppList();
 	}
@@ -380,7 +329,7 @@ public class AllApplications extends Activity {
 	@Override
 	protected void onResume() {
 		super.onResume();
-		setEinkController();
+        EinkScreen.PrepareController(null, false);
 		if (listName.equals("app_all"))
 			rereadAppList();
 		app.generalOnResume(TAG, this);
@@ -410,7 +359,7 @@ public class AllApplications extends Activity {
 					.getString(R.string.jv_allapp_uninstall));
 			// "Cancel"
 			menu.add(Menu.NONE, CNTXT_MENU_CANCEL, Menu.NONE, getResources()
-					.getString(R.string.jv_allapp_cancel));
+					.getString(R.string.app_cancel));
 		} else {
 			List<String[]> lit = app.getList("app_favorites");
 			boolean in_fav = false;
@@ -429,7 +378,7 @@ public class AllApplications extends Activity {
 					.getString(R.string.jv_allapp_uninstall));
 			// "Cancel"
 			menu.add(Menu.NONE, CNTXT_MENU_CANCEL, Menu.NONE, getResources()
-					.getString(R.string.jv_allapp_cancel));
+					.getString(R.string.app_cancel));
 		}
 	}
 

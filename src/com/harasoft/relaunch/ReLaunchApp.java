@@ -1,29 +1,10 @@
 package com.harasoft.relaunch;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
-import java.nio.channels.FileChannel;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.regex.Pattern;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Application;
 import android.app.PendingIntent;
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.SharedPreferences;
+import android.content.*;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.preference.PreferenceManager;
@@ -32,6 +13,12 @@ import android.view.Window;
 import android.view.WindowManager;
 import android.webkit.WebView;
 import android.widget.Toast;
+
+import java.io.*;
+import java.nio.channels.FileChannel;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 public class ReLaunchApp extends Application {
 	final String TAG = "ReLaunchApp";
@@ -73,8 +60,7 @@ public class ReLaunchApp extends Application {
 	public int FLT_NEW;
 	public int FLT_NEW_AND_READING;
 	public boolean filters_and;
-	
-	public final String BACKUP_DIR = "/sdcard/.relaunch";
+
 	public final String DATA_DIR = "/data/data/com.harasoft.relaunch";
 
 	public HashMap<String, Integer> history = new HashMap<String, Integer>();
@@ -83,6 +69,7 @@ public class ReLaunchApp extends Application {
 	private HashMap<String, Drawable> icons;
 	private List<HashMap<String, String>> readers;
 	private List<String> apps;
+    //SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
 
 	public BooksBase dataBase;
 
@@ -199,8 +186,7 @@ public class ReLaunchApp extends Application {
 
 	// save list
 	public void saveList(String listName) {
-		SharedPreferences prefs = PreferenceManager
-				.getDefaultSharedPreferences(getBaseContext());
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
 		if (listName.equals("favorites")) {
 			int favMax = 30;
 			try {
@@ -256,12 +242,8 @@ public class ReLaunchApp extends Application {
 			this.writeFile("columns", ReLaunch.COLS_FILE, 0, ":");
 		}
 	}
-
 	// Add to list
-	public void addToList(String listName, String dr, String fn,
-			Boolean addToEnd) {
-		// Log.d(TAG, "addToList(" + listName + ", " + dr + ":" + fn + ", " +
-		// addToEnd + ")");
+	public void addToList(String listName, String dr, String fn, Boolean addToEnd) {
 		addToList_internal(listName, dr, fn, addToEnd);
 	}
 
@@ -269,10 +251,7 @@ public class ReLaunchApp extends Application {
 		addToList(listName, fullName, addToEnd, "/");
 	}
 
-	public void addToList(String listName, String fullName, Boolean addToEnd,
-			String delimiter) {
-		// Log.d(TAG, "addToList(" + listName + ", " + fullName + ", " +
-		// addToEnd + ", " + delimiter + ")");
+	public void addToList(String listName, String fullName, Boolean addToEnd, String delimiter) {
 
 		if (delimiter.equals("/")) {
 			if (fullName.endsWith("/" + DIR_TAG)) {
@@ -312,16 +291,14 @@ public class ReLaunchApp extends Application {
 
 	}
 
-	public void addToList_internal(String listName, String dr, String fn,
-			Boolean addToEnd) {
+	public void addToList_internal(String listName, String dr, String fn, Boolean addToEnd) {
 		if (!m.containsKey(listName))
 			m.put(listName, new ArrayList<String[]>());
 		List<String[]> resultList = m.get(listName);
 
 		String[] entry = new String[] { dr, fn };
 		for (int i = 0; i < resultList.size(); i++) {
-			if (resultList.get(i)[0].equals(dr)
-					&& resultList.get(i)[1].equals(fn)) {
+			if (resultList.get(i)[0].equals(dr) && resultList.get(i)[1].equals(fn)) {
 				resultList.remove(i);
 				break;
 			}
@@ -331,7 +308,6 @@ public class ReLaunchApp extends Application {
 		else
 			resultList.add(0, entry);
 	}
-
 	// Remove from list
 	public void removeFromList(String listName, String dr, String fn) {
 		removeFromList_internal(listName, dr, fn);
@@ -350,15 +326,13 @@ public class ReLaunchApp extends Application {
 			return;
 		List<String[]> resultList = m.get(listName);
 		for (int i = 0; i < resultList.size(); i++) {
-			if (resultList.get(i)[0].equals(dr)
-					&& resultList.get(i)[1].equals(fn)) {
+			if (resultList.get(i)[0].equals(dr) && resultList.get(i)[1].equals(fn)) {
 				resultList.remove(i);
 				saveList(listName);
 				return;
 			}
 		}
 	}
-
 	// If list contains
 	public boolean contains(String listName, String dr, String fn) {
 		if (!m.containsKey(listName))
@@ -366,8 +340,7 @@ public class ReLaunchApp extends Application {
 		List<String[]> resultList = m.get(listName);
 
 		for (int i = 0; i < resultList.size(); i++) {
-			if (resultList.get(i)[0].equals(dr)
-					&& resultList.get(i)[1].equals(fn))
+			if (resultList.get(i)[0].equals(dr) && resultList.get(i)[1].equals(fn))
 				return true;
 		}
 		return false;
@@ -437,8 +410,7 @@ public class ReLaunchApp extends Application {
 		for (int i = 0; i < resultList.size(); i++) {
 			if (maxEntries != 0 && i >= maxEntries)
 				break;
-			String line = resultList.get(i)[0] + delimiter
-					+ resultList.get(i)[1] + "\n";
+			String line = resultList.get(i)[0] + delimiter + resultList.get(i)[1] + "\n";
 			try {
 				fos.write(line.getBytes());
 			} catch (IOException e) {
@@ -504,8 +476,7 @@ public class ReLaunchApp extends Application {
 		File dstFile = new File(to);
 		FileChannel src = null;
 		FileChannel dst = null;
-		boolean ret;
-//		if ((!srcFile.canRead()) || (!dstFile.canWrite()) || (dstFile.exists()))
+
 		if ((!srcFile.canRead()) || ((dstFile.exists()) && (!rewrite)))
 			return false;
 		try {
@@ -515,13 +486,35 @@ public class ReLaunchApp extends Application {
 			dst.transferFrom(src, 0, src.size());
 			src.close();
 			dst.close();
-			ret = true;
 		} catch (IOException e) {
-			ret = false;
+			return false;
 		}
-		return ret;
+		return true;
 	}
-	
+    public boolean copyDir(String from, String to) {
+        File toDir = new File(to);
+        String[] strDirList = (new File(from)).list();
+
+        if(!toDir.exists()){
+            if(!toDir.mkdirs()){
+                return false;
+            }
+        }
+        for (String aStrDirList1 : strDirList) {
+            File f1 = new File(from +"/" + aStrDirList1);
+            if (f1.isFile()) {
+                if (!copyFile(from +"/" + aStrDirList1, to +"/" + aStrDirList1, false)){
+                    return false;
+                }
+            } else {
+                if (!copyDir(from +"/" + aStrDirList1, to + "/" +aStrDirList1)){
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
 	//Move file src to dst
 	public boolean moveFile(String from, String to) {
 		boolean ret = false;
@@ -546,8 +539,7 @@ public class ReLaunchApp extends Application {
 		String[] labelp = label.split("\\%");
 		Intent i = new Intent();
 		i.setComponent(new ComponentName(labelp[0], labelp[1]));
-		i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-				| Intent.FLAG_ACTIVITY_CLEAR_TOP);
+		i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
 		return i;
 	}
 
@@ -555,11 +547,12 @@ public class ReLaunchApp extends Application {
 	// file name. Null if not found
 	public Intent launchReader(String name, String file) {
 		String re[] = name.split(":");
+        Log.i("=====================", "---------------- name = " + name);
+        Log.i("=====================", "---------------- file = " + file);
 		if (re.length == 2 && re[0].equals("Intent")) {
 			Intent i = new Intent();
 			i.setAction(Intent.ACTION_VIEW);
-			i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-					| Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			i.setDataAndType(Uri.parse("file:///" + Uri.encode(file.substring(1))), re[1]);
 			addToList("lastOpened", file, false);
 			saveList("lastOpened");
@@ -583,8 +576,7 @@ public class ReLaunchApp extends Application {
 						Toast.LENGTH_SHORT).show();
 			else {
 				i.setAction(Intent.ACTION_VIEW);
-				i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-						| Intent.FLAG_ACTIVITY_CLEAR_TOP);
+				i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
 				// i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK); - ALREADY DONE! in
 				// getIntentByLabel
 				i.setData(Uri.parse("file:///" + Uri.encode(file.substring(1))));
@@ -674,10 +666,8 @@ public class ReLaunchApp extends Application {
 		if (s.endsWith(".apk")) {
 			// Install application
 			Intent intent = new Intent(Intent.ACTION_VIEW);
-			intent.setDataAndType(Uri.parse("file://" + s),
-					"application/vnd.android.package-archive");
-			intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK
-					| Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			intent.setDataAndType(Uri.parse("file://" + s), "application/vnd.android.package-archive");
+			intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
 			a.startActivity(intent);
 			return true;
 		}
@@ -710,7 +700,7 @@ public class ReLaunchApp extends Application {
 		wv.loadDataWithBaseURL(null, str, "text/html", "utf-8", null);
 		builder.setView(wv);
 		// "Ok"
-		builder.setPositiveButton(getResources().getString(R.string.jv_rla_ok),
+		builder.setPositiveButton(getResources().getString(R.string.app_ok),
 				new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
 						dialog.dismiss();
@@ -721,24 +711,20 @@ public class ReLaunchApp extends Application {
 				getResources().getString(R.string.jv_rla_see_changelog),
 				new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
-						AlertDialog.Builder builder1 = new AlertDialog.Builder(
-								a);
+						AlertDialog.Builder builder1 = new AlertDialog.Builder(a);
 						WebView wv = new WebView(a);
 						wv.loadDataWithBaseURL(
 								null,
 								getResources().getString(R.string.about_help)
-										+ getResources().getString(
-												R.string.about_appr)
-										+ getResources().getString(
-												R.string.whats_new),
+										+ getResources().getString(R.string.about_appr)
+										+ getResources().getString(R.string.whats_new),
 								"text/html", "utf-8", null);
 						// "What's new"
-						builder1.setTitle(getResources().getString(
-								R.string.jv_rla_whats_new_title));
+						builder1.setTitle(getResources().getString(R.string.jv_rla_whats_new_title));
 						builder1.setView(wv);
 						// "Ok"
 						builder1.setPositiveButton(
-								getResources().getString(R.string.jv_rla_ok),
+								getResources().getString(R.string.app_ok),
 								new DialogInterface.OnClickListener() {
 									public void onClick(DialogInterface dialog,
 											int whichButton) {
@@ -754,8 +740,7 @@ public class ReLaunchApp extends Application {
 	public void setFullScreenIfNecessary(Activity a) {
 		if (fullScreen) {
 			a.requestWindowFeature(Window.FEATURE_NO_TITLE);
-			a.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-					WindowManager.LayoutParams.FLAG_FULLSCREEN);
+			a.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 		}
 	}
 
@@ -787,15 +772,13 @@ public class ReLaunchApp extends Application {
 		}
 		String src = fromDir.getAbsolutePath() + "/shared_prefs/com.harasoft.relaunch_preferences.xml";
 		String dst = toDir.getAbsolutePath() + "/shared_prefs/com.harasoft.relaunch_preferences.xml";
-//		boolean ret = copyFile(src, dst, true);
 		if (!copyFile(src, dst, true))
 			return false;
 		return true;
 	}
 
 	public boolean isStartDir(String dir) {
-		SharedPreferences prefs = PreferenceManager
-				.getDefaultSharedPreferences(getBaseContext());
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
 		String startDirs = prefs.getString("startDir", "/sdcard,/media/My Files");
 		if (startDirs.contains(dir))
 			return true;
@@ -803,8 +786,7 @@ public class ReLaunchApp extends Application {
 	}
 
 	public void setStartDir(String dir) {
-		SharedPreferences prefs = PreferenceManager
-				.getDefaultSharedPreferences(getBaseContext());
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
 		SharedPreferences.Editor editor = prefs.edit();
 		editor.putString("startDir", dir);
 		editor.putBoolean("showAddStartDir", false);
@@ -812,8 +794,7 @@ public class ReLaunchApp extends Application {
 	}
 
 	public void addStartDir(String dir) {
-		SharedPreferences prefs = PreferenceManager
-				.getDefaultSharedPreferences(getBaseContext());
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
 		SharedPreferences.Editor editor = prefs.edit();
 		String oldStart = prefs.getString("startDir", "/sdcard,/media/My Files");
 		editor.putString("startDir", oldStart + "," + dir);

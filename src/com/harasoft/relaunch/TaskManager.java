@@ -1,14 +1,5 @@
 package com.harasoft.relaunch;
 
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.Dialog;
@@ -28,18 +19,16 @@ import android.text.SpannableString;
 import android.text.style.StyleSpan;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.view.View.OnClickListener;
-import android.widget.AbsListView;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ListView;
-import android.widget.TextView;
+import android.widget.*;
+
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.*;
 
 public class TaskManager extends Activity {
 	final String TAG = "TaskManager";
@@ -136,35 +125,6 @@ public class TaskManager extends Activity {
 	List<Integer> newServ;
 	HashMap<Integer, PInfo> newPinfo;
 
-	private void setEinkController() {
-		if (prefs != null) {
-			Integer einkUpdateMode = 1;
-			try {
-				einkUpdateMode = Integer.parseInt(prefs.getString(
-						"einkUpdateMode", "1"));
-			} catch (Exception e) {
-				einkUpdateMode = 1;
-			}
-			if (einkUpdateMode < -1 || einkUpdateMode > 2)
-				einkUpdateMode = 1;
-			if (einkUpdateMode >= 0) {
-				EinkScreen.UpdateMode = einkUpdateMode;
-
-				Integer einkUpdateInterval = 10;
-				try {
-					einkUpdateInterval = Integer.parseInt(prefs.getString(
-							"einkUpdateInterval", "10"));
-				} catch (Exception e) {
-					einkUpdateInterval = 10;
-				}
-				if (einkUpdateInterval < 0 || einkUpdateInterval > 100)
-					einkUpdateInterval = 10;
-				EinkScreen.UpdateModeInterval = einkUpdateInterval;
-
-				EinkScreen.PrepareController(null, false);
-			}
-		}
-	}
 
 	public class cpuComparator implements java.util.Comparator<Integer> {
 		public int compare(Integer o1, Integer o2) {
@@ -525,7 +485,7 @@ public class TaskManager extends Activity {
 				taskPids = newTask;
 				servPids = newServ;
 				sortLists();
-				setEinkController();
+                EinkScreen.PrepareController(null, false);
 				adapter_t.notifyDataSetChanged();
 				adapter_s.notifyDataSetChanged();
 
@@ -1005,7 +965,7 @@ public class TaskManager extends Activity {
 		super.onCreate(savedInstanceState);
 
 		prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-		setEinkController();
+        EinkScreen.setEinkController(prefs);
 
 		app = ((ReLaunchApp) getApplicationContext());
 		app.setFullScreenIfNecessary(this);
@@ -1052,8 +1012,8 @@ public class TaskManager extends Activity {
 						sv.total = totalItemCount;
 						sv.count = visibleItemCount;
 						sv.first = firstVisibleItem;
-						setEinkController();
-						sv.invalidate();
+                        EinkScreen.PrepareController(null, false);
+                        sv.invalidate();
 					}
 
 					public void onScrollStateChanged(AbsListView view,
@@ -1077,8 +1037,12 @@ public class TaskManager extends Activity {
 						sv.total = totalItemCount;
 						sv.count = visibleItemCount;
 						sv.first = firstVisibleItem;
-						setEinkController();
-						sv.invalidate();
+                        if(N2DeviceInfo.EINK_ONYX){
+                            EinkScreen.PrepareController(sv, false);
+                        }else{
+                            EinkScreen.PrepareController(null, false);
+                            sv.invalidate();
+                        }
 					}
 
 					public void onScrollStateChanged(AbsListView view,
@@ -1091,7 +1055,7 @@ public class TaskManager extends Activity {
 			lv_t.setOnScrollListener(new AbsListView.OnScrollListener() {
 				public void onScroll(AbsListView view, int firstVisibleItem,
 						int visibleItemCount, int totalItemCount) {
-					setEinkController();
+                    EinkScreen.PrepareController(null, false);
 				}
 
 				public void onScrollStateChanged(AbsListView view,
@@ -1101,7 +1065,7 @@ public class TaskManager extends Activity {
 			lv_s.setOnScrollListener(new AbsListView.OnScrollListener() {
 				public void onScroll(AbsListView view, int firstVisibleItem,
 						int visibleItemCount, int totalItemCount) {
-					setEinkController();
+                    EinkScreen.PrepareController(null, false);
 				}
 
 				public void onScrollStateChanged(AbsListView view,
@@ -1168,17 +1132,11 @@ public class TaskManager extends Activity {
 		stopCPUUpdate();
 	}
 
-	@Override
-	protected void onRestart() {
-		super.onRestart();
-		setEinkController();
-		startCPUUpdate();
-	}
 
 	@Override
 	protected void onResume() {
 		super.onResume();
-		setEinkController();
+        EinkScreen.setEinkController(prefs);
 		startCPUUpdate();
 		app.generalOnResume(TAG, this);
 	}
@@ -1186,7 +1144,7 @@ public class TaskManager extends Activity {
 	@Override
 	protected void onStart() {
 		super.onStart();
-		setEinkController();
+        EinkScreen.setEinkController(prefs);
 		startCPUUpdate();
 	}
 

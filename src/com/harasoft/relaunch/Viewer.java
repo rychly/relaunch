@@ -53,6 +53,7 @@ public class Viewer extends Activity {
 		try {
 			br.close();
 		} catch (IOException e) {
+            //
 		}
 
 		// Set text
@@ -111,7 +112,7 @@ public class Viewer extends Activity {
 					+ getResources().getString(R.string.jv_viewer_bytes));
 			// "OK"
 			builder.setPositiveButton(
-					getResources().getString(R.string.jv_viewer_ok),
+					getResources().getString(R.string.app_ok),
 					new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog,
 								int whichButton) {
@@ -155,7 +156,7 @@ public class Viewer extends Activity {
 										R.string.jv_editor_bytes));
 						// "OK"
 						builder.setPositiveButton(
-								getResources().getString(R.string.jv_viewer_ok),
+								getResources().getString(R.string.app_ok),
 								new DialogInterface.OnClickListener() {
 									public void onClick(DialogInterface dialog,
 											int whichButton) {
@@ -198,8 +199,6 @@ public class Viewer extends Activity {
 		case EDITOR_ACT:
 			rereadFile(fileName, editTxt);
 			break;
-		default:
-			return;
 		}
 	}
 

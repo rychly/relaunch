@@ -36,7 +36,7 @@ public class Advanced extends Activity {
 	boolean addSView = true;
 
 	WifiManager wfm;
-	boolean wifiOn = false;
+	public static boolean wifiOn = false;
 	Button wifiOnOff;
 	Button wifiScan;
 	List<NetInfo> wifiNetworks = new ArrayList<NetInfo>();
@@ -47,36 +47,6 @@ public class Advanced extends Activity {
 	BroadcastReceiver b1;
 	BroadcastReceiver b2;
 	String connectedSSID;
-
-	private void setEinkController() {
-		if (prefs != null) {
-			Integer einkUpdateMode = 1;
-			try {
-				einkUpdateMode = Integer.parseInt(prefs.getString(
-						"einkUpdateMode", "1"));
-			} catch (Exception e) {
-				einkUpdateMode = 1;
-			}
-			if (einkUpdateMode < -1 || einkUpdateMode > 2)
-				einkUpdateMode = 1;
-			if (einkUpdateMode >= 0) {
-				EinkScreen.UpdateMode = einkUpdateMode;
-
-				Integer einkUpdateInterval = 10;
-				try {
-					einkUpdateInterval = Integer.parseInt(prefs.getString(
-							"einkUpdateInterval", "10"));
-				} catch (Exception e) {
-					einkUpdateInterval = 10;
-				}
-				if (einkUpdateInterval < 0 || einkUpdateInterval > 100)
-					einkUpdateInterval = 10;
-				EinkScreen.UpdateModeInterval = einkUpdateInterval;
-
-				EinkScreen.PrepareController(null, false);
-			}
-		}
-	}
 
 	static class NetInfo {
 		static int unknownLevel = -5000;
@@ -152,18 +122,6 @@ public class Advanced extends Activity {
 		String used;
 		String free;
 		boolean ro;
-
-		public void dump(String p) {
-			/*
-			 * Log.d(TAG, p + " dev=\"" + dev + "\" mpoint=\"" + mpoint +
-			 * "\" fs=\"" + fs + "\" used=\"" + used + " total=\"" + total +
-			 * "\" free=\"" + free + "\" ro=" + ro);
-			 */
-		}
-	}
-
-	private void Trace(String t, String s) {
-		// Log.d(t, s);
 	}
 
 	static class ViewHolder {
@@ -408,18 +366,19 @@ public class Advanced extends Activity {
 			String flags = f[3];
 			String[] f1 = flags.split(",");
 			boolean ignore = false;
-			for (int i = 0; i < ingnoreFs.length; i++)
+			for (int i = 0; i < ingnoreFs.length; i++){
 				if (ingnoreFs[i].equals(fs)) {
 					ignore = true;
 					break;
 				}
+            }
 			if (ignore)
 				continue;
 			Info in = new Info();
 			in.dev = f[0];
 			in.mpoint = f[1];
 			in.fs = fs;
-			for (int i = 0; i < f1.length; i++)
+			for (int i = 0; i < f1.length; i++){
 				if (f1[i].equals("ro")) {
 					in.ro = true;
 					break;
@@ -427,6 +386,7 @@ public class Advanced extends Activity {
 					in.ro = false;
 					break;
 				}
+            }
 			in.total = "0";
 			in.used = "0";
 			in.free = "0";
@@ -448,6 +408,7 @@ public class Advanced extends Activity {
 		// Wifi
 		wfm = (WifiManager) getSystemService(Context.WIFI_SERVICE);
 		wifiOn = wfm.isWifiEnabled();
+        wfm.getWifiState();
 		wifiNetworks = readScanResults(wfm);
 	}
 
@@ -534,7 +495,7 @@ public class Advanced extends Activity {
 				}
 			});
 			wifiNetworks = readScanResults(wfm);
-			setEinkController();
+            EinkScreen.PrepareController(null, false);
 			adapter.notifyDataSetChanged();
 			wifiScan.setEnabled(true);
 		} else {
@@ -555,7 +516,7 @@ public class Advanced extends Activity {
 				}
 			});
 			wifiNetworks.clear();
-			setEinkController();
+            EinkScreen.PrepareController(null, false);
 			adapter.notifyDataSetChanged();
 			wifiScan.setEnabled(false);
 		}
@@ -567,7 +528,7 @@ public class Advanced extends Activity {
 
 		prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
 
-		setEinkController();
+        EinkScreen.setEinkController(prefs);
 
 		ingnoreFs = getResources()
 				.getStringArray(R.array.filesystems_to_ignore);
@@ -580,12 +541,12 @@ public class Advanced extends Activity {
 		// "Advanced functions, info, etc."
 		((TextView) findViewById(R.id.results_title)).setText(getResources()
 				.getString(R.string.jv_advanced_title));
-		((ImageButton) findViewById(R.id.results_btn))
+		findViewById(R.id.results_btn)
 				.setOnClickListener(new View.OnClickListener() {
-					public void onClick(View v) {
-						finish();
-					}
-				});
+                    public void onClick(View v) {
+                        finish();
+                    }
+                });
 
 		// Wifi info
 		lv_wifi = (ListView) findViewById(R.id.wifi_lv);
@@ -615,8 +576,8 @@ public class Advanced extends Activity {
 						sv.total = totalItemCount;
 						sv.count = visibleItemCount;
 						sv.first = firstVisibleItem;
-						setEinkController();
-						sv.invalidate();
+                        EinkScreen.PrepareController(null, false);
+                        sv.invalidate();
 					}
 
 					public void onScrollStateChanged(AbsListView view,
@@ -629,7 +590,7 @@ public class Advanced extends Activity {
 			lv_wifi.setOnScrollListener(new AbsListView.OnScrollListener() {
 				public void onScroll(AbsListView view, int firstVisibleItem,
 						int visibleItemCount, int totalItemCount) {
-					setEinkController();
+                    EinkScreen.PrepareController(null, false);
 				}
 
 				public void onScrollStateChanged(AbsListView view,
@@ -652,7 +613,6 @@ public class Advanced extends Activity {
 		b1 = new BroadcastReceiver() {
 			@Override
 			public void onReceive(Context context, Intent intent) {
-				Trace(TAG, "--- Broadcast receiver B1");
 				wifiNetworks = readScanResults(wfm);
 				wifiScan.setEnabled(true);
 				adapter.notifyDataSetChanged();
@@ -670,7 +630,6 @@ public class Advanced extends Activity {
 		b2 = new BroadcastReceiver() {
 			@Override
 			public void onReceive(Context context, Intent intent) {
-				Trace(TAG, "--- Broadcast receiver B2");
 				wifiOn = wfm.isWifiEnabled();
 				wifiNetworks = readScanResults(wfm);
 				wifiScan.setEnabled(true);
@@ -688,7 +647,7 @@ public class Advanced extends Activity {
 
 			public void onClick(View v) {
 
-                if (DeviceInfo.EINK_SONY) {
+                if (N2DeviceInfo.EINK_SONY) {
                     final Intent intent = new Intent(Intent.ACTION_MAIN, null);
                     intent.addCategory(Intent.CATEGORY_LAUNCHER);
                     // SONY PRS-Tx only!
@@ -698,21 +657,21 @@ public class Advanced extends Activity {
                     intent.setComponent(cn);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivity(intent);
-                } else if (DeviceInfo.EINK_NOOK) {
-                    final Intent intent = new Intent(Intent.ACTION_MAIN, null);
-                    intent.addCategory(Intent.CATEGORY_LAUNCHER);
-                    // NOOK ST only!
-                    final ComponentName cn = new ComponentName(
-                            "com.android.settings",
-                            "com.android.settings.wifi.Settings_Wifi_Settings");
-                    intent.setComponent(cn);
-                    intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    startActivity(intent);
-                } else {
+                } else if (N2DeviceInfo.EINK_NOOK) {
+					final Intent intent = new Intent(Intent.ACTION_MAIN, null);
+					intent.addCategory(Intent.CATEGORY_LAUNCHER);
+					// NOOK ST only!
+					final ComponentName cn = new ComponentName(
+							"com.android.settings",
+							"com.android.settings.wifi.Settings_Wifi_Settings");
+					intent.setComponent(cn);
+					intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+					startActivity(intent);
+				} else {
                     final Intent intent = new Intent(android.provider.Settings.ACTION_WIFI_SETTINGS);
                     intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivity(intent);
-                }
+				}
 			}
 		});
 
@@ -827,10 +786,11 @@ public class Advanced extends Activity {
         unregisterReceiver(b2);
 	}
 
+
 	@Override
 	protected void onResume() {
 		super.onResume();
-		setEinkController();
+        EinkScreen.setEinkController(prefs);
 		app.generalOnResume(TAG, this);
 	}
 

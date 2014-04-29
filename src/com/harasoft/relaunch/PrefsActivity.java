@@ -1,11 +1,5 @@
 package com.harasoft.relaunch;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import android.R.integer;
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
@@ -15,24 +9,19 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
-import android.preference.CheckBoxPreference;
-import android.preference.EditTextPreference;
-import android.preference.ListPreference;
-import android.preference.Preference;
-import android.preference.PreferenceActivity;
-import android.preference.PreferenceCategory;
-import android.preference.PreferenceManager;
-import android.preference.PreferenceScreen;
+import android.os.SystemClock;
+import android.preference.*;
 import android.text.InputType;
-import android.view.LayoutInflater;
-import android.view.View;
+import android.util.Log;
+import android.view.*;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ListAdapter;
 import android.widget.ListView;
-import android.os.SystemClock;
-import android.view.MotionEvent;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class PrefsActivity extends PreferenceActivity implements
 		OnSharedPreferenceChangeListener {
@@ -226,23 +215,21 @@ public class PrefsActivity extends PreferenceActivity implements
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-
 		app = ((ReLaunchApp) getApplicationContext());
-//		app.setFullScreenIfNecessary(this);
+		app.setFullScreenIfNecessary(this);
 
 		applicationsArray = app.getApps();
-		applications = applicationsArray
-				.toArray(new CharSequence[applicationsArray.size()]);
-		happlications = app.getApps().toArray(
-				new CharSequence[app.getApps().size()]);
+		applications = applicationsArray.toArray(new CharSequence[applicationsArray.size()]);
+		happlications = app.getApps().toArray(new CharSequence[app.getApps().size()]);
 		for (int j = 0; j < happlications.length; j++) {
 			String happ = (String) happlications[j];
 			String[] happp = happ.split("\\%");
 			happlications[j] = happp[2];
 		}
 
-		prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
 		super.onCreate(savedInstanceState);
+
 		addPreferencesFromResource(R.xml.prefs);
 
 		setContentView(R.layout.prefs_main);
@@ -252,8 +239,9 @@ public class PrefsActivity extends PreferenceActivity implements
 
 		for (int i = 0; i < prefAdvancedScreen.getPreferenceCount(); i++) {
 			Preference p = prefAdvancedScreen.getPreference(i);
-			if (p instanceof PreferenceScreen)
+			if (p instanceof PreferenceScreen){
 				p.setOnPreferenceClickListener(prefScreenListener);
+            }
 		}
 
 		// Save items value
@@ -273,7 +261,7 @@ public class PrefsActivity extends PreferenceActivity implements
 						builder.setMessage(getResources().getString(
 								R.string.jv_prefs_cleanup_database_text));
 						builder.setPositiveButton(
-								getResources().getString(R.string.jv_prefs_yes),
+								getResources().getString(R.string.app_yes),
 								new DialogInterface.OnClickListener() {
 									public void onClick(DialogInterface dialog,
 											int whichButton) {
@@ -283,7 +271,7 @@ public class PrefsActivity extends PreferenceActivity implements
 								});
 						builder.setNegativeButton(
 								getResources().getString(
-										R.string.jv_relaunch_no),
+										R.string.app_no),
 								new DialogInterface.OnClickListener() {
 									public void onClick(DialogInterface dialog,
 											int whichButton) {
@@ -305,7 +293,7 @@ public class PrefsActivity extends PreferenceActivity implements
 						builder.setMessage(getResources().getString(
 								R.string.jv_prefs_clear_lru_text));
 						builder.setPositiveButton(
-								getResources().getString(R.string.jv_prefs_yes),
+								getResources().getString(R.string.app_yes),
 								new DialogInterface.OnClickListener() {
 									public void onClick(DialogInterface dialog,
 											int whichButton) {
@@ -315,7 +303,7 @@ public class PrefsActivity extends PreferenceActivity implements
 								});
 						builder.setNegativeButton(
 								getResources().getString(
-										R.string.jv_relaunch_no),
+										R.string.app_no),
 								new DialogInterface.OnClickListener() {
 									public void onClick(DialogInterface dialog,
 											int whichButton) {
@@ -337,7 +325,7 @@ public class PrefsActivity extends PreferenceActivity implements
 						builder.setMessage(getResources().getString(
 								R.string.jv_prefs_clear_favorites_text));
 						builder.setPositiveButton(
-								getResources().getString(R.string.jv_prefs_yes),
+								getResources().getString(R.string.app_yes),
 								new DialogInterface.OnClickListener() {
 									public void onClick(DialogInterface dialog,
 											int whichButton) {
@@ -347,7 +335,7 @@ public class PrefsActivity extends PreferenceActivity implements
 								});
 						builder.setNegativeButton(
 								getResources().getString(
-										R.string.jv_relaunch_no),
+										R.string.app_no),
 								new DialogInterface.OnClickListener() {
 									public void onClick(DialogInterface dialog,
 											int whichButton) {
@@ -392,7 +380,7 @@ public class PrefsActivity extends PreferenceActivity implements
 								R.string.jv_prefs_default_settings_text));
 						// "Yes"
 						builder.setPositiveButton(
-								getResources().getString(R.string.jv_prefs_yes),
+								getResources().getString(R.string.app_yes),
 								new DialogInterface.OnClickListener() {
 									public void onClick(DialogInterface dialog,
 											int whichButton) {
@@ -406,7 +394,7 @@ public class PrefsActivity extends PreferenceActivity implements
 								});
 						// "No"
 						builder.setNegativeButton(
-								getResources().getString(R.string.jv_prefs_no),
+								getResources().getString(R.string.app_no),
 								new DialogInterface.OnClickListener() {
 									public void onClick(DialogInterface dialog,
 											int whichButton) {
@@ -422,7 +410,7 @@ public class PrefsActivity extends PreferenceActivity implements
 				new Preference.OnPreferenceClickListener() {
 					public boolean onPreferenceClick(Preference pref) {
 						boolean ret = app.copyPrefs(app.DATA_DIR,
-								app.BACKUP_DIR);
+                                ReLaunch.BACKUP_DIR);
 						AlertDialog.Builder builder = new AlertDialog.Builder(
 								context);
 						if (ret) {
@@ -437,7 +425,7 @@ public class PrefsActivity extends PreferenceActivity implements
 									R.string.jv_prefs_rsr_fail_text));
 						}
 						builder.setNeutralButton(
-								getResources().getString(R.string.jv_prefs_ok),
+								getResources().getString(R.string.app_ok),
 								new DialogInterface.OnClickListener() {
 									public void onClick(DialogInterface dialog,
 											int whichButton) {
@@ -452,7 +440,7 @@ public class PrefsActivity extends PreferenceActivity implements
 		findPreference("loadSettings").setOnPreferenceClickListener(
 				new Preference.OnPreferenceClickListener() {
 					public boolean onPreferenceClick(Preference pref) {
-						boolean ret = app.copyPrefs(app.BACKUP_DIR,
+						boolean ret = app.copyPrefs(ReLaunch.BACKUP_DIR,
 								app.DATA_DIR);
 						AlertDialog.Builder builder = new AlertDialog.Builder(
 								context);
@@ -468,7 +456,7 @@ public class PrefsActivity extends PreferenceActivity implements
 									R.string.jv_prefs_rsr_fail_text));
 						}
 						builder.setNeutralButton(
-								getResources().getString(R.string.jv_prefs_ok),
+								getResources().getString(R.string.app_ok),
 								new DialogInterface.OnClickListener() {
 									public void onClick(DialogInterface dialog,
 											int whichButton) {
@@ -500,7 +488,7 @@ public class PrefsActivity extends PreferenceActivity implements
 		// final Activity pact = this;
 
 		// back button - work as cancel
-		((ImageButton) findViewById(R.id.back_btn))
+		( findViewById(R.id.back_btn))
 				.setOnClickListener(new View.OnClickListener() {
 					public void onClick(View v) {
 						if (isPreferencesChanged()) {
@@ -515,7 +503,7 @@ public class PrefsActivity extends PreferenceActivity implements
 							// "Yes"
 							builder.setPositiveButton(
 									getResources().getString(
-											R.string.jv_prefs_yes),
+											R.string.app_yes),
 									new DialogInterface.OnClickListener() {
 										public void onClick(
 												DialogInterface dialog,
@@ -530,7 +518,7 @@ public class PrefsActivity extends PreferenceActivity implements
 							// "No"
 							builder.setNegativeButton(
 									getResources().getString(
-											R.string.jv_prefs_cancel),
+											R.string.app_cancel),
 									new DialogInterface.OnClickListener() {
 										public void onClick(
 												DialogInterface dialog,
@@ -541,7 +529,7 @@ public class PrefsActivity extends PreferenceActivity implements
 							// "Cancel"
 							builder.setNeutralButton(
 									getResources().getString(
-											R.string.jv_prefs_no),
+											R.string.app_no),
 									new DialogInterface.OnClickListener() {
 										public void onClick(
 												DialogInterface dialog,
@@ -557,85 +545,6 @@ public class PrefsActivity extends PreferenceActivity implements
 						}
 					}
 				});
-
-		ImageButton upScroll = (ImageButton) findViewById(R.id.btn_scrollup);
-		upScroll.setOnClickListener(new View.OnClickListener() {
-
-			public void onClick(View v) {
-				if (DeviceInfo.EINK_NOOK) {
-					MotionEvent ev;
-					ev = MotionEvent.obtain(SystemClock.uptimeMillis(),
-							SystemClock.uptimeMillis(),
-							MotionEvent.ACTION_DOWN, 200, 100, 0);
-					getListView().dispatchTouchEvent(ev);
-					ev = MotionEvent.obtain(SystemClock.uptimeMillis(),
-							SystemClock.uptimeMillis() + 100,
-							MotionEvent.ACTION_MOVE, 200, 200, 0);
-					getListView().dispatchTouchEvent(ev);
-					SystemClock.sleep(100);
-					ev = MotionEvent.obtain(SystemClock.uptimeMillis(),
-							SystemClock.uptimeMillis(), MotionEvent.ACTION_UP,
-							200, 200, 0);
-					getListView().dispatchTouchEvent(ev);
-				} else {
-					final ListView lv = (ListView) getListView();
-					int first = lv.getFirstVisiblePosition();
-					int visible = lv.getLastVisiblePosition()
-							- lv.getFirstVisiblePosition() + 1;
-					first -= visible;
-					if (first < 0)
-						first = 0;
-					final int finfirst = first;
-					lv.clearFocus();
-					lv.post(new Runnable() {
-
-						public void run() {
-							lv.setSelection(finfirst);
-						}
-					});
-				}
-			}
-		});
-
-		ImageButton downScroll = (ImageButton) findViewById(R.id.btn_scrolldown);
-		downScroll.setOnClickListener(new View.OnClickListener() {
-
-			public void onClick(View v) {
-				if (DeviceInfo.EINK_NOOK) {
-					MotionEvent ev;
-					ev = MotionEvent.obtain(SystemClock.uptimeMillis(),
-							SystemClock.uptimeMillis(),
-							MotionEvent.ACTION_DOWN, 200, 200, 0);
-					getListView().dispatchTouchEvent(ev);
-					ev = MotionEvent.obtain(SystemClock.uptimeMillis(),
-							SystemClock.uptimeMillis() + 100,
-							MotionEvent.ACTION_MOVE, 200, 100, 0);
-					getListView().dispatchTouchEvent(ev);
-					SystemClock.sleep(100);
-					ev = MotionEvent.obtain(SystemClock.uptimeMillis(),
-							SystemClock.uptimeMillis(), MotionEvent.ACTION_UP,
-							200, 100, 0);
-					getListView().dispatchTouchEvent(ev);
-				} else {
-					final ListView lv = (ListView) getListView();
-					int total = lv.getCount();
-					int last = lv.getLastVisiblePosition();
-					if (total == last + 1)
-						return;
-					int target = last + 1;
-					if (target > (total - 1))
-						target = total - 1;
-					final int ftarget = target;
-					lv.clearFocus();
-					lv.post(new Runnable() {
-						public void run() {
-							lv.setSelection(ftarget);
-						}
-					});
-				}
-
-			}
-		});
 
 		for (int i = 0; i < getPreferenceScreen().getPreferenceCount(); i++) {
 			initSummary(getPreferenceScreen().getPreference(i));
@@ -810,7 +719,7 @@ public class PrefsActivity extends PreferenceActivity implements
 					builder1.setView(input);
 					// "OK"
 					builder1.setPositiveButton(
-							getResources().getString(R.string.jv_prefs_ok),
+							getResources().getString(R.string.app_ok),
 							new DialogInterface.OnClickListener() {
 								public void onClick(DialogInterface dialog,
 										int whichButton) {
@@ -865,6 +774,7 @@ public class PrefsActivity extends PreferenceActivity implements
 					imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
 					builder1.show();
 				}
+                checkSetDropboxAndOpds("homeButtonDT", sharedPreferences.getString(key, "none"), sharedPreferences);
 			}
 			if (key.equals("homeButtonLT")) {
 				if (sharedPreferences.getString(key, "OPENSCREEN").equals(
@@ -900,6 +810,7 @@ public class PrefsActivity extends PreferenceActivity implements
 					imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
 					builder1.show();
 				}
+                checkSetDropboxAndOpds("homeButtonLT", sharedPreferences.getString(key, "none"), sharedPreferences);
 			}
 			// LRU
 			if (key.equals("lruButtonST")) {
@@ -917,7 +828,7 @@ public class PrefsActivity extends PreferenceActivity implements
 					builder1.setView(input);
 					// "OK"
 					builder1.setPositiveButton(
-							getResources().getString(R.string.jv_prefs_ok),
+							getResources().getString(R.string.app_ok),
 							new DialogInterface.OnClickListener() {
 								public void onClick(DialogInterface dialog,
 										int whichButton) {
@@ -971,6 +882,7 @@ public class PrefsActivity extends PreferenceActivity implements
 					imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
 					builder1.show();
 				}
+                checkSetDropboxAndOpds("lruButtonDT", sharedPreferences.getString(key, "none"), sharedPreferences);
 			}
 			if (key.equals("lruButtonLT")) {
 				if (sharedPreferences.getString(key, "NOTHING").equals("OPENN")) {
@@ -1005,6 +917,7 @@ public class PrefsActivity extends PreferenceActivity implements
 					imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
 					builder1.show();
 				}
+                checkSetDropboxAndOpds("lruButtonLT", sharedPreferences.getString(key, "none"), sharedPreferences);
 			}
 			// FAV
 			if (key.equals("favButtonST")) {
@@ -1022,7 +935,7 @@ public class PrefsActivity extends PreferenceActivity implements
 					builder1.setView(input);
 					// "OK"
 					builder1.setPositiveButton(
-							getResources().getString(R.string.jv_prefs_ok),
+							getResources().getString(R.string.app_ok),
 							new DialogInterface.OnClickListener() {
 								public void onClick(DialogInterface dialog,
 										int whichButton) {
@@ -1076,6 +989,7 @@ public class PrefsActivity extends PreferenceActivity implements
 					imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
 					builder1.show();
 				}
+                checkSetDropboxAndOpds("favButtonDT", sharedPreferences.getString(key, "none"), sharedPreferences);
 			}
 			if (key.equals("favButtonLT")) {
 				if (sharedPreferences.getString(key, "NOTHING").equals("OPENN")) {
@@ -1110,6 +1024,7 @@ public class PrefsActivity extends PreferenceActivity implements
 					imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
 					builder1.show();
 				}
+                checkSetDropboxAndOpds("favButtonLT", sharedPreferences.getString(key, "none"), sharedPreferences);
 			}
 			if (key.equals("settingsButtonST")) {
 				if (sharedPreferences.getString(key, "RELAUNCH").equals("RUN")) {
@@ -1156,6 +1071,7 @@ public class PrefsActivity extends PreferenceActivity implements
 							});
 					builder.show();
 				}
+                checkSetDropboxAndOpds("settingsButtonDT", sharedPreferences.getString(key, "none"), sharedPreferences);
 			}
 			if (key.equals("settingsButtonLT")) {
 				if (sharedPreferences.getString(key, "NOTHING").equals("RUN")) {
@@ -1179,6 +1095,7 @@ public class PrefsActivity extends PreferenceActivity implements
 							});
 					builder.show();
 				}
+                checkSetDropboxAndOpds("settingsButtonLT", sharedPreferences.getString(key, "none"), sharedPreferences);
 			}
 			if (key.equals("advancedButtonST")) {
 				if (sharedPreferences.getString(key, "RELAUNCH").equals("RUN")) {
@@ -1225,7 +1142,9 @@ public class PrefsActivity extends PreferenceActivity implements
 							});
 					builder.show();
 				}
-			}
+                checkSetDropboxAndOpds("advancedButtonDT", sharedPreferences.getString(key, "none"), sharedPreferences);
+
+            }
 			if (key.equals("advancedButtonLT")) {
 				if (sharedPreferences.getString(key, "NOTHING").equals("RUN")) {
 					AlertDialog.Builder builder = new AlertDialog.Builder(
@@ -1248,7 +1167,9 @@ public class PrefsActivity extends PreferenceActivity implements
 							});
 					builder.show();
 				}
-			}
+                checkSetDropboxAndOpds("advancedButtonLT", sharedPreferences.getString(key, "none"), sharedPreferences);
+
+            }
 			if (key.equals("memButtonST")) {
 				if (sharedPreferences.getString(key, "RELAUNCH").equals("RUN")) {
 					AlertDialog.Builder builder = new AlertDialog.Builder(
@@ -1294,7 +1215,9 @@ public class PrefsActivity extends PreferenceActivity implements
 							});
 					builder.show();
 				}
-			}
+                checkSetDropboxAndOpds("memButtonDT", sharedPreferences.getString(key, "none"), sharedPreferences);
+
+            }
 			if (key.equals("memButtonLT")) {
 				if (sharedPreferences.getString(key, "NOTHING").equals("RUN")) {
 					AlertDialog.Builder builder = new AlertDialog.Builder(
@@ -1317,7 +1240,9 @@ public class PrefsActivity extends PreferenceActivity implements
 							});
 					builder.show();
 				}
-			}
+                checkSetDropboxAndOpds("memButtonLT", sharedPreferences.getString(key, "none"), sharedPreferences);
+
+            }
 			if (key.equals("batButtonST")) {
 				if (sharedPreferences.getString(key, "RELAUNCH").equals("RUN")) {
 					AlertDialog.Builder builder = new AlertDialog.Builder(
@@ -1363,7 +1288,9 @@ public class PrefsActivity extends PreferenceActivity implements
 							});
 					builder.show();
 				}
-			}
+                checkSetDropboxAndOpds("batButtonDT", sharedPreferences.getString(key, "none"), sharedPreferences);
+
+            }
 			if (key.equals("batButtonLT")) {
 				if (sharedPreferences.getString(key, "NOTHING").equals("RUN")) {
 					AlertDialog.Builder builder = new AlertDialog.Builder(
@@ -1386,7 +1313,9 @@ public class PrefsActivity extends PreferenceActivity implements
 							});
 					builder.show();
 				}
-			}
+                checkSetDropboxAndOpds("batButtonLT", sharedPreferences.getString(key, "none"), sharedPreferences);
+
+            }
 			if (key.equals("appFavButtonST")) {
 				if (sharedPreferences.getString(key, "RELAUNCH").equals("RUN")) {
 					AlertDialog.Builder builder = new AlertDialog.Builder(
@@ -1456,23 +1385,32 @@ public class PrefsActivity extends PreferenceActivity implements
 					builder.show();
 				}
 			}
-			
+            if (key.equals("dropboxSetButton")) {
+                checkSetDropboxAndOpds("dropboxSetButton", sharedPreferences.getString(key, "none"), sharedPreferences);
+
+            }
+            if (key.equals("opdsSetButton")) {
+                checkSetDropboxAndOpds("opdsSetButton", sharedPreferences.getString(key, "none"), sharedPreferences);
+
+            }
 		}
 	}
 
 	public Preference.OnPreferenceClickListener prefScreenListener = new Preference.OnPreferenceClickListener() {
 		public boolean onPreferenceClick(Preference pref) {
-			final PreferenceScreen prefScreen = (PreferenceScreen) pref;
-			LayoutInflater inflater = (LayoutInflater) getApplicationContext()
-					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            final PreferenceScreen prefScreen = (PreferenceScreen) pref;
+
+            prefScreen.getDialog().getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
+			LayoutInflater inflater = (LayoutInflater) getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 			final View prefView = inflater.inflate(R.layout.prefs_main, null);
+
 			prefScreen.getDialog().setContentView(prefView);
-			final ListView prefListView = (ListView) prefView
-					.findViewById(android.R.id.list);
+
+			final ListView prefListView = (ListView) prefView.findViewById(android.R.id.list);
 			prefScreen.bind(prefListView);
 
-			EditText tEdit = (EditText) prefView
-					.findViewById(R.id.prefernces_title);
+			EditText tEdit = (EditText) prefView.findViewById(R.id.prefernces_title);
 			tEdit.setText(pref.getTitle());
 
 			ImageButton b = (ImageButton) prefView.findViewById(R.id.back_btn);
@@ -1482,12 +1420,11 @@ public class PrefsActivity extends PreferenceActivity implements
 				}
 			});
 
-			ImageButton bu = (ImageButton) prefView
-					.findViewById(R.id.btn_scrollup);
+			ImageButton bu = (ImageButton) prefView.findViewById(R.id.btn_scrollup);
 			bu.setOnClickListener(new View.OnClickListener() {
 
 				public void onClick(View v) {
-					if (DeviceInfo.EINK_NOOK) {
+					if (N2DeviceInfo.EINK_NOOK) {
 						MotionEvent ev;
 						ev = MotionEvent.obtain(SystemClock.uptimeMillis(),
 								SystemClock.uptimeMillis(),
@@ -1526,7 +1463,7 @@ public class PrefsActivity extends PreferenceActivity implements
 			bd.setOnClickListener(new View.OnClickListener() {
 
 				public void onClick(View v) {
-					if (DeviceInfo.EINK_NOOK) {
+					if (N2DeviceInfo.EINK_NOOK) {
 						MotionEvent ev;
 						ev = MotionEvent.obtain(SystemClock.uptimeMillis(),
 								SystemClock.uptimeMillis(),
@@ -1612,5 +1549,94 @@ public class PrefsActivity extends PreferenceActivity implements
 		}
 		return equal;
 	}
+
+    private void checkSetDropboxAndOpds(String button, String key, SharedPreferences sharedPreferences) {
+        String[] buttonName = {"none","homeButtonDT", "homeButtonLT", "lruButtonDT", "lruButtonLT", "favButtonDT", "favButtonLT", "settingsButtonDT", "settingsButtonLT",
+                "advancedButtonDT", "advancedButtonLT", "memButtonDT", "memButtonLT", "batButtonDT", "batButtonLT"};
+
+        boolean newOPDS = false;
+        boolean newDropbox = false;
+        SharedPreferences.Editor editor = prefs.edit();
+
+        if("OPDS".equals(key)){
+            newOPDS = true;
+        }
+        if("DROPBOX".equals(key)){
+            newDropbox = true;
+        }
+        if(!"dropboxSetButton".equals(button) && !"opdsSetButton".equals(button)){
+            // действия при выборе из меню кнопок экрана
+            do_pref_subrequest = false;
+            if(button.equals(((ListPreference) findPreference("dropboxSetButton")).getValue())){
+                if(!key.equals("DROPBOX")){
+                    ((ListPreference) findPreference("dropboxSetButton")).setValueIndex(0);
+                    editor.putString("dropboxSetButton", "NOTHING");
+                }
+            }
+            if(button.equals(((ListPreference) findPreference("opdsSetButton")).getValue())){
+                if(!key.equals("OPDS")){
+                    ((ListPreference) findPreference("opdsSetButton")).setValueIndex(0);
+                    editor.putString("opdsSetButton", "NOTHING");
+                }
+            }
+
+            // если новые настройки
+            if(newDropbox || newOPDS){
+                //сбрасываем на всех остальных настройки
+                for (int i = 1, j=buttonName.length; i < j; i++) {
+                    if(!buttonName[i].equals(button)){
+                        // сбрасываем настройки если совпадают с проверяемыми
+                        if(sharedPreferences.getString(buttonName[i], "none").equals(key)){
+                            ((ListPreference) findPreference(buttonName[i])).setValueIndex(0);
+                            editor.putString(buttonName[i], "NOTHING");
+                        }
+                    }else{ // сохраняем настройки в модулях
+                        if(newOPDS){
+                            ((ListPreference) findPreference("opdsSetButton")).setValueIndex(i);
+                            editor.putString("opdsSetButton",buttonName[i]);
+                        }
+                        if(newDropbox){
+                            ((ListPreference) findPreference("dropboxSetButton")).setValueIndex(i);
+                            editor.putString("dropboxSetButton",buttonName[i]);
+                        }
+                    }
+                }
+            }
+            editor.commit();
+            do_pref_subrequest = true;
+        }else {
+            // действия при выборе в самих настройках модулей
+            do_pref_subrequest = false;
+            int indexValue = 0;
+            if("dropboxSetButton".equals(button)){
+                indexValue = ((ListPreference) findPreference(key)).findIndexOfValue("DROPBOX");
+                editor.putString(key, "DROPBOX");
+                button = key;
+                key = "DROPBOX";
+            }
+            if("opdsSetButton".equals(button)){
+                indexValue = ((ListPreference) findPreference(key)).findIndexOfValue("OPDS");
+                editor.putString(key, "OPDS");
+                button = key;
+                key = "OPDS";
+            }
+            //сбрасываем на всех остальных настройки
+            if("OPDS".equals(key) || "DROPBOX".equals(key)){
+                for (int i = 1, j=buttonName.length; i < j; i++) {
+                    if(!buttonName[i].equals(button)){
+                        // сбрасываем настройки если совпадают с проверяемыми
+                        if(sharedPreferences.getString(buttonName[i], "none").equals(key)){
+                            ((ListPreference) findPreference(buttonName[i])).setValueIndex(0);
+                            editor.putString(buttonName[i], "NOTHING");
+                        }
+                    }
+                }
+                ((ListPreference) findPreference(button)).setValueIndex(indexValue);
+                editor.commit();
+            }
+            do_pref_subrequest = true;
+        }
+
+    }
 
 }

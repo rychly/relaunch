@@ -1,25 +1,8 @@
 package com.harasoft.relaunch;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.regex.Pattern;
-
-import ebook.EBook;
-import ebook.parser.InstantParser;
-import ebook.parser.Parser;
-
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.ActivityNotFoundException;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.SharedPreferences;
+import android.content.*;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
@@ -31,32 +14,19 @@ import android.preference.PreferenceManager;
 import android.text.SpannableString;
 import android.text.style.StyleSpan;
 import android.util.TypedValue;
-import android.view.ContextMenu;
-import android.view.GestureDetector;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.view.MotionEvent;
-import android.view.View;
-import android.view.View.MeasureSpec;
-import android.view.View.OnTouchListener;
-import android.view.ViewGroup;
+import android.view.*;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.GestureDetector.SimpleOnGestureListener;
-import android.widget.AbsListView;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.GridView;
-import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ListView;
-import android.widget.TextView;
-import android.widget.Toast;
+import android.view.View.MeasureSpec;
+import android.view.View.OnTouchListener;
+import android.widget.*;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
+import ebook.EBook;
+
+import java.io.File;
+import java.util.*;
+import java.util.regex.Pattern;
 
 public class ResultsActivity extends Activity {
 	final String TAG = "Results";
@@ -76,44 +46,12 @@ public class ResultsActivity extends Activity {
 	Boolean rereadOnStart = true;
 	SharedPreferences prefs;
 	FLSimpleAdapter adapter;
-	ListView lv;
-	Integer currentColsNum = -1;
+    Integer currentColsNum = -1;
 	List<HashMap<String, String>> itemsArray = new ArrayList<HashMap<String, String>>();
 	Integer currentPosition = -1;
 	boolean addSView = true;
 	boolean oldHome;
 	Pattern purgeBracketsPattern;
-
-
-	private void setEinkController() {
-		if (prefs != null) {
-			Integer einkUpdateMode = 1;
-			try {
-				einkUpdateMode = Integer.parseInt(prefs.getString(
-						"einkUpdateMode", "1"));
-			} catch (Exception e) {
-				einkUpdateMode = 1;
-			}
-			if (einkUpdateMode < -1 || einkUpdateMode > 2)
-				einkUpdateMode = 1;
-			if (einkUpdateMode >= 0) {
-				EinkScreen.UpdateMode = einkUpdateMode;
-
-				Integer einkUpdateInterval = 10;
-				try {
-					einkUpdateInterval = Integer.parseInt(prefs.getString(
-							"einkUpdateInterval", "10"));
-				} catch (Exception e) {
-					einkUpdateInterval = 10;
-				}
-				if (einkUpdateInterval < 0 || einkUpdateInterval > 100)
-					einkUpdateInterval = 10;
-				EinkScreen.UpdateModeInterval = einkUpdateInterval;
-
-				EinkScreen.PrepareController(null, false);
-			}
-		}
-	}
 
 	static class ViewHolder {
 		TextView tv1;
@@ -428,7 +366,7 @@ public class ResultsActivity extends Activity {
 	}
 
 	private void redrawList() {
-		setEinkController();
+        EinkScreen.PrepareController(null, false);
 		if (prefs.getBoolean("filterResults", false)) {
 			List<HashMap<String, String>> newItemsArray = new ArrayList<HashMap<String, String>>();
 
@@ -517,7 +455,7 @@ public class ResultsActivity extends Activity {
 
 		prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
 
-		setEinkController();
+        EinkScreen.setEinkController(prefs);
 
 		app = ((ReLaunchApp) getApplicationContext());
 		app.setFullScreenIfNecessary(this);
@@ -756,8 +694,8 @@ public class ResultsActivity extends Activity {
 						sv.total = totalItemCount;
 						sv.count = visibleItemCount;
 						sv.first = firstVisibleItem;
-						setEinkController();
-						sv.invalidate();
+                        EinkScreen.PrepareController(null, false);
+                        sv.invalidate();
 					}
 
 					public void onScrollStateChanged(AbsListView view,
@@ -770,7 +708,7 @@ public class ResultsActivity extends Activity {
 			gv.setOnScrollListener(new AbsListView.OnScrollListener() {
 				public void onScroll(AbsListView view, int firstVisibleItem,
 						int visibleItemCount, int totalItemCount) {
-					setEinkController();
+                    EinkScreen.PrepareController(null, false);
 				}
 
 				public void onScrollStateChanged(AbsListView view,
@@ -871,7 +809,7 @@ public class ResultsActivity extends Activity {
 		class upScrlSimpleOnGestureListener extends SimpleOnGestureListener {
 			@Override
 			public boolean onSingleTapConfirmed(MotionEvent e) {
-				if (DeviceInfo.EINK_NOOK) { // nook
+				if (N2DeviceInfo.EINK_NOOK) { // nook
 					MotionEvent ev;
 					ev = MotionEvent.obtain(SystemClock.uptimeMillis(),
 							SystemClock.uptimeMillis(),
@@ -988,7 +926,7 @@ public class ResultsActivity extends Activity {
 		class dnScrlSimpleOnGestureListener extends SimpleOnGestureListener {
 			@Override
 			public boolean onSingleTapConfirmed(MotionEvent e) {
-				if (DeviceInfo.EINK_NOOK) { // nook special
+				if (N2DeviceInfo.EINK_NOOK) { // nook special
 					MotionEvent ev;
 					ev = MotionEvent.obtain(SystemClock.uptimeMillis(),
 							SystemClock.uptimeMillis(),
@@ -1161,7 +1099,7 @@ public class ResultsActivity extends Activity {
 						.getString(R.string.jv_results_delete_dir));
 			// "Cancel"
 			menu.add(Menu.NONE, CNTXT_MENU_CANCEL, Menu.NONE, getResources()
-					.getString(R.string.jv_results_cancel));
+					.getString(R.string.app_cancel));
 		} else if (listName.equals("favorites")) {
 			if (pos > 0)
 				// "Move one position up"
@@ -1184,7 +1122,7 @@ public class ResultsActivity extends Activity {
 								R.string.jv_results_delete_file));
 			// "Cancel"
 			menu.add(Menu.NONE, CNTXT_MENU_CANCEL, Menu.NONE, getResources()
-					.getString(R.string.jv_results_cancel));
+					.getString(R.string.app_cancel));
 		} else if (listName.equals("lastOpened")) {
 			if (app.history.containsKey(fullName)) {
 				if (app.history.get(fullName) == app.READING)
@@ -1214,7 +1152,7 @@ public class ResultsActivity extends Activity {
 								R.string.jv_results_delete_file));
 			// "Cancel"
 			menu.add(Menu.NONE, CNTXT_MENU_CANCEL, Menu.NONE, getResources()
-					.getString(R.string.jv_results_cancel));
+					.getString(R.string.app_cancel));
 		} else if (listName.equals("searchResults")) {
 			if (pos > 0)
 				// "Move one position up"
@@ -1252,7 +1190,7 @@ public class ResultsActivity extends Activity {
 								R.string.jv_results_delete_file));
 			// "Cancel"
 			menu.add(Menu.NONE, CNTXT_MENU_CANCEL, Menu.NONE, getResources()
-					.getString(R.string.jv_results_cancel));
+					.getString(R.string.app_cancel));
 		}
 	}
 
@@ -1346,7 +1284,7 @@ public class ResultsActivity extends Activity {
 								R.string.jv_results_delete_file_text2));
 				// "Yes"
 				builder.setPositiveButton(
-						getResources().getString(R.string.jv_results_yes),
+						getResources().getString(R.string.app_yes),
 						new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog,
 									int whichButton) {
@@ -1359,7 +1297,7 @@ public class ResultsActivity extends Activity {
 						});
 				// "No"
 				builder.setNegativeButton(
-						getResources().getString(R.string.jv_results_no),
+						getResources().getString(R.string.app_no),
 						new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog,
 									int whichButton) {
@@ -1392,7 +1330,7 @@ public class ResultsActivity extends Activity {
 									R.string.jv_results_delete_em_dir_text2));
 					// "Yes"
 					builder.setPositiveButton(
-							getResources().getString(R.string.jv_results_yes),
+							getResources().getString(R.string.app_yes),
 							new DialogInterface.OnClickListener() {
 								public void onClick(DialogInterface dialog,
 										int whichButton) {
@@ -1405,7 +1343,7 @@ public class ResultsActivity extends Activity {
 							});
 					// "No"
 					builder.setNegativeButton(
-							getResources().getString(R.string.jv_results_no),
+							getResources().getString(R.string.app_no),
 							new DialogInterface.OnClickListener() {
 								public void onClick(DialogInterface dialog,
 										int whichButton) {
@@ -1434,7 +1372,7 @@ public class ResultsActivity extends Activity {
 									R.string.jv_results_delete_ne_dir_text2));
 					// "Yes"
 					builder.setPositiveButton(
-							getResources().getString(R.string.jv_results_yes),
+							getResources().getString(R.string.app_yes),
 							new DialogInterface.OnClickListener() {
 								public void onClick(DialogInterface dialog,
 										int whichButton) {
@@ -1447,7 +1385,7 @@ public class ResultsActivity extends Activity {
 							});
 					// "No"
 					builder.setNegativeButton(
-							getResources().getString(R.string.jv_results_no),
+							getResources().getString(R.string.app_no),
 							new DialogInterface.OnClickListener() {
 								public void onClick(DialogInterface dialog,
 										int whichButton) {
@@ -1467,7 +1405,7 @@ public class ResultsActivity extends Activity {
 
 	@Override
 	protected void onResume() {
-		setEinkController();
+        EinkScreen.setEinkController(prefs);
 		super.onResume();
 		app.generalOnResume(TAG, this);
 	}
@@ -1476,8 +1414,7 @@ public class ResultsActivity extends Activity {
 		EBook eBook;
 		if ((!file.endsWith("fb2")) && (!file.endsWith("fb2.zip")) &&(!file.endsWith("epub")))
 			return file;
-		String fileName = dir + "/" + file;
-		eBook = app.dataBase.getBookByFileName(dir + "/" + file);
+        eBook = app.dataBase.getBookByFileName(dir + "/" + file);
 		if (eBook.isOk) {
 			String output = prefs.getString("bookTitleFormat", "[%a. ]%t");
 			if (eBook.authors.size() > 0) {

@@ -1,39 +1,8 @@
 package com.harasoft.relaunch;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.Stack;
-
-import ebook.EBook;
-import ebook.parser.InstantParser;
-import ebook.parser.Parser;
-import android.R.style;
-import android.app.Activity;
-import android.app.ActivityManager;
-import android.app.AlertDialog;
+import android.app.*;
 import android.app.ActivityManager.MemoryInfo;
-import android.app.Dialog;
-import android.content.ActivityNotFoundException;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.SharedPreferences;
+import android.content.*;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
@@ -52,38 +21,23 @@ import android.preference.PreferenceManager;
 import android.text.SpannableString;
 import android.text.TextUtils.TruncateAt;
 import android.text.style.StyleSpan;
-import android.util.Log;
 import android.util.TypedValue;
-import android.view.GestureDetector;
+import android.view.*;
 import android.view.GestureDetector.SimpleOnGestureListener;
-import android.view.KeyEvent;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.view.MotionEvent;
-import android.view.View;
 import android.view.View.MeasureSpec;
 import android.view.View.OnTouchListener;
-import android.view.ViewGroup;
-import android.view.Window;
-import android.view.WindowManager;
 import android.webkit.WebView;
-import android.widget.AdapterView;
-import android.view.LayoutInflater;
-import android.widget.AbsListView;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.GridView;
-import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ListView;
+import android.widget.*;
 import android.widget.LinearLayout.LayoutParams;
-import android.widget.ListAdapter;
-import android.widget.SimpleAdapter;
-import android.widget.TextView;
-import android.widget.Toast;
+import com.dropbox.client2.DropboxAPI;
+import com.dropbox.client2.android.AndroidAuthSession;
+import com.dropbox.client2.exception.DropboxException;
+import ebook.EBook;
+import ebook.parser.InstantParser;
+import ebook.parser.Parser;
+
+import java.io.*;
+import java.util.*;
 
 
 public class ReLaunch extends Activity {
@@ -120,20 +74,23 @@ public class ReLaunch extends Activity {
 	final static int CNTXT_MENU_RENAME = 14;
 	final static int CNTXT_MENU_CREATE_DIR = 15;
 	final static int CNTXT_MENU_COPY_DIR = 16;
-	final static int CNTXT_MENU_MOVE_DIR = 17;
+	//final static int CNTXT_MENU_MOVE_DIR = 17;
 	final static int CNTXT_MENU_SWITCH_TITLES = 18;
 	final static int CNTXT_MENU_TAGS_RENAME = 19;
 	final static int CNTXT_MENU_ADD_STARTDIR = 20;
 	final static int CNTXT_MENU_SHOW_BOOKINFO = 21;
 	final static int CNTXT_MENU_FILE_INFO = 22;
 	final static int CNTXT_MENU_SET_STARTDIR = 23;
-	final static int BROWSE_FILES = 0;
-	final static int BROWSE_TITLES = 1;
-	final static int BROWSE_COVERS = 2;
+    final static int CNTXT_MENU_COPY_DROPBOX = 24;
+    final static int CNTXT_MENU_COPY_DIR_DROPBOX = 25;
+	//final static int BROWSE_FILES = 0;
+	//final static int BROWSE_TITLES = 1;
+	//final static int BROWSE_COVERS = 2;
 	final static int SORT_FILES_ASC = 0;
 	final static int SORT_FILES_DESC = 1;
 	final static int SORT_TITLES_ASC = 2;
 	final static int SORT_TITLES_DESC = 3;
+    public static String BACKUP_DIR = "/sdcard/.relaunch";
 	String currentRoot = "/sdcard";
 	Integer currentPosition = -1;
 	List<HashMap<String, String>> itemsArray;
@@ -155,7 +112,7 @@ public class ReLaunch extends Activity {
 	boolean addSView = true;
 
 	// multicolumns per directory configuration
-	List<String[]> columnsArray = new ArrayList<String[]>();
+	//List<String[]> columnsArray = new ArrayList<String[]>();
 	Integer currentColsNum = -1;
 
 	// Bottom info panel
@@ -255,40 +212,12 @@ public class ReLaunch extends Activity {
 		}
 	}
 
-	private void setEinkController() {
-		if (prefs != null) {
-			Integer einkUpdateMode = 1;
-			try {
-				einkUpdateMode = Integer.parseInt(prefs.getString(
-						"einkUpdateMode", "1"));
-			} catch (Exception e) {
-				einkUpdateMode = 1;
-			}
-			if (einkUpdateMode < -1 || einkUpdateMode > 2)
-				einkUpdateMode = 1;
-			if (einkUpdateMode >= 0) {
-				EinkScreen.UpdateMode = einkUpdateMode;
 
-				Integer einkUpdateInterval = 10;
-				try {
-					einkUpdateInterval = Integer.parseInt(prefs.getString(
-							"einkUpdateInterval", "10"));
-				} catch (Exception e) {
-					einkUpdateInterval = 10;
-				}
-				if (einkUpdateInterval < 0 || einkUpdateInterval > 100)
-					einkUpdateInterval = 10;
-				EinkScreen.UpdateModeInterval = einkUpdateInterval;
-
-				EinkScreen.PrepareController(null, false);
-			}
-		}
-	}
 
 	private boolean checkField(String[] a, String f) {
-		for (int i = 0; i < a.length; i++)
-			if (a[i].equals("*") || a[i].equals(f))
-				return true;
+        for (String anA : a)
+            if (anA.equals("*") || anA.equals(f))
+                return true;
 		return false;
 	}
 
@@ -315,7 +244,7 @@ public class ReLaunch extends Activity {
 			builder.setView(wv);
 			// "YES"
 			builder.setPositiveButton(
-					getResources().getString(R.string.jv_relaunch_yes),
+					getResources().getString(R.string.app_yes),
 					new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog,
 								int whichButton) {
@@ -327,7 +256,7 @@ public class ReLaunch extends Activity {
 					});
 			// "NO"
 			builder.setNegativeButton(
-					getResources().getString(R.string.jv_relaunch_no),
+					getResources().getString(R.string.app_no),
 					new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog,
 								int whichButton) {
@@ -403,12 +332,12 @@ public class ReLaunch extends Activity {
 			if (prefs.getBoolean("hideKnownExts", false)) {
 				rc = app.getReaders();
 				Set<String> tkeys = new HashSet<String>();
-				for (int i = 0; i < rc.size(); i++) {
-					Object[] keys = rc.get(i).keySet().toArray();
-					for (int j = 0; j < keys.length; j++) {
-						tkeys.add(keys[j].toString());
-					}
-				}
+                for (HashMap<String, String> aRc : rc) {
+                    Object[] keys = aRc.keySet().toArray();
+                    for (Object key : keys) {
+                        tkeys.add(key.toString());
+                    }
+                }
 				exts = new ArrayList<String>(tkeys);
 				final class ExtsComparator implements
 						java.util.Comparator<String> {
@@ -471,9 +400,7 @@ public class ReLaunch extends Activity {
 							.equals("0")) {
 						iv.setVisibility(View.GONE);
 					} else {
-						iv.setImageBitmap(scaleDrawableById(R.drawable.dir_ok,
-								Integer.parseInt(prefs.getString(
-										"firstLineIconSizePx", "48"))));
+						iv.setImageBitmap(scaleDrawableById(R.drawable.dir_ok,Integer.parseInt(prefs.getString("firstLineIconSizePx", "48"))));
 					}
 				} else {
 					if (useFaces) {
@@ -639,10 +566,10 @@ public class ReLaunch extends Activity {
 		Integer auto_cols_num = 1;
 		ArrayList<Integer> tmp = new ArrayList<Integer>();
 		if (itemsArray.size() > 0) {
-			Integer factor = 0;
-			for (Integer i = 0; i < itemsArray.size(); i++) {
-				tmp.add(itemsArray.get(i).get("sname").length());
-			}
+			Integer factor ;
+            for (HashMap<String, String> anItemsArray : itemsArray) {
+                tmp.add(anItemsArray.get("sname").length());
+            }
 			String pattern = prefs.getString("columnsAlgIntensity",
 					"70 3:5 7:4 15:3 48:2"); // default - medium
 			String[] spat = pattern.split("[\\s\\:]+");
@@ -666,7 +593,7 @@ public class ReLaunch extends Activity {
 	}
 
 	private void redrawList() {
-		setEinkController();
+		EinkScreen.PrepareController(null, false);
 		GridView gv = (GridView) findViewById(useDirViewer ? R.id.results_list
 				: R.id.gl_list);
 		if (prefs.getBoolean("filterResults", false)) {
@@ -751,13 +678,13 @@ public class ReLaunch extends Activity {
 				enabled = false;
 				String[] homes = prefs.getString("startDir",
 						"/sdcard,/media/My Files").split("\\,");
-				for (int i = 0; i < homes.length; i++) {
-					if (homes[i].length() < currDir.length()
-							&& currDir.startsWith(homes[i])) {
-						enabled = true;
-						break;
-					}
-				}
+                for (String home : homes) {
+                    if (home.length() < currDir.length()
+                            && currDir.startsWith(home)) {
+                        enabled = true;
+                        break;
+                    }
+                }
 			}
 			up.setEnabled(enabled);
 			// gesture listener
@@ -772,20 +699,8 @@ public class ReLaunch extends Activity {
 					}
 					return true;
 				}
-
-				@Override
-				public boolean onDoubleTap(MotionEvent e) {
-					return true;
-				}
-
-				@Override
-				public void onLongPress(MotionEvent e) {
-					if (up.hasWindowFocus()) {
-
-					}
-				}
 			}
-			;
+
 			UpSimpleOnGestureListener up_gl = new UpSimpleOnGestureListener();
 			final GestureDetector up_gd = new GestureDetector(up_gl);
 			up.setOnTouchListener(new OnTouchListener() {
@@ -903,7 +818,7 @@ public class ReLaunch extends Activity {
 												null, null);
 						}
 					} catch (IllegalArgumentException e) {
-						Log.v("ReLaunch", "Battery intent illegal arguments");
+						//Log.v("ReLaunch", "Battery intent illegal arguments");
 					}
 
 				}
@@ -921,7 +836,7 @@ public class ReLaunch extends Activity {
 		List<String> files = new ArrayList<String>();
 		List<String> dirs = new ArrayList<String>();
 
-		setEinkController();
+        EinkScreen.PrepareController(null, false);
 
 		currentRoot = root;
 		currentPosition = (startPosition == -1) ? 0 : startPosition;
@@ -996,7 +911,7 @@ public class ReLaunch extends Activity {
 				menuSort();
 			}
 		}
-		;
+
 		TvSimpleOnGestureListener tv_gl = new TvSimpleOnGestureListener();
 		final GestureDetector tv_gd = new GestureDetector(tv_gl);
 		tv.setOnTouchListener(new OnTouchListener() {
@@ -1078,7 +993,7 @@ public class ReLaunch extends Activity {
 					}
 				}
 			}
-			;
+
 			advSimpleOnGestureListener adv_gl = new advSimpleOnGestureListener();
 			final GestureDetector adv_gd = new GestureDetector(adv_gl);
 			adv.setOnTouchListener(new OnTouchListener() {
@@ -1154,7 +1069,7 @@ public class ReLaunch extends Activity {
 		gv.setAdapter(adapter);
 
 		gv.setHorizontalSpacing(0);
-		Integer colsNum = -1;
+		Integer colsNum;
 		if (getDirectoryColumns(currentRoot) != 0) {
 			colsNum = getDirectoryColumns(currentRoot);
 		} else {
@@ -1190,8 +1105,9 @@ public class ReLaunch extends Activity {
 						sv.total = totalItemCount;
 						sv.count = visibleItemCount;
 						sv.first = firstVisibleItem;
-						setEinkController();
-						sv.invalidate();
+
+                        EinkScreen.PrepareController(null, false);
+    				    sv.invalidate();
 					}
 
 					public void onScrollStateChanged(AbsListView view,
@@ -1204,7 +1120,7 @@ public class ReLaunch extends Activity {
 			gv.setOnScrollListener(new AbsListView.OnScrollListener() {
 				public void onScroll(AbsListView view, int firstVisibleItem,
 						int visibleItemCount, int totalItemCount) {
-					setEinkController();
+                    EinkScreen.PrepareController(null, false);
 				}
 
 				public void onScrollStateChanged(AbsListView view,
@@ -1328,12 +1244,12 @@ public class ReLaunch extends Activity {
 			public void onLongPress(MotionEvent e) {
 				if (!ReLaunch.this.hasWindowFocus())
 					return;
-				int menuType = 0;
+				int menuType;
 				int position = findViewByXY(e);
 				HashMap<String, String> item;
 				String fn = null;
 				String dr = null;
-				String tp = null;
+				String tp;
 				String fullName = null;
 				ArrayList<String> aList = new ArrayList<String>(10);
 				if (position == -1)
@@ -1344,7 +1260,7 @@ public class ReLaunch extends Activity {
 					dr = item.get("dname");
 					tp = item.get("type");
 					fullName = dr + "/" + fn;
-					if (tp == "dir")
+					if (tp.equals("dir"))
 						menuType = 1;
 					else if (fn.endsWith("fb2") || fn.endsWith("fb2.zip") || fn.endsWith("epub"))
 						menuType = 2;
@@ -1371,6 +1287,7 @@ public class ReLaunch extends Activity {
 						aList.add(getString(R.string.jv_relaunch_create_folder));
 						aList.add(getString(R.string.jv_relaunch_rename));
 						aList.add(getString(R.string.jv_relaunch_move));
+                        aList.add(getString(R.string.jv_relaunch_copy_dir));
 						if (fileOp != 0) {
 							aList.add(getString(R.string.jv_relaunch_paste));
 						}
@@ -1443,7 +1360,11 @@ public class ReLaunch extends Activity {
 					}
 					aList.add(getString(R.string.jv_relaunch_fileinfo));
 				}
-				aList.add(getString(R.string.jv_relaunch_cancel));
+                if(menuType > 0){
+                    aList.add(getString(R.string.jv_relaunch_add_Dropbox));
+                    aList.add(getString(R.string.jv_relaunch_add_dir_Dropbox));
+                }
+				aList.add(getString(R.string.app_cancel));
 				final int pos = position;
 				final String[] list = aList.toArray(new String[aList.size()]);
 				
@@ -1454,7 +1375,7 @@ public class ReLaunch extends Activity {
 				builder.setAdapter(cmAdapter, new DialogInterface.OnClickListener() {
 				    public void onClick(DialogInterface dialog, int item) {
 						String s = list[item];
-						if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_cancel)))
+						if (s.equalsIgnoreCase(getString(R.string.app_cancel)))
 							onContextMenuSelected(CNTXT_MENU_CANCEL, pos);
 						else if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_delete)))
 							onContextMenuSelected(CNTXT_MENU_DELETE_F, pos);
@@ -1476,6 +1397,8 @@ public class ReLaunch extends Activity {
 							onContextMenuSelected(CNTXT_MENU_OPENWITH, pos);
 						else if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_copy)))
 							onContextMenuSelected(CNTXT_MENU_COPY_FILE, pos);
+                        else if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_copy_dir)))
+                            onContextMenuSelected(CNTXT_MENU_COPY_DIR, pos);
 						else if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_move)))
 							onContextMenuSelected(CNTXT_MENU_MOVE_FILE, pos);
 						else if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_paste)))
@@ -1484,8 +1407,6 @@ public class ReLaunch extends Activity {
 							onContextMenuSelected(CNTXT_MENU_RENAME, pos);
 						else if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_create_folder)))
 							onContextMenuSelected(CNTXT_MENU_CREATE_DIR, pos);
-						else if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_move_dir)))
-							onContextMenuSelected(CNTXT_MENU_MOVE_DIR, pos);
 						else if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_tags_rename)))
 							onContextMenuSelected(CNTXT_MENU_TAGS_RENAME, pos);
 						else if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_set_startdir)))
@@ -1496,13 +1417,17 @@ public class ReLaunch extends Activity {
 							onContextMenuSelected(CNTXT_MENU_SHOW_BOOKINFO, pos);
 						else if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_fileinfo)))
 							onContextMenuSelected(CNTXT_MENU_FILE_INFO, pos);
+                        else if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_add_Dropbox)))
+                            onContextMenuSelected(CNTXT_MENU_COPY_DROPBOX, pos);
+                        else if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_add_dir_Dropbox)))
+                            onContextMenuSelected(CNTXT_MENU_COPY_DIR_DROPBOX, pos);
 				    }
 				});
 				AlertDialog alert = builder.create();
 				alert.requestWindowFeature(Window.FEATURE_NO_TITLE);
 				alert.show();
 			}
-		};
+		}
 
 		GlSimpleOnGestureListener gv_gl = new GlSimpleOnGestureListener(this);
 		final GestureDetector gv_gd = new GestureDetector(gv_gl);
@@ -1523,7 +1448,7 @@ public class ReLaunch extends Activity {
 		class upScrlSimpleOnGestureListener extends SimpleOnGestureListener {
 			@Override
 			public boolean onSingleTapConfirmed(MotionEvent e) {
-				if (DeviceInfo.EINK_NOOK) { // nook
+				if (N2DeviceInfo.EINK_NOOK) { // nook
 					MotionEvent ev;
 					ev = MotionEvent.obtain(SystemClock.uptimeMillis(),
 							SystemClock.uptimeMillis(),
@@ -1592,7 +1517,7 @@ public class ReLaunch extends Activity {
 				}
 			}
 		}
-		;
+
 		upScrlSimpleOnGestureListener upscrl_gl = new upScrlSimpleOnGestureListener();
 		final GestureDetector upscrl_gd = new GestureDetector(upscrl_gl);
 		upScroll.setOnTouchListener(new OnTouchListener() {
@@ -1640,7 +1565,7 @@ public class ReLaunch extends Activity {
 		class dnScrlSimpleOnGestureListener extends SimpleOnGestureListener {
 			@Override
 			public boolean onSingleTapConfirmed(MotionEvent e) {
-				if (DeviceInfo.EINK_NOOK) { // nook special
+				if (N2DeviceInfo.EINK_NOOK) { // nook special
 					MotionEvent ev;
 					ev = MotionEvent.obtain(SystemClock.uptimeMillis(),
 							SystemClock.uptimeMillis(),
@@ -1706,7 +1631,7 @@ public class ReLaunch extends Activity {
 				}
 			}
 		}
-		;
+
 		dnScrlSimpleOnGestureListener dnscrl_gl = new dnScrlSimpleOnGestureListener();
 		final GestureDetector dnscrl_gd = new GestureDetector(dnscrl_gl);
 		downScroll.setOnTouchListener(new OnTouchListener() {
@@ -1779,8 +1704,8 @@ public class ReLaunch extends Activity {
 		componentSearchIntent.setAction(Intent.ACTION_MAIN);
 		List<ResolveInfo> ril = pm.queryIntentActivities(componentSearchIntent,
 				0);
-		String pname = "";
-		String aname = "";
+		String pname;
+		String aname ;
 		String hname = "";
 		for (ResolveInfo ri : ril) {
 			if (ri.activityInfo != null) {
@@ -1845,7 +1770,10 @@ public class ReLaunch extends Activity {
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-
+        if(N2DeviceInfo.EINK_ONYX){
+            currentRoot = "/mnt/storage";
+            BACKUP_DIR = "/mnt/storage/.relaunch";
+        }
 		// If we called from Home launcher?
 		final Intent data = getIntent();
 		if (data.getExtras() == null) {
@@ -1882,7 +1810,6 @@ public class ReLaunch extends Activity {
 		app.FLT_NEW_AND_READING = getResources().getInteger(
 				R.integer.FLT_NEW_AND_READING);
 
-		// Preferences
 		prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
 		if (prefs.getString("startMode", "UNKNOWN").equalsIgnoreCase("LAUNCHER"))
 			useHome = true;
@@ -1949,7 +1876,7 @@ public class ReLaunch extends Activity {
 			setContentView(R.layout.results_layout);
 			if (data.getExtras() != null)
 				start_dir = data.getStringExtra("start_dir");
-			((ImageButton) findViewById(R.id.results_btn))
+			(findViewById(R.id.results_btn))
 					.setOnClickListener(new View.OnClickListener() {
 						public void onClick(View v) {
 							finish();
@@ -1983,19 +1910,8 @@ public class ReLaunch extends Activity {
 						startActivity(intent);
 						return true;
 					}
-
-					@Override
-					public boolean onDoubleTap(MotionEvent e) {
-						return true;
-					}
-
-					@Override
-					public void onLongPress(MotionEvent e) {
-						if (lrua_button.hasWindowFocus()) {
-						}
-					}
 				}
-				;
+
 				LruaSimpleOnGestureListener lrua_gl = new LruaSimpleOnGestureListener();
 				final GestureDetector lrua_gd = new GestureDetector(lrua_gl);
 				lrua_button.setOnTouchListener(new OnTouchListener() {
@@ -2021,19 +1937,8 @@ public class ReLaunch extends Activity {
 						return true;
 					}
 
-					@Override
-					public boolean onDoubleTap(MotionEvent e) {
-						return true;
-					}
-
-					@Override
-					public void onLongPress(MotionEvent e) {
-						if (alla_button.hasWindowFocus()) {
-
-						}
-					}
 				}
-				;
+
 				AllaSimpleOnGestureListener alla_gl = new AllaSimpleOnGestureListener();
 				final GestureDetector alla_gd = new GestureDetector(alla_gl);
 				alla_button.setOnTouchListener(new OnTouchListener() {
@@ -2103,7 +2008,13 @@ public class ReLaunch extends Activity {
 						} else if (prefs.getString("homeButtonST", "OPENN")
 								.equals("OPENSCREEN")) {
 							screenHome();
-						}
+						} else if (prefs.getString("homeButtonST", "OPENN")
+                                .equals("DROPBOX")) {
+                            screenDropbox();
+                        }else if (prefs.getString("homeButtonST", "OPENN")
+                                .equals("OPDS")) {
+                            screenOPDS();
+                        }
 						return true;
 					}
 
@@ -2119,7 +2030,13 @@ public class ReLaunch extends Activity {
 						} else if (prefs.getString("homeButtonDT", "OPENMENU")
 								.equals("OPENSCREEN")) {
 							screenHome();
-						}
+						} else if (prefs.getString("homeButtonDT", "OPENN")
+                                .equals("DROPBOX")) {
+                            screenDropbox();
+                        } else if (prefs.getString("homeButtonDT", "OPENN")
+                                .equals("OPDS")) {
+                            screenOPDS();
+                        }
 						return true;
 					}
 
@@ -2136,7 +2053,13 @@ public class ReLaunch extends Activity {
 							} else if (prefs.getString("homeButtonLT",
 									"OPENSCREEN").equals("OPENSCREEN")) {
 								screenHome();
-							}
+							} else if (prefs.getString("homeButtonLT", "OPENN")
+                                    .equals("DROPBOX")) {
+                                screenDropbox();
+                            } else if (prefs.getString("homeButtonLT", "OPENN")
+                                    .equals("OPDS")) {
+                                screenOPDS();
+                            }
 						}
 					}
 				}
@@ -2171,7 +2094,13 @@ public class ReLaunch extends Activity {
 								"RELAUNCH").equals("RUN")) {
 							actionRun(prefs.getString("settingsButtonSTapp",
 									"%%"));
-						}
+						} else if (prefs.getString("settingsButtonST",
+                                "RELAUNCH").equals("DROPBOX")) {
+                            screenDropbox();
+                        } else if (prefs.getString("settingsButtonST",
+                                "RELAUNCH").equals("OPDS")) {
+                            screenOPDS();
+                        }
 						return true;
 					}
 
@@ -2193,7 +2122,13 @@ public class ReLaunch extends Activity {
 								"RELAUNCH").equals("RUN")) {
 							actionRun(prefs.getString("settingsButtonDTapp",
 									"%%"));
-						}
+						} else if (prefs.getString("settingsButtonDT",
+                                "RELAUNCH").equals("DROPBOX")) {
+                            screenDropbox();
+                        } else if (prefs.getString("settingsButtonDT",
+                                "RELAUNCH").equals("OPDS")) {
+                            screenOPDS();
+                        }
 						return true;
 					}
 
@@ -2216,7 +2151,13 @@ public class ReLaunch extends Activity {
 									"RELAUNCH").equals("RUN")) {
 								actionRun(prefs.getString(
 										"settingsButtonLTapp", "%%"));
-							}
+							} else if (prefs.getString("settingsButtonLT",
+                                    "RELAUNCH").equals("DROPBOX")) {
+                                screenDropbox();
+                            } else if (prefs.getString("settingsButtonLT",
+                                    "RELAUNCH").equals("OPDS")) {
+                                screenOPDS();
+                            }
 						}
 					}
 				}
@@ -2278,7 +2219,13 @@ public class ReLaunch extends Activity {
 						} else if (prefs.getString("lruButtonST", "OPENSCREEN")
 								.equals("OPENSCREEN")) {
 							menuLastopened();
-						}
+						} else if (prefs.getString("lruButtonST", "OPENSCREEN")
+                                .equals("DROPBOX")) {
+                            screenDropbox();
+                        } else if (prefs.getString("lruButtonST", "OPENSCREEN")
+                                .equals("OPDS")) {
+                            screenOPDS();
+                        }
 						return true;
 					}
 
@@ -2296,7 +2243,13 @@ public class ReLaunch extends Activity {
 						} else if (prefs.getString("lruButtonDT", "NOTHING")
 								.equals("OPENSCREEN")) {
 							menuLastopened();
-						}
+						} else if (prefs.getString("lruButtonDT", "NOTHING")
+                                .equals("DROPBOX")) {
+                            screenDropbox();
+                        } else if (prefs.getString("lruButtonDT", "NOTHING")
+                                .equals("OPDS")) {
+                            screenOPDS();
+                        }
 						return true;
 					}
 
@@ -2320,7 +2273,13 @@ public class ReLaunch extends Activity {
 									.getString("lruButtonLT", "NOTHING")
 									.equals("OPENSCREEN")) {
 								menuLastopened();
-							}
+							} else if (prefs.getString("lruButtonLT", "NOTHING")
+                                    .equals("DROPBOX")) {
+                                screenDropbox();
+                            } else if (prefs.getString("lruButtonLT", "NOTHING")
+                                    .equals("OPDS")) {
+                                screenOPDS();
+                            }
 						}
 					}
 				}
@@ -2351,7 +2310,13 @@ public class ReLaunch extends Activity {
 						} else if (prefs.getString("favButtonST", "OPENSCREEN")
 								.equals("OPENSCREEN")) {
 							menuFavorites();
-						}
+						} else if (prefs.getString("favButtonST", "OPENSCREEN")
+                                .equals("DROPBOX")) {
+                            screenDropbox();
+                        } else if (prefs.getString("favButtonST", "OPENSCREEN")
+                                .equals("OPDS")) {
+                            screenOPDS();
+                        }
 						return true;
 					}
 
@@ -2369,7 +2334,13 @@ public class ReLaunch extends Activity {
 						} else if (prefs.getString("favButtonDT", "NOTHING")
 								.equals("OPENSCREEN")) {
 							menuFavorites();
-						}
+						} else if (prefs.getString("favButtonDT", "NOTHING")
+                                .equals("DROPBOX")) {
+                            screenDropbox();
+                        } else if (prefs.getString("favButtonDT", "NOTHING")
+                                .equals("OPDS")) {
+                            screenOPDS();
+                        }
 						return true;
 					}
 
@@ -2393,7 +2364,13 @@ public class ReLaunch extends Activity {
 									.getString("favButtonLT", "NOTHING")
 									.equals("OPENSCREEN")) {
 								menuFavorites();
-							}
+							} else if (prefs.getString("favButtonLT", "NOTHING")
+                                    .equals("DROPBOX")) {
+                                screenDropbox();
+                            } else if (prefs.getString("favButtonLT", "NOTHING")
+                                    .equals("OPDS")) {
+                                screenOPDS();
+                            }
 						}
 					}
 				}
@@ -2432,7 +2409,13 @@ public class ReLaunch extends Activity {
 						} else if (prefs.getString("memButtonST", "RELAUNCH")
 								.equals("RUN")) {
 							actionRun(prefs.getString("memButtonSTapp", "%%"));
-						}
+						} else if (prefs.getString("memButtonST", "RELAUNCH")
+                                .equals("DROPBOX")) {
+                            screenDropbox();
+                        } else if (prefs.getString("memButtonST", "RELAUNCH")
+                                .equals("OPDS")) {
+                            screenOPDS();
+                        }
 						return true;
 					}
 
@@ -2455,7 +2438,13 @@ public class ReLaunch extends Activity {
 						} else if (prefs.getString("memButtonDT", "NOTHING")
 								.equals("RUN")) {
 							actionRun(prefs.getString("memButtonDTapp", "%%"));
-						}
+						} else if (prefs.getString("memButtonDT", "NOTHING")
+                                .equals("DROPBOX")) {
+                            screenDropbox();
+                        } else if (prefs.getString("memButtonDT", "NOTHING")
+                                .equals("OPDS")) {
+                            screenOPDS();
+                        }
 						return true;
 					}
 
@@ -2484,11 +2473,17 @@ public class ReLaunch extends Activity {
 									.equals("RUN")) {
 								actionRun(prefs.getString("memButtonLTapp",
 										"%%"));
-							}
+							} else if (prefs.getString("memButtonLT", "NOTHING")
+                                    .equals("DROPBOX")) {
+                                screenDropbox();
+                            } else if (prefs.getString("memButtonLT", "NOTHING")
+                                    .equals("OPDS")) {
+                                screenOPDS();
+                            }
 						}
 					}
 				}
-				;
+
 				MemlSimpleOnGestureListener meml_gl = new MemlSimpleOnGestureListener();
 				final GestureDetector meml_gd = new GestureDetector(meml_gl);
 				mem_l.setOnTouchListener(new View.OnTouchListener() {
@@ -2525,7 +2520,13 @@ public class ReLaunch extends Activity {
 						} else if (prefs.getString("batButtonST", "RELAUNCH")
 								.equals("RUN")) {
 							actionRun(prefs.getString("batButtonSTapp", "%%"));
-						}
+						} else if (prefs.getString("batButtonST", "RELAUNCH")
+                                .equals("DROPBOX")) {
+                            screenDropbox();
+                        } else if (prefs.getString("batButtonST", "RELAUNCH")
+                                .equals("OPDS")) {
+                            screenOPDS();
+                        }
 						return true;
 					}
 
@@ -2548,7 +2549,13 @@ public class ReLaunch extends Activity {
 						} else if (prefs.getString("batButtonDT", "NOTHING")
 								.equals("RUN")) {
 							actionRun(prefs.getString("batButtonDTapp", "%%"));
-						}
+						} else if (prefs.getString("batButtonDT", "NOTHING")
+                                .equals("DROPBOX")) {
+                            screenDropbox();
+                        } else if (prefs.getString("batButtonDT", "NOTHING")
+                                .equals("OPDS")) {
+                            screenOPDS();
+                        }
 						return true;
 					}
 
@@ -2577,7 +2584,13 @@ public class ReLaunch extends Activity {
 									.equals("RUN")) {
 								actionRun(prefs.getString("batButtonLTapp",
 										"%%"));
-							}
+							} else if (prefs.getString("batButtonLT", "NOTHING")
+                                    .equals("DROPBOX")) {
+                                screenDropbox();
+                            } else if (prefs.getString("batButtonLT", "NOTHING")
+                                    .equals("OPDS")) {
+                                screenOPDS();
+                            }
 						}
 					}
 				}
@@ -2618,7 +2631,7 @@ public class ReLaunch extends Activity {
 						R.string.jv_relaunch_whats_new));
 				builder.setView(wv);
 				builder.setPositiveButton(
-						getResources().getString(R.string.jv_relaunch_ok),
+						getResources().getString(R.string.app_ok),
 						new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog,
 									int whichButton) {
@@ -2635,7 +2648,7 @@ public class ReLaunch extends Activity {
 			checkDevice(Build.DEVICE, Build.MANUFACTURER, Build.MODEL,
 					Build.PRODUCT);
 
-			setEinkController();
+            EinkScreen.setEinkController(prefs);
 
 			// First directory to get to
 			if (data.getExtras() != null
@@ -2643,7 +2656,12 @@ public class ReLaunch extends Activity {
 				drawDirectory(data.getExtras().getString("start_dir"), -1);
 			} else {
 				if (prefs.getBoolean("saveDir", true))
-					drawDirectory(prefs.getString("lastdir", "/sdcard"), -1);
+                    if(N2DeviceInfo.EINK_ONYX){
+					    drawDirectory(prefs.getString("lastdir", "/mnt/storage"), -1);
+                    }else{
+                        drawDirectory(prefs.getString("lastdir", "/sdcard"), -1);
+                    }
+
 				else {
 					String[] startDirs = prefs.getString("startDir",
 							"/sdcard,/media/My Files").split("\\,");
@@ -2819,7 +2837,7 @@ public class ReLaunch extends Activity {
 						}
 					});
 			builder.setNegativeButton(
-					getResources().getString(R.string.jv_relaunch_cancel),
+					getResources().getString(R.string.app_cancel),
 					new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog,
 								int whichButton) {
@@ -2894,7 +2912,7 @@ public class ReLaunch extends Activity {
 												.getString(
 														R.string.jv_relaunch_activity_not_found_text3));
 								builder1.setPositiveButton(getResources()
-										.getString(R.string.jv_relaunch_ok),
+										.getString(R.string.app_ok),
 										new DialogInterface.OnClickListener() {
 											public void onClick(
 													DialogInterface dialog,
@@ -2921,7 +2939,7 @@ public class ReLaunch extends Activity {
 							builder1.setView(input);
 							// "Ok"
 							builder1.setPositiveButton(getResources()
-									.getString(R.string.jv_relaunch_ok),
+									.getString(R.string.app_ok),
 									new DialogInterface.OnClickListener() {
 										public void onClick(
 												DialogInterface dialog,
@@ -2968,7 +2986,7 @@ public class ReLaunch extends Activity {
 												builder2.setPositiveButton(
 														getResources()
 																.getString(
-																		R.string.jv_relaunch_ok),
+																		R.string.app_ok),
 														new DialogInterface.OnClickListener() {
 															public void onClick(
 																	DialogInterface dialog,
@@ -2984,7 +3002,7 @@ public class ReLaunch extends Activity {
 					});
 			// "Cancel"
 			builder.setNegativeButton(
-					getResources().getString(R.string.jv_relaunch_cancel),
+					getResources().getString(R.string.app_cancel),
 					new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog,
 								int whichButton) {
@@ -3011,7 +3029,7 @@ public class ReLaunch extends Activity {
 								R.string.jv_relaunch_del_file_text2));
 				// "Yes"
 				builder.setPositiveButton(
-						getResources().getString(R.string.jv_relaunch_yes),
+						getResources().getString(R.string.app_yes),
 						new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog,
 									int whichButton) {
@@ -3024,7 +3042,7 @@ public class ReLaunch extends Activity {
 						});
 				// "No"
 				builder.setNegativeButton(
-						getResources().getString(R.string.jv_relaunch_no),
+						getResources().getString(R.string.app_no),
 						new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog,
 									int whichButton) {
@@ -3053,7 +3071,7 @@ public class ReLaunch extends Activity {
 								R.string.jv_relaunch_del_em_dir_text2));
 				// "Yes"
 				builder.setPositiveButton(
-						getResources().getString(R.string.jv_relaunch_yes),
+						getResources().getString(R.string.app_yes),
 						new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog,
 									int whichButton) {
@@ -3066,7 +3084,7 @@ public class ReLaunch extends Activity {
 						});
 				// "No"
 				builder.setNegativeButton(
-						getResources().getString(R.string.jv_relaunch_no),
+						getResources().getString(R.string.app_no),
 						new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog,
 									int whichButton) {
@@ -3096,7 +3114,7 @@ public class ReLaunch extends Activity {
 								R.string.jv_relaunch_del_ne_dir_text2));
 				// "Yes"
 				builder.setPositiveButton(
-						getResources().getString(R.string.jv_relaunch_yes),
+						getResources().getString(R.string.app_yes),
 						new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog,
 									int whichButton) {
@@ -3109,7 +3127,7 @@ public class ReLaunch extends Activity {
 						});
 				// "No"
 				builder.setNegativeButton(
-						getResources().getString(R.string.jv_relaunch_no),
+						getResources().getString(R.string.app_no),
 						new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog,
 									int whichButton) {
@@ -3135,11 +3153,11 @@ public class ReLaunch extends Activity {
 			fileOp = CNTXT_MENU_MOVE_FILE;
 			break;
 
-		case CNTXT_MENU_MOVE_DIR:
-			fileOpFile = fname;
-			fileOpDir = dname;
-			fileOp = CNTXT_MENU_MOVE_DIR;
-			break;
+        case CNTXT_MENU_COPY_DIR:
+            fileOpFile = fname;
+            fileOpDir = dname;
+            fileOp = CNTXT_MENU_COPY_DIR;
+            break;
 
 		case CNTXT_MENU_PASTE:
 			String src;
@@ -3151,8 +3169,11 @@ public class ReLaunch extends Activity {
 			boolean retCode = false;
 			if (fileOp == CNTXT_MENU_COPY_FILE)
 				retCode = app.copyFile(src, dst, false);
-			else if ((fileOp == CNTXT_MENU_MOVE_FILE) || (fileOp == CNTXT_MENU_MOVE_DIR))
+			else if (fileOp == CNTXT_MENU_MOVE_FILE)
 				retCode = app.moveFile(src, dst);
+            else if (fileOp == CNTXT_MENU_COPY_DIR){
+                retCode = app.copyDir(src, dst);
+            }
 			if (retCode) {
 				HashMap<String, String> fitem = new HashMap<String, String>();
 				fitem.put("name", fileOpFile);
@@ -3165,10 +3186,6 @@ public class ReLaunch extends Activity {
 						fitem.put("sname", app.dataBase.getEbookName(dname, fileOpFile, prefs.getString("bookTitleFormat", "%t[\n%a][. %s][-%n]")));
 					else
 						fitem.put("sname", fileOpFile);
-				} else if (fileOp == CNTXT_MENU_MOVE_DIR) {
-					fitem.put("sname", fileOpFile);
-					fitem.put("type", "dir");
-					fitem.put("reader", "nope");
 				}
 				itemsArray.add(fitem);
 				fileOp = 0;
@@ -3182,7 +3199,7 @@ public class ReLaunch extends Activity {
 						R.string.jv_relaunch_paste_fail_text)
 						+ " " + fileOpFile);
 				builder.setNeutralButton(
-						getResources().getString(R.string.jv_relaunch_ok),
+						getResources().getString(R.string.app_ok),
 						new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog,
 									int whichButton) {
@@ -3212,7 +3229,7 @@ public class ReLaunch extends Activity {
 					R.string.jv_relaunch_rename_title));
 			// "OK"
 			builder.setPositiveButton(
-					getResources().getString(R.string.jv_relaunch_ok),
+					getResources().getString(R.string.app_ok),
 					new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog,
 								int whichButton) {
@@ -3232,7 +3249,7 @@ public class ReLaunch extends Activity {
 										R.string.jv_relaunch_rename_fail_text)
 										+ " " + fname);
 								builder.setNeutralButton(
-										getResources().getString(R.string.jv_relaunch_ok),
+										getResources().getString(R.string.app_ok),
 										new DialogInterface.OnClickListener() {
 											public void onClick(DialogInterface dialog,
 													int whichButton) {
@@ -3245,7 +3262,7 @@ public class ReLaunch extends Activity {
 					});
 			// "Cancel"
 			builder.setNegativeButton(
-					getResources().getString(R.string.jv_relaunch_cancel),
+					getResources().getString(R.string.app_cancel),
 					new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog,
 								int whichButton) {
@@ -3269,7 +3286,7 @@ public class ReLaunch extends Activity {
 					R.string.jv_relaunch_rename_title));
 			// "OK"
 			builder.setPositiveButton(
-					getResources().getString(R.string.jv_relaunch_ok),
+					getResources().getString(R.string.app_ok),
 					new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog,
 								int whichButton) {
@@ -3289,7 +3306,7 @@ public class ReLaunch extends Activity {
 										R.string.jv_relaunch_rename_fail_text)
 										+ " " + fname);
 								builder.setNeutralButton(
-										getResources().getString(R.string.jv_relaunch_ok),
+										getResources().getString(R.string.app_ok),
 										new DialogInterface.OnClickListener() {
 											public void onClick(DialogInterface dialog,
 													int whichButton) {
@@ -3302,7 +3319,7 @@ public class ReLaunch extends Activity {
 					});
 			// "Cancel"
 			builder.setNegativeButton(
-					getResources().getString(R.string.jv_relaunch_cancel),
+					getResources().getString(R.string.app_cancel),
 					new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog,
 								int whichButton) {
@@ -3323,7 +3340,7 @@ public class ReLaunch extends Activity {
 					R.string.jv_relaunch_create_folder_title));
 			// "OK"
 			builder.setPositiveButton(
-					getResources().getString(R.string.jv_relaunch_ok),
+					getResources().getString(R.string.app_ok),
 					new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog,
 								int whichButton) {
@@ -3353,7 +3370,7 @@ public class ReLaunch extends Activity {
 										R.string.jv_relaunch_create_folder_fail_text)
 										+ " " + newFullName);
 								builder.setNeutralButton(
-										getResources().getString(R.string.jv_relaunch_ok),
+										getResources().getString(R.string.app_ok),
 										new DialogInterface.OnClickListener() {
 											public void onClick(DialogInterface dialog,
 													int whichButton) {
@@ -3366,7 +3383,7 @@ public class ReLaunch extends Activity {
 					});
 			// "Cancel"
 			builder.setNegativeButton(
-					getResources().getString(R.string.jv_relaunch_cancel),
+					getResources().getString(R.string.app_cancel),
 					new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog,
 								int whichButton) {
@@ -3393,13 +3410,21 @@ public class ReLaunch extends Activity {
 			showFileInfo(dname + "/" + fname);
 			break;
 
+        case CNTXT_MENU_COPY_DROPBOX:
+                copyFileToDropbox(dname, fname);
+                break;
+
+        case CNTXT_MENU_COPY_DIR_DROPBOX:
+            copyFileToLocalDirDropbox(dname, fname);
+            break;
+
 		}
 		return true;
 	}
 
-	@Override
+    @Override
 	protected void onResume() {
-		setEinkController();
+        EinkScreen.setEinkController(prefs);
 		super.onResume();
 		if (app.dataBase == null)
 			app.dataBase = new BooksBase(this);
@@ -3480,7 +3505,7 @@ public class ReLaunch extends Activity {
 									R.string.jv_relaunch_launcher_text))
 					// "YES"
 					.setPositiveButton(
-							getResources().getString(R.string.jv_relaunch_yes),
+							getResources().getString(R.string.app_yes),
 							new DialogInterface.OnClickListener() {
 								public void onClick(DialogInterface dialog,
 										int which) {
@@ -3489,7 +3514,7 @@ public class ReLaunch extends Activity {
 							})
 					// "NO"
 					.setNegativeButton(
-							getResources().getString(R.string.jv_relaunch_no),
+							getResources().getString(R.string.app_no),
 							null).show();
 			}
 			return true;
@@ -3530,7 +3555,7 @@ public class ReLaunch extends Activity {
 		intent.putExtra("title",
 				getResources().getString(R.string.jv_relaunch_fav));
 		intent.putExtra("rereadOnStart", true);
-		setEinkController(); // ??? not needed
+        EinkScreen.PrepareController(null, false); // ??? not needed
 		startActivity(intent);
 	}
 
@@ -3568,7 +3593,7 @@ public class ReLaunch extends Activity {
 					}
 				});
 		builder.setNegativeButton(
-				getResources().getString(R.string.jv_relaunch_cancel),
+				getResources().getString(R.string.app_cancel),
 				new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
 						dialog.dismiss();
@@ -3597,6 +3622,14 @@ public class ReLaunch extends Activity {
 		startActivity(intent);
 	}
 
+    private void screenDropbox() {
+        Intent intent = new Intent(ReLaunch.this, DropBoxActivity.class);
+        startActivity(intent);
+    }
+    private void screenOPDS() {
+        Intent intent = new Intent(ReLaunch.this, OPDSActivity.class);
+        startActivity(intent);
+    }
 	private void menuAbout() {
 		app.About(this);
 	}
@@ -3677,7 +3710,7 @@ public class ReLaunch extends Activity {
 					}
 				});
 		builder.setNegativeButton(
-				getResources().getString(R.string.jv_relaunch_cancel),
+				getResources().getString(R.string.app_cancel),
 				new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
 						dialog.dismiss();
@@ -3746,7 +3779,7 @@ public class ReLaunch extends Activity {
 			}
 		}
 
-		if (DeviceInfo.EINK_SONY) {
+		if (N2DeviceInfo.EINK_SONY) {
 			int prevCode = 0x0069;
 			int nextCode = 0x006a;
 			GridView gv = (GridView) findViewById(R.id.gl_list);
@@ -3781,13 +3814,35 @@ public class ReLaunch extends Activity {
 		return super.dispatchKeyEvent(event);
 	}
 
-	private void showBookInfo(String file) {
+	private void showBookInfo(final String file) {
 		final int COVER_MAX_W = 280;
 		Bitmap cover = null;
 		final Dialog dialog = new Dialog(this, android.R.style.Theme_Light_NoTitleBar_Fullscreen);
 		dialog.getWindow().requestFeature(Window.FEATURE_NO_TITLE);
 		dialog.setContentView(R.layout.bookinfo);
-		
+
+        if(".fb2".equalsIgnoreCase(file.substring(file.length()-4)) || ".fb2.zip".equalsIgnoreCase(file.substring(file.length()-8))){
+            // добавляем кнопку дополнительной информации о файле
+            Button btnMore = new Button(this);
+            btnMore.setText(getString(R.string.srt_btn_more_info_book));//"More");
+            btnMore.setTextSize(24);
+            btnMore.setBackgroundResource(R.drawable.main_button);
+            btnMore.setPadding(20,10,20,10);
+            LinearLayout ll = (LinearLayout)dialog.findViewById(R.id.linearLayout4);
+            LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+            lp.gravity = Gravity.RIGHT;
+            ll.addView(btnMore, lp);
+            btnMore.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
+                    Intent intent = new Intent(app, ExtendedInfoBook.class);
+                    intent.putExtra("filename", file);
+                    startActivity(intent);
+                }
+            });
+
+            //=============================================================================
+        }
 		Parser parser = new InstantParser();
 		EBook eBook = parser.parse(file, true);
 		if (eBook.cover != null) {
@@ -3849,7 +3904,6 @@ public class ReLaunch extends Activity {
 				dialog.dismiss();
 			}
 		});
-
 		dialog.show();
 	}
 
@@ -3858,7 +3912,6 @@ public class ReLaunch extends Activity {
 
 		final Dialog dialog = new Dialog(this);
 		dialog.getWindow().requestFeature(Window.FEATURE_NO_TITLE);
-//		dialog.setTitle(getString(R.string.jv_relaunch_fileinfo_title));
 		dialog.setContentView(R.layout.fileinfo);
 		LinearLayout llSize = (LinearLayout) dialog.findViewById(R.id.llSize);
 		if (file.isDirectory())
@@ -3874,11 +3927,11 @@ public class ReLaunch extends Activity {
 			Runtime rt = Runtime.getRuntime();
 			String[] args = {"ls", "-l", filename};
 			Process proc = rt.exec(args);
-			String str = filename.replace(" ", "\\ ");
+			//String str = filename.replace(" ", "\\ ");
 			BufferedReader br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
 			int read;
 			char[] buffer = new char[4096];
-			StringBuffer output = new StringBuffer();
+			StringBuilder output = new StringBuilder();
 			while ((read = br.read(buffer)) > 0) {
 				output.append(buffer, 0, read);
 			}
@@ -3906,5 +3959,199 @@ public class ReLaunch extends Activity {
 		dialog.show();
 	}
 
+    private void copyFileToLocalDirDropbox(String dirname, String filename) {
+        String src, str_f, locDirDrop;
 
+        locDirDrop = prefs.getString("LocalfolderDropbox", "none");
+        if(!"none".equals(locDirDrop)){
+            str_f = locDirDrop.trim();
+            if(str_f.lastIndexOf("/") == str_f.length()-1) {
+                locDirDrop = str_f.substring(0, str_f.length()-1);
+            }else{
+                locDirDrop = str_f;
+            }
+            String dst = locDirDrop + "/" + filename;
+            src = dirname + "/" + filename;
+            File toDir = new File(src);
+            if(toDir.isDirectory()){
+                app.copyDir(src, dst);
+            }else{
+                app.copyFile(src, dst, false);
+            }
+        }
+    }
+
+
+    private void copyFileToDropbox(final String dirname, String filename) {
+        // получаем имя папки Dropbox, куда будем закидывать выделенное
+        String str_f;
+        String DBPath;
+        final Activity activity = this;
+        DBPath = prefs.getString("DropBoxfolder", "none");
+        str_f = DBPath.trim();
+        if(str_f.lastIndexOf("/") == str_f.length()-1){
+            DBPath = str_f.substring(0, str_f.length()-1);
+        }else{
+            DBPath = str_f;
+        }
+        //---------------------------------------------------------------------
+        // проверяем наличие подключения к сервису Dropbox
+        final DropboxAPI<AndroidAuthSession> mDBApiDB;
+        mDBApiDB = DropBoxActivity.mDBApi;
+        if(mDBApiDB == null){
+            showToast(getString(R.string.srt_dbactivity_err_con_dropbox));//" Нет подключения к серверу");
+            return;   // нет подключения к сервису
+        }
+        //------------------------------------------------------------------------
+        // проверяем наличие на сервере и если такое уже есть - выдаем диалог с вариантами
+        int checkRez = checkFileDB(DBPath, filename, mDBApiDB);
+        if(checkRez == 1){
+
+            // выбор действия
+            String[] list_url = new String[2];
+            final String[] tempNameFile = {filename};
+            final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+            builder.setTitle(getString(R.string.jv_relaunch_activity_not_found_text1));//"На сервере уже есть такой файл.");//"Скачать файлы");
+            list_url[0] = getString(R.string.jv_relaunch_rename);//"Переименовать";
+            list_url[1] = getString(R.string.jv_relaunch_rewrite);//"Заменить";
+            final String finalDBPath = DBPath;
+            builder.setItems(list_url, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int item) {
+
+                    if(item == 0){
+                        final AlertDialog.Builder builder2 = new AlertDialog.Builder(activity);
+                        builder2.setTitle(getString(R.string.jv_relaunch_rename_title));//"Введите новое имя");
+                        final EditText input = new EditText(activity);
+                        builder2.setView(input);
+                        builder2.setCancelable(true);
+                        builder2.setNegativeButton(getResources().getString(R.string.app_cancel), new DialogInterface.OnClickListener() { // Кнопка Отмена
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss(); // Отпускает диалоговое окно
+                            }
+                        });
+                        builder2.setPositiveButton(getResources().getString(R.string.app_ok), new DialogInterface.OnClickListener() { // Кнопка Отмена
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                String newName = input.getText().toString().trim();
+
+                                if (newName.length() > 0) {
+                                    uploadFilesOrDir(dirname, tempNameFile[0], finalDBPath, mDBApiDB, newName);
+                                }else{
+                                    uploadFilesOrDir(dirname, tempNameFile[0], finalDBPath, mDBApiDB, "");
+                                }
+                                dialog.dismiss(); // Отпускает диалоговое окно
+                            }
+                        });
+                        builder2.show();
+                    }
+                    if(item == 1){
+                        try {
+                            mDBApiDB.delete(finalDBPath + "/" +tempNameFile[0]);
+                        } catch (DropboxException e) {
+                            showToast(getString(R.string.srt_dbactivity_err_upl_dropbox));//"Ошибка при перезаписи.");
+                        }
+
+                        uploadFilesOrDir(dirname, tempNameFile[0], finalDBPath, mDBApiDB, "");
+                    }
+                    dialog.dismiss(); // Отпускает диалоговое окно
+                }
+            });
+            builder.setCancelable(true);
+            builder.setNegativeButton(getResources().getString(R.string.app_cancel), new DialogInterface.OnClickListener() { // Кнопка Отмена
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss(); // Отпускает диалоговое окно
+                }
+            });
+            builder.show();
+
+        }else if(checkRez == 0){
+            uploadFilesOrDir(dirname, filename, DBPath, mDBApiDB, "");
+        }
+
+    }
+    private boolean uploadFilesOrDir(String dirname, String filename, String DBPath, DropboxAPI<AndroidAuthSession> mDBApi, String newfilename) {
+        //------------------------------------------------------------------------
+        // выясняем чего копируем - папку или файл
+        FileInputStream mFos;
+        if(newfilename.equals("")){
+            newfilename = filename;
+        }
+        String src = dirname + "/" + filename;
+        File toDir = new File(src);
+        if(toDir.isDirectory()){
+            if (!uploadFiles(dirname + "/" + filename, (dirname + "/" ).length(), DBPath, mDBApi)) {
+                return false;
+            }
+        }else{ // копирование одиночного файла
+            File f1 = new File(src);
+            try {
+                mFos = new FileInputStream(src);
+            } catch (FileNotFoundException e) {
+                return false;
+            }
+            try {
+                mDBApi.putFile(DBPath + "/" + newfilename, mFos, f1.length(), null, null);
+            } catch (DropboxException e) {
+                showToast(getString(R.string.srt_dbactivity_err_upl_dropbox));//" Ошибка при записи файла на сервер");
+                return false;
+            }
+        }
+        //-----------------------------------------------------------------------
+        showToast(getString(R.string.jv_prefs_rsr_ok_text));//" Успешно выполнено");
+        return true;
+    }
+    private boolean uploadFiles(String Path, int start_pos_path, String DBPath, DropboxAPI<AndroidAuthSession> mDBApi) {
+        String[] strDirList = (new File(Path)).list();
+        String strPath = Path.substring(start_pos_path);
+        FileInputStream mFos;
+
+        for (String aStrDirList : strDirList) {
+
+            File f1 = new File(Path+ File.separator + aStrDirList);
+            if (f1.isFile()) {
+                    try {
+                        mFos = new FileInputStream(f1);
+                    } catch (FileNotFoundException e) {
+                        showToast(getString(R.string.jv_editor_openerr_text1));//" Ошибка при открытии файла");
+                        return false;
+                    }
+                    try {
+                        mDBApi.putFile(DBPath + "/" + strPath + File.separator + f1.getName(), mFos, f1.length(), null, null);
+                    } catch (DropboxException e) {
+                        showToast(getString(R.string.srt_dbactivity_err_upl_dropbox));//" Ошибка при записи на сервер");
+                        return false;
+                    }
+            } else {
+                if (!uploadFiles(Path + File.separator + aStrDirList , start_pos_path, DBPath, mDBApi)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private int checkFileDB(String PathDB, String filenameOrDirname, DropboxAPI<AndroidAuthSession> mDBApi){
+        DropboxAPI.Entry entries;
+        try {
+            entries = mDBApi.metadata(PathDB, 0, null, true, null);
+        } catch (DropboxException e) {
+            return -1;
+        }
+        for (DropboxAPI.Entry e : entries.contents) {
+            if (!e.isDeleted) {
+                if(e.fileName().equals(filenameOrDirname)){
+                    return 1;
+                }
+            }
+        }
+        return 0;
+    }
+
+    private void showToast(String msg) {
+        Toast error = Toast.makeText(this, msg, Toast.LENGTH_LONG);
+        error.show();
+    }
 }

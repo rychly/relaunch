@@ -34,7 +34,7 @@
             android:background="@drawable/main_button"
             android:drawableLeft="@drawable/ci_ok"
             android:gravity="center"
-            android:text="@string/service_details_layout_ok" >
+            android:text="@string/app_ok" >
         </Button>
     </LinearLayout>
 

@@ -86,7 +86,7 @@
             android:drawableLeft="@drawable/ci_del"
             android:minWidth="64dp"
             android:paddingRight="5.3dp"
-            android:text="@string/editor_layout_cancel" >
+            android:text="@string/app_cancel" >
         </Button>
     </LinearLayout>
 

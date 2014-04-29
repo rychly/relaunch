@@ -81,7 +81,7 @@ public class Editor extends Activity implements TextWatcher {
 							.getString(R.string.jv_editor_openerr_text2));
 			// "OK"
 			builder.setPositiveButton(
-					getResources().getString(R.string.jv_editor_ok),
+					getResources().getString(R.string.app_ok),
 					new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog,
 								int whichButton) {
@@ -107,7 +107,7 @@ public class Editor extends Activity implements TextWatcher {
 					+ " \"" + fname + "\"");
 			// "OK"
 			builder.setPositiveButton(
-					getResources().getString(R.string.jv_editor_ok),
+					getResources().getString(R.string.app_ok),
 					new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog,
 								int whichButton) {
@@ -133,7 +133,7 @@ public class Editor extends Activity implements TextWatcher {
 					+ " \"" + fname + "\"");
 			// "OK"
 			builder.setPositiveButton(
-					getResources().getString(R.string.jv_editor_ok),
+					getResources().getString(R.string.app_ok),
 					new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog,
 								int whichButton) {
@@ -199,7 +199,7 @@ public class Editor extends Activity implements TextWatcher {
 					+ " "
 					+ getResources().getString(R.string.jv_editor_bytes));
 			builder.setPositiveButton(
-					getResources().getString(R.string.jv_editor_ok),
+					getResources().getString(R.string.app_ok),
 					new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog,
 								int whichButton) {
@@ -244,7 +244,7 @@ public class Editor extends Activity implements TextWatcher {
 						// "YES"
 						builder.setPositiveButton(
 								getResources()
-										.getString(R.string.jv_editor_yes),
+										.getString(R.string.app_yes),
 								new DialogInterface.OnClickListener() {
 									public void onClick(DialogInterface dialog,
 											int whichButton) {
@@ -256,7 +256,7 @@ public class Editor extends Activity implements TextWatcher {
 								});
 						// "NO"
 						builder.setNegativeButton(
-								getResources().getString(R.string.jv_editor_no),
+								getResources().getString(R.string.app_no),
 								new DialogInterface.OnClickListener() {
 									public void onClick(DialogInterface dialog,
 											int whichButton) {
@@ -290,12 +290,12 @@ public class Editor extends Activity implements TextWatcher {
 			saveBtn.setEnabled(false);
 			// "Back"
 			cancelBtn
-					.setText(getResources().getString(R.string.jv_editor_back));
+					.setText(getResources().getString(R.string.app_cancel));
 		} else {
 			saveBtn.setEnabled(true);
 			// "Cancel"
 			cancelBtn.setText(getResources().getString(
-					R.string.jv_editor_cancel));
+					R.string.app_cancel));
 		}
 	}
 

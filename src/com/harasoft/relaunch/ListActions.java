@@ -1,12 +1,5 @@
 package com.harasoft.relaunch;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ActivityNotFoundException;
@@ -15,6 +8,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.widget.Toast;
+
+import java.util.*;
 
 public class ListActions {
 	String TAG = "ListActions";
@@ -103,15 +98,7 @@ public class ListActions {
 				exts = new ArrayList<String>(tkeys);
 				Collections.sort(exts, new ExtsComparator());
 			}
-			// known dirs
-			ArrayList<String> dirs = new ArrayList<String>();
-			if (prefs.getBoolean("hideKnownDirs", false)) {
-				String[] home_dirs = prefs.getString("startDir",
-						"/sdcard,/media/My Files").split("\\,");
-				for (int i = 0; i < home_dirs.length; i++)
-					dirs.add(home_dirs[i]);
-				Collections.sort(dirs, new ExtsComparator());
-			}
+
 			final CharSequence[] lnames = new CharSequence[itemsArray.size()];
 			for (int i = 0; i < itemsArray.size(); i++) {
 				HashMap<String, String> item = itemsArray.get(i);
@@ -149,7 +136,7 @@ public class ListActions {
 							dialog.dismiss();
 						}
 					});
-			builder.setNegativeButton(app.getResources().getString(R.string.jv_results_menu_button),
+			builder.setNegativeButton(app.getResources().getString(R.string.app_cancel),
 					new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog,
 								int whichButton) {

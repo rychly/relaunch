@@ -81,7 +81,8 @@
         android:textColor="@color/normal_fg"
         android:textStyle="bold" >
     </Button>
-
+
+
     <LinearLayout
     	android:id="@+id/linearLayoutNavigate"
     	android:layout_width="fill_parent"
@@ -153,7 +154,8 @@
             android:stretchMode="columnWidth" >
         </GridView>
     </LinearLayout>
-
+
+
     <LinearLayout
     	android:id="@+id/linearLayoutBottom"
     	android:layout_width="fill_parent"
