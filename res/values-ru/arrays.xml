@@ -12,5 +12,5 @@
 		<item>ru</item>
 		<item>es</item>
 	</string-array>
-
+    <string name="app_settings_sys_settings">Системные настройки</string>
 </resources>

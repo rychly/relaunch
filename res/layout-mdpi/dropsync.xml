@@ -94,13 +94,4 @@
                 android:layout_marginLeft="5dp" android:layout_marginRight="5dp" android:layout_gravity="left"
                 android:textSize="24dp" android:textStyle="normal"/>
     </LinearLayout>
-    <Button
-            android:layout_width="wrap_content"
-            android:layout_height="56dp"
-            android:text="@string/str_SelectAndDownload"
-            android:id="@+id/select_and_dowload" android:layout_gravity="center" android:background="@drawable/main_button"
-            android:longClickable="false" android:layout_marginTop="10dp" android:enabled="false"
-            android:visibility="visible" android:textStyle="normal" android:textSize="24dp"
-            android:layout_marginLeft="5dp" android:layout_marginRight="5dp" android:paddingLeft="10dp"
-            android:paddingRight="10dp"/>
 </LinearLayout>

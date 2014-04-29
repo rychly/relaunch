@@ -6,7 +6,7 @@
 	android:background="@color/normal_bg"
 	android:orientation="vertical"
 	android:paddingBottom="0dp"
-	android:paddingTop="0dp" >
+	android:paddingTop="0dp" android:id="@+id/grid_cell">
 
 	<ImageView
 		android:id="@+id/fl_separator"
@@ -18,7 +18,7 @@
 		android:layout_width="wrap_content"
 		android:layout_height="wrap_content"
 		android:layout_gravity="top|left"
-		android:background="@color/normal_bg"
+		android:background="@android:color/transparent"
 		android:orientation="horizontal"
 		android:paddingBottom="2dp"
 		android:paddingTop="2dp" >
@@ -29,7 +29,7 @@
 			android:layout_height="wrap_content"
 			android:layout_gravity="top|left"
 			android:layout_marginLeft="4dp"
-			android:background="@color/normal_bg"
+			android:background="@android:color/transparent"
 			android:src="@drawable/dir_ok" >
 		</ImageView>
 
@@ -37,10 +37,10 @@
 			android:id="@+id/fl_holder"
 			android:layout_width="fill_parent"
 			android:layout_height="wrap_content"
-			android:layout_gravity="top|left"
+			android:layout_gravity="center_vertical|left"
 			android:layout_marginLeft="4dp"
 			android:layout_marginRight="4dp"
-			android:background="@color/normal_bg"
+			android:background="@android:color/transparent"
 			android:orientation="vertical" >
 
 			<TextView
@@ -50,10 +50,9 @@
 				android:layout_gravity="top|left"
 				android:layout_marginLeft="4dp"
 				android:layout_weight="1"
-				android:background="@color/normal_transparent"
+				android:background="@android:color/transparent"
 				android:gravity="center_vertical"
-				android:text="TextView"
-				android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textAppearance="?android:attr/textAppearanceMedium"
 				android:textColor="@color/normal_fg" />
 
 			<TextView
@@ -63,7 +62,7 @@
 				android:layout_gravity="top|left"
 				android:layout_marginLeft="4dp"
 				android:layout_weight="1"
-				android:background="@color/normal_transparent"
+				android:background="@android:color/transparent"
 				android:gravity="center_vertical"
 				android:text=""
 				android:textAppearance="?android:attr/textAppearanceSmall"

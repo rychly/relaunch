@@ -5,6 +5,28 @@
     <string name="app_cancel">Cancelar</string>
     <string name="app_yes">SÍ</string>
     <string name="app_no">NO</string>
+
+    <string name="app_settings_opds">OPDS</string>
+    <string name="app_settings_dropbox">Dropbox</string>
+    <string name="app_settings_lock">Bloqueo del dispositivo</string>
+    <string name="app_settings_power_off">Apague el dispositivo</string>
+    <string name="app_settings_switch_wifi">Interruptor WiFi estado</string>
+    <string name="app_settings_run">Ejecutar la aplicación</string>
+    <string name="app_settings_nothing">No hacer nada</string>
+    <string name="app_settings_battery">Abierto \"el consumo de la batería\" ventana</string>
+    <string name="app_settings_app_manager">Abierto \"Gestor de aplicaciones\" de la ventana</string>
+    <string name="app_settings_favorites_doc">Favoritos pantalla abierta</string>
+    <string name="app_settings_favorites_doc_menu">Abrir el menú Favoritos</string>
+    <string name="app_settings_favorites_doc_number">Abrir Favoritos №</string>
+    <string name="app_settings_lru_doc">Abrir la pantalla abrió por última vez</string>
+    <string name="app_settings_lru_doc_menu">Abra el menú abrió por última vez</string>
+    <string name="app_settings_lru_doc_number">Abrir Última abierto №</string>
+    <string name="app_settings_home">Abrir ventana de carpetas inicial</string>
+    <string name="app_settings_home_menu">Abrir menú de carpetas inicial</string>
+    <string name="app_settings_home_number">Abrir carpeta incial №</string>
+    <string name="app_settings_settings">Abierto \"Configuración\" ventana</string>
+    <string name="app_settings_advanced">Abierto \"Funciones avanzadas\" ventana</string>
+
     <string name="model_warning">&lt;h2&gt;Esta aplicación está diseñada sólo para
 		el Nook Simple Touch y el Sony
 		PRS-T1&lt;/h2&gt;&lt;br&gt;&lt;center&gt;&lt;b&gt;¿Desea

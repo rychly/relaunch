@@ -5,6 +5,32 @@
     <string name="app_cancel">Отмена</string>
     <string name="app_yes">Да</string>
     <string name="app_no">Нет</string>
+
+    <string name="app_settings_opds">OPDS</string>
+    <string name="app_settings_dropbox">Dropbox</string>
+    <string name="app_settings_lock">Заблокировать устройство</string>
+    <string name="app_settings_power_off">Выключить устройство</string>
+    <string name="app_settings_switch_wifi">Переключить состояние WiFi</string>
+    <string name="app_settings_run">Выполнить приложение</string>
+    <string name="app_settings_nothing">Ничего не делать</string>
+    <string name="app_settings_battery">Открыть окно \"Расход батареи\"</string>
+    <string name="app_settings_app_manager">Открыть окно \"Менеджер приложений\"</string>
+    <string name="app_settings_favorites_doc">Открыть окно избранного</string>
+    <string name="app_settings_favorites_doc_menu">Открыть меню Избранного</string>
+    <string name="app_settings_favorites_doc_number">Открыть Избранное №</string>
+    <string name="app_settings_lru_doc">Открыть окно Недавно открытых</string>
+    <string name="app_settings_lru_doc_menu">Открыть меню Недавно открытых</string>
+    <string name="app_settings_lru_doc_number">Открыть Недавно открытый №</string>
+    <string name="app_settings_home">Открыть окно списка начальных папок</string>
+    <string name="app_settings_home_menu">Открыть меню выбора начальной папки</string>
+    <string name="app_settings_home_number">Открыть начальную папку №</string>
+    <string name="app_settings_settings">Открыть окно \"Настройки\"</string>
+    <string name="app_settings_advanced">Открыть окно \"Дополнительные функции\"</string>
+    <string name="app_settings_favorites_app">Открыть \"Избранные приложения\"</string>
+    <string name="app_settings_all_app">Открыть \"Все приложения\"</string>
+    <string name="app_settings_last_app">Открыть \"Недавно запущеные приложения\"</string>
+    <string name="app_settings_search">Открыть окно \"Поиск\"</string>
+
 	<string name="model_warning">&lt;h2>Эта программа разработана для Nook Simple
 		Touch или Sony PRS-T1!&lt;/h2>&lt;br>&lt;center>&lt;b>Хотите
 		продолжить?&lt;/b>&lt;/center></string>
@@ -358,17 +384,13 @@
 	<string name="pref_i_columnsAlgIntensity_title">Алгоритм определения числа колонок</string>
 	<string name="pref_i_columnsAppAll_title">Все приложения</string>
 	<string name="pref_i_columnsAppFav_title">Избранные приложения</string>
-	<string name="pref_i_rowSeparator_title">Показывать разделитель строк в списке файлов
-	</string>
+	<string name="pref_i_rowSeparator_title">Показывать разделитель строк в списке файлов</string>
 	<string name="pref_i_homeButtonST_title">Одиночное нажатие кнопки \"К Началу\"</string>
 	<string name="pref_i_homeButtonDT_title">Двойное нажатие кнопки \"К Началу\"</string>
 	<string name="pref_i_homeButtonLT_title">Длительное нажатие кнопки \"К Началу\"</string>
-	<string name="pref_i_lruButtonST_title">Одиночное нажатие кнопки \"Недавно открытые\"
-	</string>
-	<string name="pref_i_lruButtonDT_title">Двойное нажатие кнопки \"Недавно открытые\"
-	</string>
-	<string name="pref_i_lruButtonLT_title">Длительное нажатие кнопки \"Недавно открытые\"
-	</string>
+	<string name="pref_i_lruButtonST_title">Одиночное нажатие кнопки \"Недавно открытые\"</string>
+	<string name="pref_i_lruButtonDT_title">Двойное нажатие кнопки \"Недавно открытые\"</string>
+	<string name="pref_i_lruButtonLT_title">Длительное нажатие кнопки \"Недавно открытые\"</string>
 	<string name="pref_i_favButtonST_title">Одиночное нажатие кнопки \"Избранное\"</string>
 	<string name="pref_i_favButtonDT_title">Двойное нажатие кнопки \"Избранное\"</string>
 	<string name="pref_i_favButtonLT_title">Длительное нажатие кнопки \"Избранное\"</string>
@@ -384,12 +406,20 @@
 	<string name="pref_i_batButtonST_title">Одиночное нажатие кнопки \"Ост. батареи\"</string>
 	<string name="pref_i_batButtonDT_title">Двойное нажатие кнопки \"Ост. батареи\"</string>
 	<string name="pref_i_batButtonLT_title">Длительное нажатие кнопки \"Ост. батареи\"</string>
-	<string name="pref_i_appFavButtonST_title">Одиночное нажатие кнопки Избранные приложения
-	</string>
-	<string name="pref_i_appFavButtonDT_title">Двойное нажатие кнопки Избранные приложения
-	</string>
-	<string name="pref_i_appFavButtonLT_title">Длительное нажатие кнопки Избранные приложения
-	</string>
+	<string name="pref_i_appFavButtonST_title">Одиночное нажатие кнопки \"Избранные приложения\"</string>
+	<string name="pref_i_appFavButtonDT_title">Двойное нажатие кнопки \"Избранные приложения\"</string>
+	<string name="pref_i_appFavButtonLT_title">Длительное нажатие кнопки \"Избранные приложения\"</string>
+
+    <string name="pref_i_appAllButtonST_title">Одиночное нажатие кнопки \"Все приложения\"</string>
+    <string name="pref_i_appAllButtonDT_title">Двойное нажатие кнопки \"Все приложения\"</string>
+    <string name="pref_i_appAllButtonLT_title">Длительное нажатие кнопки \"Все приложения\"</string>
+    <string name="pref_i_appLastButtonST_title">Одиночное нажатие кнопки \"Недавно запущенные приложения\"</string>
+    <string name="pref_i_appLastButtonDT_title">Двойное нажатие кнопки \"Недавно запущенные приложения\"</string>
+    <string name="pref_i_appLastButtonLT_title">Длительное нажатие кнопки \"Недавно запущенные приложения\"</string>
+    <string name="pref_i_searchButtonST_title">Одиночное нажатие кнопки  \"Поиск\"</string>
+    <string name="pref_i_searchButtonDT_title">Двойное нажатие кнопки \"Поиск\"</string>
+    <string name="pref_i_searchButtonLT_title">Длительное нажатие кнопки \"Поиск\"</string>
+
 	<string name="pref_i_homeMode_title">Режим работы при вызове кнопкой Home</string>
 	<string name="pref_i_homeMode_on">Запускаться как рабочий стол</string>
 	<string name="pref_i_homeMode_off">Запускаться как обычное приложение</string>
@@ -410,16 +440,13 @@
 	<string name="pref_i_dateUS_off">"Европейский" (dd.mm.yyyy)</string>
 	<string name="pref_i_disableScrollJump_title">Запрет быстрой прокрутки кнопками</string>
 	<string name="pref_i_disableScrollJump_on">Быстрая прокрутка запрещена</string>
-	<string name="pref_i_disableScrollJump_off">Быстрая прокрутка разрешена (часто неточно!)
-	</string>
+	<string name="pref_i_disableScrollJump_off">Быстрая прокрутка разрешена (часто неточно!)</string>
 	<string name="pref_i_scrollPerc_title">Шаг "быстрой" прокрутки</string>
-	<string name="pref_i_scrollPerc_sum">Шаг "быстрой" прокрутки кнопками (проценты)
-	</string>
+	<string name="pref_i_scrollPerc_sum">Шаг "быстрой" прокрутки кнопками (проценты)</string>
 	<string name="pref_i_customScroll_title">Собственная полоса прокрутки</string>
 	<string name="pref_i_customScroll_on">Использовать собственную полосу прокрутки</string>
 	<string name="pref_i_scrollWidth_title">Ширина полосы прокрутки</string>
-	<string name="pref_i_scrollWidth_sum">Ширина собственной полосы прокрутки… (пикс.)
-    </string>
+	<string name="pref_i_scrollWidth_sum">Ширина собственной полосы прокрутки… (пикс.)</string>
 	<string name="pref_i_scrollPad_title">Отступ полосы прокрутки</string>
 	<string name="pref_i_useBackButton_off">Кнопка \"Back\" завершает программу</string>
 	<string name="pref_i_useBackButton_on">Кнопка \"Back\" открывает родительскую папку</string>
@@ -450,8 +477,8 @@
 	<string name="pref_i_appLruSize_sum">Сохранять в списке "Недавно запущенных приложений"
         последние… (приложений)</string>
 	<string name="pref_i_appFavSize_title">Избранные приложения</string>
-	<string name="pref_i_appFavSize_sum">Сохранять в списке "Избранных приложений"…
-        (приложений)</string>
+	<string name="pref_i_appFavSize_sum">Сохранять в списке "Избранных приложений"…(приложений)</string>
+
 	<string name="pref_i_useFileManagerFunctions_title">Использовать функции файлового менеджера</string>
 	<string name="pref_i_useFileManagerFunctions_on">Показывать пункты меню файлового менеджера</string>
 	<string name="pref_i_useFileManagerFunctions_off">Не показывать пункты меню файлового менеджера
@@ -515,42 +542,7 @@
 	<string name="arr_einkUpdateMode_names_2">Качественный (GC+ONESHOT_ALL)</string>
 	<string name="arr_einkUpdateMode_names_3">Быстрый (GU+ONESHOT_ALL)</string>
 	<string name="arr_einkUpdateMode_names_4">Быстрый (GL16+ACTIVE_ALL)</string>
-	<string name="arr_home_button_actions_names_1">Ничего не делать</string>
-	<string name="arr_home_button_actions_names_2">Открыть начальную папку №</string>
-	<string name="arr_home_button_actions_names_3">Открыть меню выбора начальной папки</string>
-	<string name="arr_home_button_actions_names_4">Открыть окно списка начальных папок</string>
-	<string name="arr_lru_button_actions_names_1">Ничего не делать</string>
-	<string name="arr_lru_button_actions_names_2">Открыть Недавно открытый #</string>
-	<string name="arr_lru_button_actions_names_3">Открыть меню Недавно открытых</string>
-	<string name="arr_lru_button_actions_names_4">Открыть окно Недавно открытых</string>
-	<string name="arr_fav_button_actions_names_1">Ничего не делать</string>
-	<string name="arr_fav_button_actions_names_2">Открыть Избранное #</string>
-	<string name="arr_fav_button_actions_names_3">Открыть меню Избранного</string>
-	<string name="arr_fav_button_actions_names_4">Открыть окно избранного</string>
-	<string name="arr_advanced_button_actions_names_1">Ничего не делать</string>
-	<string name="arr_advanced_button_actions_names_2">Открыть окно \"Дополнительные функции\"</string>
-	<string name="arr_advanced_button_actions_names_3">Заблокировать устройство</string>
-	<string name="arr_advanced_button_actions_names_4">Выключить устройство</string>
-	<string name="arr_advanced_button_actions_names_5">Переключить состояние WiFi</string>
-	<string name="arr_advanced_button_actions_names_6">Выполнить приложение</string>
-	<string name="arr_settings_button_actions_names_1">Ничего не делать</string>
 	<string name="arr_settings_button_actions_names_2">Открыть окно \"Настройки\"</string>
-	<string name="arr_settings_button_actions_names_3">Заблокировать устройство</string>
-	<string name="arr_settings_button_actions_names_4">Выключить устройство</string>
-	<string name="arr_settings_button_actions_names_5">Переключить состояние WiFi</string>
-	<string name="arr_settings_button_actions_names_6">Выполнить приложение</string>
-	<string name="arr_mem_button_actions_names_1">Ничего не делать</string>
-	<string name="arr_mem_button_actions_names_2">Открыть окно \"Менеджер приложений\"</string>
-	<string name="arr_mem_button_actions_names_3">Заблокировать устройство</string>
-	<string name="arr_mem_button_actions_names_4">Выключить устройство</string>
-	<string name="arr_mem_button_actions_names_5">Переключить состояние WiFi</string>
-	<string name="arr_mem_button_actions_names_6">Выполнить приложение</string>
-	<string name="arr_bat_button_actions_names_1">Ничего не делать</string>
-	<string name="arr_bat_button_actions_names_2">Открыть окно \"Расход батареи\"</string>
-	<string name="arr_bat_button_actions_names_3">Заблокировать устройство</string>
-	<string name="arr_bat_button_actions_names_4">Выключить устройство</string>
-	<string name="arr_bat_button_actions_names_5">Переключить состояние WiFi</string>
-	<string name="arr_bat_button_actions_names_6">Выполнить приложение</string>
 	<string name="arr_output_columns_names_1">Автоматическое число колонок</string>
 	<string name="arr_output_columns_names_2">1 колонка</string>
 	<string name="arr_output_columns_names_3">2 колонки</string>
@@ -574,9 +566,6 @@
 	<string name="pref_i_showFullDirPath_title">Полный путь к папке</string>
 	<string name="jv_relaunch_add_startdir">Добавить к Начальным папкам</string>
 	<string name="jv_relaunch_set_startdir">Установить Начальной папкой</string>
-	<string name="arr_appfav_button_actions_names_1">Ничего не делать</string>
-	<string name="arr_appfav_button_actions_names_2">Открыть \"Избранные приложения\"</string>
-	<string name="arr_appfav_button_actions_names_3">Выполнить приложение</string>
 	<string name="bookinfo_authors">Авторы:</string>
 	<string name="bookinfo_series">Серия:</string>
 	<string name="bookinfo_title">Название:</string>
@@ -645,4 +634,32 @@
     <string name="srt_info_book_translator_info">Переводчик:\n</string>
     <string name="jv_relaunch_rewrite">Переписать…</string>
     <string name="srt_dbactivity_file_del">Удалить выбранное?</string>
+    <string name="pref_i_showDropbox_title">Показывать Dropbox как корневую папку</string>
+    <string name="pref_i_showOnePanel_title">Панель 1: Домой, Документы, Поиск, Нстройка</string>
+    <string name="pref_i_showOnePanel_on">Панель видна</string>
+    <string name="pref_i_showOnePanel_off">Панель скрыта</string>
+    <string name="pref_i_showTwoPanel_title">Панель 2: текущая папка</string>
+    <string name="pref_i_showThreePanel_title">Панель 3: кнопки навигации, Дополнительные настройки</string>
+    <string name="pref_i_showFourPanel_title">Панель 4: Память, Программы, Аккумулятор</string>
+    <string name="srt_dbactivity_warn_create_folder">Ошибка создания папки</string>
+    <string name="srt_dbactivity_no_inet">Отсутствует соединение с интернетом!</string>
+    <string name="srt_opdsactivity_err_folder">Невозможно создать локальный каталог или неверный путь</string>
+    <string name="srt_opdsactivity_err_url">Неполный адрес каталога</string>
+    <string name="jv_open_dir">Открыть папку с файлом</string>
+    <string name="jv_results_add_opds">Добавить OPDS каталог</string>
+    <string name="jv_results_addres_opds">Адрес OPDS каталога</string>
+    <string name="jv_results_name_opds">Имя каталога</string>
+    <string name="jv_relaunch_OPDS_catalogs">OPDS каталоги</string>
+    <string name="jv_relaunch_edit">Изменить</string>
+    <string name="pref_i_opdsSize_title">Список OPDS каталогов</string>
+    <string name="pref_i_opdsSize_sum">Сохранять в списке \"Список OPDS каталогов\"…</string>
+    <string name="jv_results_pass_opds">Пароль пользователя</string>
+    <string name="jv_results_login_opds">Имя пользователя</string>
+    <string name="jv_results_checkbox_opds">Использовать пароль</string>
+    <string name="pref_i_resetOPDS_title">Очистить список OPDS каталогов</string>
+    <string name="jv_relaunch_clean">Удалить базу OPDS каталогов</string>
+    <string name="jv_relaunch_selecte">Выделить</string>
+    <string name="jv_relaunch_del_sel_file_title">Удаление выбранных файлов</string>
+    <string name="jv_relaunch_del_sel_file_text1">Удалить следующие файлы:</string>
+    <string name="jv_relaunch_unselecte">Снять выделение</string>
 </resources>

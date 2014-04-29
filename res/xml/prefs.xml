@@ -343,6 +343,38 @@
 					android:key="rowSeparator"
 					android:layout="@layout/pref_child"
 					android:title="@string/pref_i_rowSeparator_title" />
+                <CheckBoxPreference
+                        android:defaultValue="true"
+                        android:key="showOnePanel"
+                        android:layout="@layout/pref_child"
+                        android:persistent="true"
+                        android:summaryOff="@string/pref_i_showOnePanel_off"
+                        android:summaryOn="@string/pref_i_showOnePanel_on"
+                        android:title="@string/pref_i_showOnePanel_title" />
+                <CheckBoxPreference
+                        android:defaultValue="true"
+                        android:key="showTwoPanel"
+                        android:layout="@layout/pref_child"
+                        android:persistent="true"
+                        android:summaryOff="@string/pref_i_showOnePanel_off"
+                        android:summaryOn="@string/pref_i_showOnePanel_on"
+                        android:title="@string/pref_i_showTwoPanel_title" />
+                <CheckBoxPreference
+                        android:defaultValue="true"
+                        android:key="showThreePanel"
+                        android:layout="@layout/pref_child"
+                        android:persistent="true"
+                        android:summaryOff="@string/pref_i_showOnePanel_off"
+                        android:summaryOn="@string/pref_i_showOnePanel_on"
+                        android:title="@string/pref_i_showThreePanel_title" />
+                <CheckBoxPreference
+                        android:defaultValue="true"
+                        android:key="showFourPanel"
+                        android:layout="@layout/pref_child"
+                        android:persistent="true"
+                        android:summaryOff="@string/pref_i_showOnePanel_off"
+                        android:summaryOn="@string/pref_i_showOnePanel_on"
+                        android:title="@string/pref_i_showFourPanel_title" />
 			</PreferenceScreen>
 			<PreferenceScreen android:title="@string/pref_s_file_title" >
 				<Preference
@@ -419,40 +451,40 @@
 				android:key="psButtons"
 				android:title="@string/pref_s_buttons_title" >
 				<ListPreference
-					android:defaultValue="OPENN"
+					android:defaultValue="HOMEN"
 					android:enabled="true"
-					android:entries="@array/home_button_actions_names"
-					android:entryValues="@array/home_button_actions_values"
+					android:entries="@array/arr_button_actions_names"
+					android:entryValues="@array/arr_button_actions_values"
 					android:key="homeButtonST"
 					android:layout="@layout/pref_child"
 					android:persistent="true"
 					android:selectable="true"
 					android:title="@string/pref_i_homeButtonST_title" />
 				<ListPreference
-					android:defaultValue="OPENMENU"
+					android:defaultValue="HOMEMENU"
 					android:enabled="true"
-					android:entries="@array/home_button_actions_names"
-					android:entryValues="@array/home_button_actions_values"
+                    android:entries="@array/arr_button_actions_names"
+                    android:entryValues="@array/arr_button_actions_values"
 					android:key="homeButtonDT"
 					android:layout="@layout/pref_child"
 					android:persistent="true"
 					android:selectable="true"
 					android:title="@string/pref_i_homeButtonDT_title" />
 				<ListPreference
-					android:defaultValue="OPENSCREEN"
+					android:defaultValue="HOMESCREEN"
 					android:enabled="true"
-					android:entries="@array/home_button_actions_names"
-					android:entryValues="@array/home_button_actions_values"
+                    android:entries="@array/arr_button_actions_names"
+                    android:entryValues="@array/arr_button_actions_values"
 					android:key="homeButtonLT"
 					android:layout="@layout/pref_child"
 					android:persistent="true"
 					android:selectable="true"
 					android:title="@string/pref_i_homeButtonLT_title" />
 				<ListPreference
-					android:defaultValue="OPENSCREEN"
+					android:defaultValue="LRUSCREEN"
 					android:enabled="true"
-					android:entries="@array/lru_button_actions_names"
-					android:entryValues="@array/lru_button_actions_values"
+                    android:entries="@array/arr_button_actions_names"
+                    android:entryValues="@array/arr_button_actions_values"
 					android:key="lruButtonST"
 					android:layout="@layout/pref_child"
 					android:persistent="true"
@@ -461,8 +493,8 @@
 				<ListPreference
 					android:defaultValue="NOTHING"
 					android:enabled="true"
-					android:entries="@array/lru_button_actions_names"
-					android:entryValues="@array/lru_button_actions_values"
+                    android:entries="@array/arr_button_actions_names"
+                    android:entryValues="@array/arr_button_actions_values"
 					android:key="lruButtonDT"
 					android:layout="@layout/pref_child"
 					android:persistent="true"
@@ -471,18 +503,18 @@
 				<ListPreference
 					android:defaultValue="NOTHING"
 					android:enabled="true"
-					android:entries="@array/lru_button_actions_names"
-					android:entryValues="@array/lru_button_actions_values"
+                    android:entries="@array/arr_button_actions_names"
+                    android:entryValues="@array/arr_button_actions_values"
 					android:key="lruButtonLT"
 					android:layout="@layout/pref_child"
 					android:persistent="true"
 					android:selectable="true"
 					android:title="@string/pref_i_lruButtonLT_title" />
 				<ListPreference
-					android:defaultValue="OPENSCREEN"
+					android:defaultValue="FAVDOCSCREEN"
 					android:enabled="true"
-					android:entries="@array/fav_button_actions_names"
-					android:entryValues="@array/fav_button_actions_values"
+                    android:entries="@array/arr_button_actions_names"
+                    android:entryValues="@array/arr_button_actions_values"
 					android:key="favButtonST"
 					android:layout="@layout/pref_child"
 					android:persistent="true"
@@ -491,8 +523,8 @@
 				<ListPreference
 					android:defaultValue="NOTHING"
 					android:enabled="true"
-					android:entries="@array/fav_button_actions_names"
-					android:entryValues="@array/fav_button_actions_values"
+                    android:entries="@array/arr_button_actions_names"
+                    android:entryValues="@array/arr_button_actions_values"
 					android:key="favButtonDT"
 					android:layout="@layout/pref_child"
 					android:persistent="true"
@@ -501,48 +533,48 @@
 				<ListPreference
 					android:defaultValue="NOTHING"
 					android:enabled="true"
-					android:entries="@array/fav_button_actions_names"
-					android:entryValues="@array/fav_button_actions_values"
+                    android:entries="@array/arr_button_actions_names"
+                    android:entryValues="@array/arr_button_actions_values"
 					android:key="favButtonLT"
 					android:layout="@layout/pref_child"
 					android:persistent="true"
 					android:selectable="true"
 					android:title="@string/pref_i_favButtonLT_title" />
 				<ListPreference
-					android:defaultValue="RELAUNCH"
+					android:defaultValue="SETTINGS"
 					android:enabled="true"
-					android:entries="@array/settings_button_actions_names"
-					android:entryValues="@array/settings_button_actions_values"
+                    android:entries="@array/arr_button_actions_names"
+                    android:entryValues="@array/arr_button_actions_values"
 					android:key="settingsButtonST"
 					android:layout="@layout/pref_child"
 					android:persistent="true"
 					android:selectable="true"
 					android:title="@string/pref_i_settingsButtonST_title" />
 				<ListPreference
-					android:defaultValue="NOTHING"
+					android:defaultValue="SETTINGS"
 					android:enabled="true"
-					android:entries="@array/settings_button_actions_names"
-					android:entryValues="@array/settings_button_actions_values"
+                    android:entries="@array/arr_button_actions_names"
+                    android:entryValues="@array/arr_button_actions_values"
 					android:key="settingsButtonDT"
 					android:layout="@layout/pref_child"
 					android:persistent="true"
 					android:selectable="true"
 					android:title="@string/pref_i_settingsButtonDT_title" />
 				<ListPreference
-					android:defaultValue="NOTHING"
+					android:defaultValue="SETTINGS"
 					android:enabled="true"
-					android:entries="@array/settings_button_actions_names"
-					android:entryValues="@array/settings_button_actions_values"
+                    android:entries="@array/arr_button_actions_names"
+                    android:entryValues="@array/arr_button_actions_values"
 					android:key="settingsButtonLT"
 					android:layout="@layout/pref_child"
 					android:persistent="true"
 					android:selectable="true"
 					android:title="@string/pref_i_settingsButtonLT_title" />
 				<ListPreference
-					android:defaultValue="RELAUNCH"
+					android:defaultValue="ADVANCED"
 					android:enabled="true"
-					android:entries="@array/advanced_button_actions_names"
-					android:entryValues="@array/advanced_button_actions_values"
+                    android:entries="@array/arr_button_actions_names"
+                    android:entryValues="@array/arr_button_actions_values"
 					android:key="advancedButtonST"
 					android:layout="@layout/pref_child"
 					android:persistent="true"
@@ -551,8 +583,8 @@
 				<ListPreference
 					android:defaultValue="NOTHING"
 					android:enabled="true"
-					android:entries="@array/advanced_button_actions_names"
-					android:entryValues="@array/advanced_button_actions_values"
+                    android:entries="@array/arr_button_actions_names"
+                    android:entryValues="@array/arr_button_actions_values"
 					android:key="advancedButtonDT"
 					android:layout="@layout/pref_child"
 					android:persistent="true"
@@ -561,18 +593,18 @@
 				<ListPreference
 					android:defaultValue="NOTHING"
 					android:enabled="true"
-					android:entries="@array/advanced_button_actions_names"
-					android:entryValues="@array/advanced_button_actions_values"
+                    android:entries="@array/arr_button_actions_names"
+                    android:entryValues="@array/arr_button_actions_values"
 					android:key="advancedButtonLT"
 					android:layout="@layout/pref_child"
 					android:persistent="true"
 					android:selectable="true"
 					android:title="@string/pref_i_advancedButtonLT_title" />
 				<ListPreference
-					android:defaultValue="RELAUNCH"
+					android:defaultValue="APPMANAGER"
 					android:enabled="true"
-					android:entries="@array/mem_button_actions_names"
-					android:entryValues="@array/mem_button_actions_values"
+                    android:entries="@array/arr_button_actions_names"
+                    android:entryValues="@array/arr_button_actions_values"
 					android:key="memButtonST"
 					android:layout="@layout/pref_child"
 					android:persistent="true"
@@ -581,8 +613,8 @@
 				<ListPreference
 					android:defaultValue="NOTHING"
 					android:enabled="true"
-					android:entries="@array/mem_button_actions_names"
-					android:entryValues="@array/mem_button_actions_values"
+                    android:entries="@array/arr_button_actions_names"
+                    android:entryValues="@array/arr_button_actions_values"
 					android:key="memButtonDT"
 					android:layout="@layout/pref_child"
 					android:persistent="true"
@@ -591,18 +623,18 @@
 				<ListPreference
 					android:defaultValue="NOTHING"
 					android:enabled="true"
-					android:entries="@array/mem_button_actions_names"
-					android:entryValues="@array/mem_button_actions_values"
+                    android:entries="@array/arr_button_actions_names"
+                    android:entryValues="@array/arr_button_actions_values"
 					android:key="memButtonLT"
 					android:layout="@layout/pref_child"
 					android:persistent="true"
 					android:selectable="true"
 					android:title="@string/pref_i_memButtonLT_title" />
 				<ListPreference
-					android:defaultValue="RELAUNCH"
+					android:defaultValue="BATTERY"
 					android:enabled="true"
-					android:entries="@array/bat_button_actions_names"
-					android:entryValues="@array/bat_button_actions_values"
+                    android:entries="@array/arr_button_actions_names"
+                    android:entryValues="@array/arr_button_actions_values"
 					android:key="batButtonST"
 					android:layout="@layout/pref_child"
 					android:persistent="true"
@@ -611,8 +643,8 @@
 				<ListPreference
 					android:defaultValue="NOTHING"
 					android:enabled="true"
-					android:entries="@array/bat_button_actions_names"
-					android:entryValues="@array/bat_button_actions_values"
+                    android:entries="@array/arr_button_actions_names"
+                    android:entryValues="@array/arr_button_actions_values"
 					android:key="batButtonDT"
 					android:layout="@layout/pref_child"
 					android:persistent="true"
@@ -621,18 +653,18 @@
 				<ListPreference
 					android:defaultValue="NOTHING"
 					android:enabled="true"
-					android:entries="@array/bat_button_actions_names"
-					android:entryValues="@array/bat_button_actions_values"
+                    android:entries="@array/arr_button_actions_names"
+                    android:entryValues="@array/arr_button_actions_values"
 					android:key="batButtonLT"
 					android:layout="@layout/pref_child"
 					android:persistent="true"
 					android:selectable="true"
 					android:title="@string/pref_i_batButtonLT_title" />
 				<ListPreference
-					android:defaultValue="RELAUNCH"
+					android:defaultValue="FAVAPP"
 					android:enabled="true"
-					android:entries="@array/appfav_button_actions_names"
-					android:entryValues="@array/appfav_button_actions_values"
+                    android:entries="@array/arr_button_actions_names"
+                    android:entryValues="@array/arr_button_actions_values"
 					android:key="appFavButtonST"
 					android:layout="@layout/pref_child"
 					android:persistent="true"
@@ -641,8 +673,8 @@
 				<ListPreference
 					android:defaultValue="NOTHING"
 					android:enabled="true"
-					android:entries="@array/appfav_button_actions_names"
-					android:entryValues="@array/appfav_button_actions_values"
+                    android:entries="@array/arr_button_actions_names"
+                    android:entryValues="@array/arr_button_actions_values"
 					android:key="appFavButtonDT"
 					android:layout="@layout/pref_child"
 					android:persistent="true"
@@ -651,13 +683,103 @@
 				<ListPreference
 					android:defaultValue="NOTHING"
 					android:enabled="true"
-					android:entries="@array/appfav_button_actions_names"
-					android:entryValues="@array/appfav_button_actions_values"
+                    android:entries="@array/arr_button_actions_names"
+                    android:entryValues="@array/arr_button_actions_values"
 					android:key="appFavButtonLT"
 					android:layout="@layout/pref_child"
 					android:persistent="true"
 					android:selectable="true"
 					android:title="@string/pref_i_appFavButtonLT_title" />
+                <ListPreference
+                        android:defaultValue="ALLAPP"
+                        android:enabled="true"
+                        android:entries="@array/arr_button_actions_names"
+                        android:entryValues="@array/arr_button_actions_values"
+                        android:key="appAllButtonST"
+                        android:layout="@layout/pref_child"
+                        android:persistent="true"
+                        android:selectable="true"
+                        android:title="@string/pref_i_appAllButtonST_title" />
+                <ListPreference
+                        android:defaultValue="NOTHING"
+                        android:enabled="true"
+                        android:entries="@array/arr_button_actions_names"
+                        android:entryValues="@array/arr_button_actions_values"
+                        android:key="appAllButtonDT"
+                        android:layout="@layout/pref_child"
+                        android:persistent="true"
+                        android:selectable="true"
+                        android:title="@string/pref_i_appAllButtonDT_title" />
+                <ListPreference
+                        android:defaultValue="NOTHING"
+                        android:enabled="true"
+                        android:entries="@array/arr_button_actions_names"
+                        android:entryValues="@array/arr_button_actions_values"
+                        android:key="appAllButtonLT"
+                        android:layout="@layout/pref_child"
+                        android:persistent="true"
+                        android:selectable="true"
+                        android:title="@string/pref_i_appAllButtonLT_title" />
+                <ListPreference
+                        android:defaultValue="LASTAPP"
+                        android:enabled="true"
+                        android:entries="@array/arr_button_actions_names"
+                        android:entryValues="@array/arr_button_actions_values"
+                        android:key="appLastButtonST"
+                        android:layout="@layout/pref_child"
+                        android:persistent="true"
+                        android:selectable="true"
+                        android:title="@string/pref_i_appLastButtonST_title" />
+                <ListPreference
+                        android:defaultValue="NOTHING"
+                        android:enabled="true"
+                        android:entries="@array/arr_button_actions_names"
+                        android:entryValues="@array/arr_button_actions_values"
+                        android:key="appLastButtonDT"
+                        android:layout="@layout/pref_child"
+                        android:persistent="true"
+                        android:selectable="true"
+                        android:title="@string/pref_i_appLastButtonDT_title" />
+                <ListPreference
+                        android:defaultValue="NOTHING"
+                        android:enabled="true"
+                        android:entries="@array/arr_button_actions_names"
+                        android:entryValues="@array/arr_button_actions_values"
+                        android:key="appLastButtonLT"
+                        android:layout="@layout/pref_child"
+                        android:persistent="true"
+                        android:selectable="true"
+                        android:title="@string/pref_i_appLastButtonLT_title" />
+                <ListPreference
+                        android:defaultValue="SEARCH"
+                        android:enabled="true"
+                        android:entries="@array/arr_button_actions_names"
+                        android:entryValues="@array/arr_button_actions_values"
+                        android:key="searchButtonST"
+                        android:layout="@layout/pref_child"
+                        android:persistent="true"
+                        android:selectable="true"
+                        android:title="@string/pref_i_searchButtonST_title" />
+                <ListPreference
+                        android:defaultValue="NOTHING"
+                        android:enabled="true"
+                        android:entries="@array/arr_button_actions_names"
+                        android:entryValues="@array/arr_button_actions_values"
+                        android:key="searchButtonDT"
+                        android:layout="@layout/pref_child"
+                        android:persistent="true"
+                        android:selectable="true"
+                        android:title="@string/pref_i_searchButtonDT_title" />
+                <ListPreference
+                        android:defaultValue="NOTHING"
+                        android:enabled="true"
+                        android:entries="@array/arr_button_actions_names"
+                        android:entryValues="@array/arr_button_actions_values"
+                        android:key="searchButtonLT"
+                        android:layout="@layout/pref_child"
+                        android:persistent="true"
+                        android:selectable="true"
+                        android:title="@string/pref_i_searchButtonLT_title" />
 			</PreferenceScreen>
 			<PreferenceScreen android:title="@string/pref_s_launcherSettings_title" >
 				<CheckBoxPreference
@@ -862,6 +984,16 @@
 					android:selectable="true"
 					android:summary="@string/pref_i_appFavSize_sum"
 					android:title="@string/pref_i_appFavSize_title" />
+                <EditTextPreference
+                        android:defaultValue="30"
+                        android:enabled="true"
+                        android:key="opdsSize"
+                        android:layout="@layout/pref_child"
+                        android:numeric="integer"
+                        android:persistent="true"
+                        android:selectable="true"
+                        android:summary="@string/pref_i_opdsSize_sum"
+                        android:title="@string/pref_i_opdsSize_title" />
 			</PreferenceScreen>
             <PreferenceScreen android:title="@string/pref_s_screenDropBox_title" >
                 <EditTextPreference
@@ -902,32 +1034,20 @@
                         android:persistent="true"
                         android:selectable="true"
                         android:title="@string/pref_i_dropboxSetButton_title" />
+                <CheckBoxPreference
+                        android:defaultValue="false"
+                        android:key="showDropbox"
+                        android:layout="@layout/pref_child"
+                        android:persistent="true"
+                        android:title="@string/pref_i_showDropbox_title" />
             </PreferenceScreen>
             <PreferenceScreen android:title="@string/pref_s_screenOPDS_title" >
-                <EditTextPreference
-                        android:defaultValue="none"
-                        android:key="OPDS catalog"
-                        android:layout="@layout/pref_child"
-                        android:summary="@string/pref_i_OPDS_catalog_info"
-                        android:title="@string/pref_i_OPDS_catalog" />
                 <EditTextPreference
                         android:defaultValue="none"
                         android:key="Local folder OPDS"
                         android:layout="@layout/pref_child"
                         android:summary="@string/pref_i_Local_folder_OPDS_info"
                         android:title="@string/pref_i_Local_folder_OPDS" />
-                <EditTextPreference
-                        android:defaultValue=""
-                        android:key="OPDS login"
-                        android:layout="@layout/pref_child"
-                        android:summary="@string/pref_i_OPDS_login_info"
-                        android:title="@string/pref_i_OPDS_login" />
-                <EditTextPreference
-                        android:defaultValue=""
-                        android:key="OPDS password"
-                        android:layout="@layout/pref_child"
-                        android:summary="@string/pref_i_OPDS_password_info"
-                        android:title="@string/pref_i_OPDS_password" />
                 <ListPreference
                         android:defaultValue="NOTHING"
                         android:enabled="true"
