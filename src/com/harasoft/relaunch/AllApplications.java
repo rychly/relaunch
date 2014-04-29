@@ -35,7 +35,7 @@ public class AllApplications extends Activity {
 
 	ReLaunchApp app;
 	HashMap<String, Drawable> icons;
-	Boolean rereadOnStart = false;
+	//Boolean rereadOnStart = false;
 	List<String> itemsArray = new ArrayList<String>();
 	AppAdapter adapter;
 	GridView lv;
@@ -44,6 +44,7 @@ public class AllApplications extends Activity {
 	SharedPreferences prefs;
 	boolean addSView = true;
 	int gcols = 2;
+    LayoutInflater vi;
 
 
 	static class ViewHolder {
@@ -66,9 +67,11 @@ public class AllApplications extends Activity {
 			ViewHolder holder;
 			View v = convertView;
 			if (v == null) {
-				LayoutInflater vi = (LayoutInflater) getApplicationContext()
-						.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+				//LayoutInflater vi = (LayoutInflater) getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 				v = vi.inflate(R.layout.applications_item, null);
+                if(v == null){
+                    return null;
+                }
 				holder = new ViewHolder();
 				holder.tv = (TextView) v.findViewById(R.id.app_name);
 				holder.iv = (ImageView) v.findViewById(R.id.app_icon);
@@ -95,6 +98,7 @@ public class AllApplications extends Activity {
 		try {
 			appLruMax = Integer.parseInt(prefs.getString("appLruSize", "30"));
 		} catch (NumberFormatException e) {
+            //emply
 		}
 		app.writeFile("app_last", ReLaunch.APP_LRU_FILE, appLruMax, ":");
 	}
@@ -104,6 +108,7 @@ public class AllApplications extends Activity {
 		try {
 			appFavMax = Integer.parseInt(prefs.getString("appFavSize", "30"));
 		} catch (NumberFormatException e) {
+            //emply
 		}
 		app.writeFile("app_favorites", ReLaunch.APP_FAV_FILE, appFavMax, ":");
 	}
@@ -161,10 +166,12 @@ public class AllApplications extends Activity {
 
 		prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
 		app = ((ReLaunchApp) getApplicationContext());
-		app.setFullScreenIfNecessary(this);
-		setContentView(R.layout.all_applications);
+        if (app != null) {
+            app.setFullScreenIfNecessary(this);
+        }
+        setContentView(R.layout.all_applications);
 		icons = app.getIcons();
-
+        vi = (LayoutInflater) getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		// Create applications list
 		final Intent data = getIntent();
 		if (data.getExtras() == null) {
@@ -193,7 +200,7 @@ public class AllApplications extends Activity {
 			gcols = Integer.parseInt(cols);
 
 		}
-		((ImageButton) findViewById(R.id.app_btn))
+		(findViewById(R.id.app_btn))
 				.setOnClickListener(new View.OnClickListener() {
 					public void onClick(View v) {
 						finish();
@@ -332,7 +339,7 @@ public class AllApplications extends Activity {
         EinkScreen.PrepareController(null, false);
 		if (listName.equals("app_all"))
 			rereadAppList();
-		app.generalOnResume(TAG, this);
+		app.generalOnResume(TAG);
 	}
 
 	@Override
@@ -387,8 +394,10 @@ public class AllApplications extends Activity {
 		if (item.getItemId() == CNTXT_MENU_CANCEL)
 			return true;
 
-		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item
-				.getMenuInfo();
+		AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
+        if(info == null){
+            return false;
+        }
 		final int pos = info.position;
 		String it = itemsArray.get(pos);
 
@@ -439,11 +448,15 @@ public class AllApplications extends Activity {
 			break;
 		case CNTXT_MENU_UNINSTALL:
 			PackageManager pm = getPackageManager();
+            if(pm == null){
+                return false;
+            }
 			PackageInfo pi = null;
 			String[] itp = it.split("\\%");
 			try {
 				pi = pm.getPackageInfo(itp[0], 0);
 			} catch (Exception e) {
+                //emply
 			}
 			if (pi == null)
 				// "PackageInfo not found for label \"" + it + "\""
@@ -487,7 +500,7 @@ public class AllApplications extends Activity {
 			rereadAppList();
 			break;
 		default:
-			return;
+			//return;
 		}
 	}
 }

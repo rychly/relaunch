@@ -281,7 +281,7 @@ public class Editor extends Activity implements TextWatcher {
 	@Override
 	protected void onResume() {
 		super.onResume();
-		app.generalOnResume(TAG, this);
+		app.generalOnResume(TAG);
 	}
 
 	public void afterTextChanged(Editable s) {

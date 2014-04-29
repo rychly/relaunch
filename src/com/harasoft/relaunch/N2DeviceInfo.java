@@ -42,8 +42,7 @@ public class N2DeviceInfo {
 				&& (MODEL.contentEquals("NOOK") || MODEL.contentEquals("BNRV300") || MODEL.contentEquals("BNRV350"))
 				&& DEVICE.toLowerCase().contentEquals("zoom2");
 		EINK_NOOK_120 = EINK_NOOK && (MODEL.contentEquals("BNRV300") || MODEL.contentEquals("BNRV350"));
-		EINK_SONY = MANUFACTURER.toLowerCase().contentEquals("sony")
-				&& MODEL.contentEquals("PRS-T1");
+		EINK_SONY = MANUFACTURER.toLowerCase().contentEquals("sony")&& MODEL.contentEquals("PRS-T1");
         EINK_ONYX = (MODEL.toLowerCase().contentEquals("i63sml_hd") && DEVICE.toLowerCase().contentEquals("i63sml_hd")) ||
                     (MODEL.toLowerCase().contentEquals("i63ml_hd") && DEVICE.toLowerCase().contentEquals("i63ml_hd")) ||
                     (MODEL.toLowerCase().contentEquals("i63sl_hd") && DEVICE.toLowerCase().contentEquals("i63sl_hd"));

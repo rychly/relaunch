@@ -366,10 +366,8 @@ public class ExtendedInfoBook extends Activity {
                                 String temp = name;
                                 viewTxt.append(getString(R.string.srt_info_book_sequence_info));//"Серия:\n");
                                 if(number.length() > 0){
-                                    temp += "\", №";
+                                    temp += ", №";
                                     temp += number;
-                                }else{
-                                    temp += "\"";
                                 }
                                 text = new SpannableString(temp+"\n");
                                 text.setSpan(new RelativeSizeSpan(1.2f), 0, text.length(), Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);

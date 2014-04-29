@@ -268,12 +268,10 @@ public class SearchActivity extends Activity {
 					Collections.sort(searchResults, o1c);
 				}
 				app.setList("searchResults", searchResults);
-				Intent intent = new Intent(SearchActivity.this,
-						ResultsActivity.class);
+				Intent intent = new Intent(SearchActivity.this,ResultsActivity.class);
 				intent.putExtra("list", "searchResults");
 				// "Search results"
-				intent.putExtra("title",
-						getResources().getString(R.string.jv_search_results));
+				intent.putExtra("title",getResources().getString(R.string.jv_search_results));
 				intent.putExtra("rereadOnStart", false);
 				intent.putExtra("total", filesCount);
 				startActivity(intent);
@@ -399,7 +397,7 @@ public class SearchActivity extends Activity {
 		super.onResume();
 		searchAs.setSelection(prefs.getInt("searchAs", 0), false);
 		searchIn.setSelection(prefs.getInt("searchIn", 0), false);
-		app.generalOnResume(TAG, this);
+		app.generalOnResume(TAG);
 	}
 
 	@Override

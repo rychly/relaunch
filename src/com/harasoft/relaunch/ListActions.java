@@ -68,7 +68,7 @@ public class ListActions {
 		createItemsArray();
 		if (itemsArray.size() > 0) {
 			// exts dirs sorter
-			final class ExtsComparator implements java.util.Comparator<String> {
+			final class ExtsComparator implements Comparator<String> {
 				public int compare(String a, String b) {
 					if (a == null && b == null)
 						return 0;
@@ -161,12 +161,9 @@ public class ListActions {
 		String fullName = item.get("dname") + "/" + item.get("fname");
 		if (item.get("type").equals("dir")) {
 			Intent intent = new Intent(act, ReLaunch.class);
-			intent.putExtra("dirviewer", false);
 			intent.putExtra("start_dir", fullName);
 			intent.putExtra("home", ReLaunch.useHome);
 			intent.putExtra("home1", ReLaunch.useHome1);
-			intent.putExtra("shop", ReLaunch.useShop);
-			intent.putExtra("library", ReLaunch.useLibrary);
 			act.startActivityForResult(intent, ReLaunch.DIR_ACT);
 		} else {
 			String fileName = item.get("fname");

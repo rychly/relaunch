@@ -20,9 +20,8 @@ public class BooksBase {
 	DbHelper dbHelper;
 	public static SQLiteDatabase db;
 
-	 private Pattern purgeBracketsPattern = Pattern.compile("\\[[\\s\\.\\-_]*\\]");
-//	private Pattern purgeBracketsPattern = Pattern
-//			.compile("\\[[\\[\\]\\s\\.\\-_]*\\]");
+    // private Pattern purgeBracketsPattern = Pattern.compile("\\[[\\s\\.\\-_]*\\]");
+	 private Pattern purgeBracketsPattern = Pattern.compile("\\[[\\[\\]\\s\\.\\-_]*\\]");
 
 	private class DbHelper extends SQLiteOpenHelper {
 		final static int VERSION = 1;
@@ -39,7 +38,8 @@ public class BooksBase {
 		public void onCreate(SQLiteDatabase db) {
 			db.execSQL("create table if not exists BOOKS ("
 					+ "ID integer primary key autoincrement, "
-					+ "FILE text unique, " + "TITLE text default '', "
+					+ "FILE text unique, "
+                    + "TITLE text default '', "
 					+ "FIRSTNAME text default '', "
 					+ "LASTNAME text default '', " + "SERIES text default '', "
 					+ "NUMBER text default '')");
@@ -163,18 +163,15 @@ public class BooksBase {
 
 	public String getEbookName(String fileName, String format) {
 		EBook eBook;
-		String file = fileName.substring(fileName.lastIndexOf('/') + 1,
-				fileName.length());
-		if ((!file.endsWith("fb2")) && (!file.endsWith("fb2.zip"))
-				&& (!file.endsWith("epub")))
+		String file = fileName.substring(fileName.lastIndexOf('/') + 1,fileName.length());
+		if ((!file.endsWith("fb2")) && (!file.endsWith("fb2.zip"))&& (!file.endsWith("epub")))
 			return file;
 		eBook = getBookByFileName(fileName);
 		if (!eBook.isOk) {
 			Parser parser = new InstantParser();
 			eBook = parser.parse(fileName);
 			if (eBook.isOk) {
-				if ((eBook.sequenceNumber != null)
-						&& (eBook.sequenceNumber.length() == 1))
+				if ((eBook.sequenceNumber != null)&& (eBook.sequenceNumber.length() == 1))
 					eBook.sequenceNumber = "0" + eBook.sequenceNumber;
 				addBook(eBook);
 			}

@@ -16,9 +16,7 @@ import android.widget.Toast;
 
 import java.io.*;
 import java.nio.channels.FileChannel;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public class ReLaunchApp extends Application {
 	final String TAG = "ReLaunchApp";
@@ -69,7 +67,6 @@ public class ReLaunchApp extends Application {
 	private HashMap<String, Drawable> icons;
 	private List<HashMap<String, String>> readers;
 	private List<String> apps;
-    //SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
 
 	public BooksBase dataBase;
 
@@ -120,7 +117,7 @@ public class ReLaunchApp extends Application {
 		}
 		return rc;
 	}
-
+    /*
 	public List<String> extNames() {
 		List<String> rc = new ArrayList<String>();
 		for (HashMap<String, String> r : readers) {
@@ -130,7 +127,7 @@ public class ReLaunchApp extends Application {
 			}
 		}
 		return rc;
-	}
+	}   */
 
 	/*
 	 * Misc lists management (list is identified by name)
@@ -153,35 +150,10 @@ public class ReLaunchApp extends Application {
 	public void setDefault(String name) {
 		// Set list default
 		List<String[]> nl = new ArrayList<String[]>();
-		if (name.equals("lastOpened")) {
+		/*if (name.equals("lastOpened")) {
 		} else if (name.equals("favorites")) {
-		}
+		}  */
 		m.put(name, nl);
-	}
-
-	// dump all lists to log (debug)
-	public void dumpLists() {
-		/*
-		 * for (String k : m.keySet()) { Log.d(TAG, "LIST: \"" + k + "\""); for
-		 * (String[] n : m.get(k)) Log.d(TAG, "    \"" + n[0] + "\"; \"" + n[1]
-		 * + "\""); }
-		 */
-	}
-
-	// dump specified lists to log (debug)
-	public void dumpList(String name) {
-		/*
-		 * Log.d(TAG, "LIST: \"" + name + "\""); for (String[] n : m.get(name))
-		 * Log.d(TAG, "    \"" + n[0] + "\"; \"" + n[1] + "\"");
-		 */
-	}
-
-	// dump lists to log (debug)
-	public void dumpList(String name, List<String[]> l) {
-		/*
-		 * Log.d(TAG, "LIST: \"" + name + "\""); for (String[] n : l) Log.d(TAG,
-		 * "    \"" + n[0] + "\"; \"" + n[1] + "\"");
-		 */
 	}
 
 	// save list
@@ -192,6 +164,7 @@ public class ReLaunchApp extends Application {
 			try {
 				favMax = Integer.parseInt(prefs.getString("favSize", "30"));
 			} catch (NumberFormatException e) {
+                //emply
 			}
 			this.writeFile("favorites", ReLaunch.FAV_FILE, favMax);
 		}
@@ -200,6 +173,7 @@ public class ReLaunchApp extends Application {
 			try {
 				lruMax = Integer.parseInt(prefs.getString("lruSize", "30"));
 			} catch (NumberFormatException e) {
+                //emply
 			}
 			this.writeFile("lastOpened", ReLaunch.LRU_FILE, lruMax);
 		}
@@ -209,6 +183,7 @@ public class ReLaunchApp extends Application {
 				appLruMax = Integer.parseInt(prefs
 						.getString("appLruSize", "30"));
 			} catch (NumberFormatException e) {
+                //emply
 			}
 			this.writeFile("app_last", ReLaunch.APP_LRU_FILE, appLruMax, ":");
 		}
@@ -218,9 +193,9 @@ public class ReLaunchApp extends Application {
 				appFavMax = Integer.parseInt(prefs
 						.getString("appFavSize", "30"));
 			} catch (NumberFormatException e) {
+                //emply
 			}
-			this.writeFile("app_favorites", ReLaunch.APP_FAV_FILE, appFavMax,
-					":");
+			this.writeFile("app_favorites", ReLaunch.APP_FAV_FILE, appFavMax, ":");
 		}
 		if (listName.equals("history")) {
 			List<String[]> h = new ArrayList<String[]>();
@@ -313,13 +288,13 @@ public class ReLaunchApp extends Application {
 		removeFromList_internal(listName, dr, fn);
 	}
 
-	public void removeFromList(String listName, String fullName) {
+	/*public void removeFromList(String listName, String fullName) {
 		File f = new File(fullName);
 		if (!f.exists())
 			return;
 		removeFromList_internal(listName, f.getParent(), f.getName());
 
-	}
+	} */
 
 	public void removeFromList_internal(String listName, String dr, String fn) {
 		if (!m.containsKey(listName))
@@ -339,10 +314,10 @@ public class ReLaunchApp extends Application {
 			return false;
 		List<String[]> resultList = m.get(listName);
 
-		for (int i = 0; i < resultList.size(); i++) {
-			if (resultList.get(i)[0].equals(dr) && resultList.get(i)[1].equals(fn))
-				return true;
-		}
+        for (String[] aResultList : resultList) {
+            if (aResultList[0].equals(dr) && aResultList[1].equals(fn))
+                return true;
+        }
 		return false;
 	}
 
@@ -356,18 +331,19 @@ public class ReLaunchApp extends Application {
 		try {
 			fis = openFileInput(fileName);
 		} catch (FileNotFoundException e) {
+            //emply
 		}
 		if (fis == null)
 			return false;
 		else {
-			InputStreamReader insr = null;
+			InputStreamReader insr;
 			try {
 				insr = new InputStreamReader(fis, "utf8");
 			} catch (UnsupportedEncodingException e) {
 				return false;
 			}
 			BufferedReader bufr = new BufferedReader(insr, FileBufferSize);
-			String l = new String();
+			String l;
 			while (true) {
 				try {
 					l = bufr.readLine();
@@ -385,6 +361,7 @@ public class ReLaunchApp extends Application {
 				insr.close();
 				fis.close();
 			} catch (IOException e) {
+                //emply
 			}
 		}
 		return true;
@@ -395,13 +372,12 @@ public class ReLaunchApp extends Application {
 		writeFile(listName, fileName, maxEntries, "/");
 	}
 
-	public void writeFile(String listName, String fileName, int maxEntries,
-			String delimiter) {
+	public void writeFile(String listName, String fileName, int maxEntries, String delimiter) {
 		if (!m.containsKey(listName))
 			return;
 
 		List<String[]> resultList = m.get(listName);
-		FileOutputStream fos = null;
+		FileOutputStream fos;
 		try {
 			fos = openFileOutput(fileName, Context.MODE_PRIVATE);
 		} catch (FileNotFoundException e) {
@@ -414,11 +390,13 @@ public class ReLaunchApp extends Application {
 			try {
 				fos.write(line.getBytes());
 			} catch (IOException e) {
+                //emply
 			}
 		}
 		try {
 			fos.close();
 		} catch (IOException e) {
+            //emply
 		}
 	}
 
@@ -443,17 +421,26 @@ public class ReLaunchApp extends Application {
 			try {
 				rc = f.delete();
 			} catch (SecurityException e) {
+                //emply
 			}
 		}
 		return rc;
 	}
 
 	// Remove directory
+    /*public boolean removeDirectory(String fullname) {
+        File f = new File(fullname);
+        return removeDirectory(f.getParent(), f.getName());
+    }*/
+
 	public boolean removeDirectory(String dr, String fn) {
 		boolean rc = false;
 		String dname = dr + "/" + fn;
 		File d = new File(dname);
 		File[] allEntries = d.listFiles();
+        if(allEntries == null){
+            return false;
+        }
 		for (File f : allEntries) {
 			if (f.isDirectory()) {
 				if (!removeDirectory(dname, f.getName()))
@@ -466,26 +453,41 @@ public class ReLaunchApp extends Application {
 		try {
 			rc = d.delete();
 		} catch (SecurityException e) {
+            //emply
 		}
 		return rc;
 	}
+    // универсальный вход для удаления
+    public boolean removeDirAndFile(String dir, String file) {
+        String dname = dir + "/" + file;
+        File d = new File(dname);
+        if (d.isDirectory()) {
+            if (!removeDirectory(dir, file))
+                return false;
+        } else {
+            if (!removeFile(dir, file))
+                return false;
+        }
+        return true;
+    }
 
 	//Copy file src to dst
 	public boolean copyFile(String from, String to, boolean rewrite) {
 		File srcFile = new File(from);
 		File dstFile = new File(to);
-		FileChannel src = null;
-		FileChannel dst = null;
+		FileChannel src;
+		FileChannel dst;
 
 		if ((!srcFile.canRead()) || ((dstFile.exists()) && (!rewrite)))
 			return false;
 		try {
-			dstFile.createNewFile();
-			src = new FileInputStream(srcFile).getChannel();
-			dst = new FileOutputStream(dstFile).getChannel();
-			dst.transferFrom(src, 0, src.size());
-			src.close();
-			dst.close();
+			if(dstFile.createNewFile()) {
+                src = new FileInputStream(srcFile).getChannel();
+                dst = new FileOutputStream(dstFile).getChannel();
+                dst.transferFrom(src, 0, src.size());
+                src.close();
+                dst.close();
+            }
 		} catch (IOException e) {
 			return false;
 		}
@@ -531,24 +533,25 @@ public class ReLaunchApp extends Application {
 	
 	public boolean createDir(String dst) {
 		File dir = new File(dst);
-		return dir.mkdir();
+		return dir.mkdirs();
 	}
 	
 	// common utility - get intent by label, null if not found
 	public Intent getIntentByLabel(String label) {
 		String[] labelp = label.split("\\%");
-		Intent i = new Intent();
-		i.setComponent(new ComponentName(labelp[0], labelp[1]));
-		i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-		return i;
+        if(labelp.length > 1 && labelp[0] != null && labelp[1] != null) {
+            Intent i = new Intent();
+            i.setComponent(new ComponentName(labelp[0], labelp[1]));
+            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            return i;
+        }
+        return null;
 	}
 
 	// common utility - return intent to launch reader by reader name and full
 	// file name. Null if not found
 	public Intent launchReader(String name, String file) {
 		String re[] = name.split(":");
-        Log.i("=====================", "---------------- name = " + name);
-        Log.i("=====================", "---------------- file = " + file);
 		if (re.length == 2 && re[0].equals("Intent")) {
 			Intent i = new Intent();
 			i.setAction(Intent.ACTION_VIEW);
@@ -565,14 +568,11 @@ public class ReLaunchApp extends Application {
 			Intent i = getIntentByLabel(name);
 			if (i == null)
 				// "Activity \"" + name + "\" not found!"
-				Toast.makeText(
-						this,
-						getResources().getString(R.string.jv_rla_activity)
+				Toast.makeText(this,getResources().getString(R.string.jv_rla_activity)
 								+ " \""
 								+ name
 								+ "\" "
-								+ getResources().getString(
-										R.string.jv_rla_not_found),
+								+ getResources().getString(R.string.jv_rla_not_found),
 						Toast.LENGTH_SHORT).show();
 			else {
 				i.setAction(Intent.ACTION_VIEW);
@@ -591,7 +591,7 @@ public class ReLaunchApp extends Application {
 		}
 		return null;
 	}
-
+ /*
 	// compare by second element of String[]
 	public class o1Comparator implements java.util.Comparator<String[]> {
 		public int compare(String[] o1, String[] o2) {
@@ -605,11 +605,10 @@ public class ReLaunchApp extends Application {
 
 	public o1Comparator getO1Comparator() {
 		return new o1Comparator();
-	}
+	} */
 
 	// FILTER
-	public boolean filterFile1(String dname, String fname, Integer method,
-			String value) {
+	public boolean filterFile1(String dname, String fname, Integer method, String value) {
 		if (method == FLT_STARTS)
 			return fname.startsWith(value);
 		else if (method == FLT_ENDS)
@@ -638,6 +637,7 @@ public class ReLaunchApp extends Application {
 				try {
 					filtMethod = Integer.parseInt(f[0]);
 				} catch (NumberFormatException e) {
+                    //emply
 				}
 				if (filters_and) {
 					// AND all filters
@@ -649,7 +649,7 @@ public class ReLaunchApp extends Application {
 						return true;
 				}
 			}
-			return filters_and ? true : false;
+			return filters_and;
 		} else
 			return true;
 	}
@@ -685,6 +685,7 @@ public class ReLaunchApp extends Application {
 		try {
 			vers = getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
 		} catch (Exception e) {
+            //emply
 		}
 		AlertDialog.Builder builder = new AlertDialog.Builder(a);
 		WebView wv = new WebView(a);
@@ -744,7 +745,7 @@ public class ReLaunchApp extends Application {
 		}
 	}
 
-	public void generalOnResume(String name, Activity a) {
+	public void generalOnResume(String name) {
 		Log.d(TAG, "--- onResume(" + name + ")");
 	}
 
@@ -772,18 +773,14 @@ public class ReLaunchApp extends Application {
 		}
 		String src = fromDir.getAbsolutePath() + "/shared_prefs/com.harasoft.relaunch_preferences.xml";
 		String dst = toDir.getAbsolutePath() + "/shared_prefs/com.harasoft.relaunch_preferences.xml";
-		if (!copyFile(src, dst, true))
-			return false;
-		return true;
-	}
+        return copyFile(src, dst, true);
+    }
 
 	public boolean isStartDir(String dir) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
 		String startDirs = prefs.getString("startDir", "/sdcard,/media/My Files");
-		if (startDirs.contains(dir))
-			return true;
-		return false;
-	}
+        return startDirs.contains(dir);
+    }
 
 	public void setStartDir(String dir) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
@@ -800,5 +797,46 @@ public class ReLaunchApp extends Application {
 		editor.putString("startDir", oldStart + "," + dir);
 		editor.commit();
 	}
+    public void showToast(String msg) {
+        Toast error = Toast.makeText(this, msg, Toast.LENGTH_LONG);
+        error.show();
+    }
+    // автоматический подбор числа колонок
+    public int getAutoColsNum(List<HashMap<String, String>> itemsArray, String polName, String columnsAlgIntensity) {
+        // implementation - via percentiles len
+        int auto_cols_num = 1;
+        ArrayList<Integer> tmp = new ArrayList<Integer>();
 
+        if (itemsArray.size() > 0) {
+            int factor ;
+            for (HashMap<String, String> anItemsArray : itemsArray) {
+                tmp.add(anItemsArray.get(polName).length());
+            }
+            String[] spat = columnsAlgIntensity.split("[\\s\\:]+");
+            int quantile = Integer.parseInt(spat[0]);
+            factor = Percentile(tmp, quantile);
+            for (int i = 1; i < spat.length; i = i + 2) {
+                try {
+                    double fval = Double.parseDouble(spat[i]);
+                    int cval = Integer.parseInt(spat[i + 1]);
+                    if (factor <= fval) {
+                        auto_cols_num = cval;
+                        break;
+                    }
+                } catch (Exception e) {
+                    // emply
+                }
+            }
+        }
+        if (auto_cols_num > itemsArray.size())
+            auto_cols_num = itemsArray.size();
+        return auto_cols_num;
+    }
+    private int Percentile(ArrayList<Integer> values, int Quantile)
+    // not fully "mathematical proof", but not too difficult and working
+    {
+        Collections.sort(values);
+        int index = (values.size() * Quantile) / 100;
+        return values.get(index);
+    }
 }

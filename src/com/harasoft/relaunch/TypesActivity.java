@@ -9,7 +9,6 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -29,7 +28,7 @@ public class TypesActivity extends Activity {
 	final String TAG = "Types";
 	final String INTENT_PREFIX = "Intent:";
 	HashMap<String, Drawable> icons;
-	PackageManager pm;
+
 	List<String> applicationsArray;
 	CharSequence[] applications;
 	CharSequence[] happlications;
@@ -57,12 +56,10 @@ public class TypesActivity extends Activity {
 			return 0;
 		}
 
-		public View getView(final int position, View convertView,
-				ViewGroup parent) {
+		public View getView(final int position, View convertView, ViewGroup parent) {
 			View v = convertView;
 			if (v == null) {
-				LayoutInflater vi = (LayoutInflater) getApplicationContext()
-						.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+				LayoutInflater vi = (LayoutInflater) getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 				v = vi.inflate(R.layout.types_layout, null);
 			}
 			final HashMap<String, String> item = itemsArray.get(position);
@@ -72,12 +69,10 @@ public class TypesActivity extends Activity {
 				// Setting up button
 				ImageButton upBtn = (ImageButton) v.findViewById(R.id.types_up);
 				if (position == 0) {
-					upBtn.setImageDrawable(getResources().getDrawable(
-							android.R.drawable.checkbox_off_background));
+					upBtn.setImageDrawable(getResources().getDrawable(android.R.drawable.checkbox_off_background));
 					upBtn.setEnabled(false);
 				} else {
-					upBtn.setImageDrawable(getResources().getDrawable(
-							R.drawable.ci_arrowup));
+					upBtn.setImageDrawable(getResources().getDrawable(R.drawable.ci_arrowup));
 					upBtn.setEnabled(true);
 				}
 				upBtn.setOnClickListener(new View.OnClickListener() {
@@ -90,15 +85,12 @@ public class TypesActivity extends Activity {
 				});
 
 				// Setting down button
-				ImageButton downBtn = (ImageButton) v
-						.findViewById(R.id.types_down);
+				ImageButton downBtn = (ImageButton) v.findViewById(R.id.types_down);
 				if (position == (itemsArray.size() - 1)) {
-					downBtn.setImageDrawable(getResources().getDrawable(
-							android.R.drawable.checkbox_off_background));
+					downBtn.setImageDrawable(getResources().getDrawable(android.R.drawable.checkbox_off_background));
 					downBtn.setEnabled(false);
 				} else {
-					downBtn.setImageDrawable(getResources().getDrawable(
-							R.drawable.ci_arrowdown));
+					downBtn.setImageDrawable(getResources().getDrawable(R.drawable.ci_arrowdown));
 					downBtn.setEnabled(true);
 				}
 				downBtn.setOnClickListener(new View.OnClickListener() {
@@ -111,8 +103,7 @@ public class TypesActivity extends Activity {
 				});
 
 				// Setting remove button
-				ImageButton rmBtn = (ImageButton) v
-						.findViewById(R.id.types_delete);
+				ImageButton rmBtn = (ImageButton) v.findViewById(R.id.types_delete);
 				rmBtn.setEnabled(itemsArray.size() > 1);
 				rmBtn.setOnClickListener(new View.OnClickListener() {
 					public void onClick(View v) {
@@ -122,8 +113,7 @@ public class TypesActivity extends Activity {
 				});
 
 				// Setting extension title
-				TextView ext_title = (TextView) v
-						.findViewById(R.id.types_ext_title);
+				TextView ext_title = (TextView) v.findViewById(R.id.types_ext_title);
 				// "Suffix (" + (position+1) + "/" + (itemsArray.size()) + ")"
 				ext_title.setText(getResources().getString(
 						R.string.jv_types_suffix)
@@ -154,8 +144,7 @@ public class TypesActivity extends Activity {
 								new DialogInterface.OnClickListener() {
 									public void onClick(DialogInterface dialog,
 											int whichButton) {
-										String value = input.getText()
-												.toString();
+										String value = String.valueOf(input.getText());
 										if (value.equals(""))
 											// "Can't be empty!"
 											Toast.makeText(
@@ -197,12 +186,11 @@ public class TypesActivity extends Activity {
 				} else {
 					appName.setText(app);
 				}
-				if (icons.containsKey(app))
-					iv.setImageDrawable(icons.get(app));
-				else
-					iv.setImageDrawable(getResources().getDrawable(
-							R.drawable.icon));
-
+				if (icons.containsKey(app)) {
+                    iv.setImageDrawable(icons.get(app));
+                }else {
+                    iv.setImageDrawable(getResources().getDrawable(R.drawable.icon));
+                }
 				appName.setOnClickListener(new View.OnClickListener() {
 
 					public void onClick(View v) {
@@ -261,12 +249,10 @@ public class TypesActivity extends Activity {
 										builder3.setTitle(getResources()
 												.getString(
 														R.string.jv_types_intent_type));
-										final EditText input = new EditText(
-												cntx);
+										final EditText input = new EditText(cntx);
 										String v = item.get("rdr");
 										if (v.startsWith(INTENT_PREFIX))
-											v = v.substring(INTENT_PREFIX
-													.length());
+											v = v.substring(INTENT_PREFIX.length());
 										else
 											v = "application/";
 										input.setText(v);
@@ -279,9 +265,7 @@ public class TypesActivity extends Activity {
 													public void onClick(
 															DialogInterface dialog,
 															int whichButton) {
-														String value = input
-																.getText()
-																.toString();
+														String value = String.valueOf(input.getText());
 														if (value.equals(""))
 															// "Can't be empty!"
 															Toast.makeText(
@@ -304,10 +288,7 @@ public class TypesActivity extends Activity {
 												});
 
 										// "Cancel"
-										builder3.setNegativeButton(
-												getResources()
-														.getString(
-																R.string.app_cancel),
+										builder3.setNegativeButton(getResources().getString(R.string.app_cancel),
 												new DialogInterface.OnClickListener() {
 													public void onClick(
 															DialogInterface dialog,
@@ -321,16 +302,12 @@ public class TypesActivity extends Activity {
 								});
 
 						// "Cancel"
-						builder1.setNegativeButton(
-								getResources().getString(
-										R.string.app_cancel),
+						builder1.setNegativeButton(getResources().getString(R.string.app_cancel),
 								new DialogInterface.OnClickListener() {
-									public void onClick(DialogInterface dialog,
-											int which) {
+									public void onClick(DialogInterface dialog, int which) {
 										dialog.dismiss();
 									}
 								});
-
 						builder1.show();
 					}
 				});
@@ -429,6 +406,6 @@ public class TypesActivity extends Activity {
 	@Override
 	protected void onResume() {
 		super.onResume();
-		app.generalOnResume(TAG, this);
+		app.generalOnResume(TAG);
 	}
 }

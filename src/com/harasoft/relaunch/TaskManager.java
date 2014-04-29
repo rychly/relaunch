@@ -126,7 +126,7 @@ public class TaskManager extends Activity {
 	HashMap<Integer, PInfo> newPinfo;
 
 
-	public class cpuComparator implements java.util.Comparator<Integer> {
+	public class cpuComparator implements Comparator<Integer> {
 		public int compare(Integer o1, Integer o2) {
 			PInfo p1 = pinfo.get(o1);
 			PInfo p2 = pinfo.get(o2);
@@ -146,7 +146,7 @@ public class TaskManager extends Activity {
 		}
 	}
 
-	public class sizeComparator implements java.util.Comparator<Integer> {
+	public class sizeComparator implements Comparator<Integer> {
 		public int compare(Integer o1, Integer o2) {
 			PInfo p1 = pinfo.get(o1);
 			PInfo p2 = pinfo.get(o2);
@@ -162,7 +162,7 @@ public class TaskManager extends Activity {
 		}
 	}
 
-	public class abcComparator implements java.util.Comparator<Integer> {
+	public class abcComparator implements Comparator<Integer> {
 		public int compare(Integer o1, Integer o2) {
 			PInfo p1 = pinfo.get(o1);
 			PInfo p2 = pinfo.get(o2);
@@ -616,13 +616,13 @@ public class TaskManager extends Activity {
 		((TextView) dialog.findViewById(R.id.tm1_name)).setText(p.name);
 		((TextView) dialog.findViewById(R.id.tm1_extra)).setText(p.extra);
 		((Button) dialog.findViewById(R.id.tm1_ok))
-				.setOnClickListener(new View.OnClickListener() {
+				.setOnClickListener(new OnClickListener() {
 					public void onClick(View v) {
 						dialog.dismiss();
 					}
 				});
 		Button killBtn = (Button) dialog.findViewById(R.id.tm1_kill);
-		killBtn.setOnClickListener(new View.OnClickListener() {
+		killBtn.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				try {
 					ActivityManager am = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
@@ -687,13 +687,13 @@ public class TaskManager extends Activity {
 				.setText(p.clientLabel);
 		((TextView) dialog.findViewById(R.id.tm2_clientd)).setText(p.descr);
 		((Button) dialog.findViewById(R.id.tm2_ok))
-				.setOnClickListener(new View.OnClickListener() {
+				.setOnClickListener(new OnClickListener() {
 					public void onClick(View v) {
 						dialog.dismiss();
 					}
 				});
 		Button killBtn = (Button) dialog.findViewById(R.id.tm2_kill);
-		killBtn.setOnClickListener(new View.OnClickListener() {
+		killBtn.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				try {
 					ActivityManager am = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
@@ -1092,25 +1092,25 @@ public class TaskManager extends Activity {
 		tasks_title = (TextView) findViewById(R.id.tm_tasks_title);
 		serv_title = (TextView) findViewById(R.id.tm_services_title);
 		((ImageButton) findViewById(R.id.tm_back))
-				.setOnClickListener(new View.OnClickListener() {
+				.setOnClickListener(new OnClickListener() {
 					public void onClick(View v) {
 						finish();
 					}
 				});
 		sortSizeBtn = (Button) findViewById(R.id.sort_size);
-		sortSizeBtn.setOnClickListener(new View.OnClickListener() {
+		sortSizeBtn.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				setSorting(sortSize);
 			}
 		});
 		sortCpuBtn = (Button) findViewById(R.id.sort_cpu);
-		sortCpuBtn.setOnClickListener(new View.OnClickListener() {
+		sortCpuBtn.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				setSorting(sortCpu);
 			}
 		});
 		sortAbcBtn = (Button) findViewById(R.id.sort_abc);
-		sortAbcBtn.setOnClickListener(new View.OnClickListener() {
+		sortAbcBtn.setOnClickListener(new OnClickListener() {
 			public void onClick(View v) {
 				setSorting(sortAbc);
 			}
@@ -1138,7 +1138,7 @@ public class TaskManager extends Activity {
 		super.onResume();
         EinkScreen.setEinkController(prefs);
 		startCPUUpdate();
-		app.generalOnResume(TAG, this);
+		app.generalOnResume(TAG);
 	}
 
 	@Override

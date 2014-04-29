@@ -3,6 +3,7 @@ package com.harasoft.relaunch;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.ProtocolException;
 import java.net.URL;
 
 public class HttpBasicAuthentication {
@@ -15,7 +16,7 @@ public class HttpBasicAuthentication {
         Username=username;
         Password=password;
     }
-    public HttpURLConnection Connect() throws IOException {
+    public HttpURLConnection Connect(){
 
         HttpURLConnection result;
         URL url;
@@ -25,40 +26,45 @@ public class HttpBasicAuthentication {
         try {
             url = new URL(StrUrl);
         } catch (MalformedURLException e) {
-            throw new IOException("Неправильно указан URL");
+            return  null;
         }
 
         try {
             result = (HttpURLConnection)url.openConnection();
         } catch (IOException e) {
-            throw new IOException("Невозможно установить Интернет-соединение с источником данных");
+            return null;
         }
 
 
-        if(Username!="" && Password!=""){
+        if(!Username.equals("") && !Username.trim().equals("") && !Password.equals("")){
             base64EncodedCredentials = Base64Coder.encodeString(Username + ":" + Password);
+            result.setRequestProperty("Authorization", "Basic " + base64EncodedCredentials);
+            try {
+                result.setRequestMethod("POST");
+            } catch (ProtocolException e) {
+                return null;
+            }
+            result.setDoOutput(true);
+            result.setDoInput(true);
+            try {
+                responseCode = result.getResponseCode();
+            } catch (IOException e) {
+                return null;
+            }
+
+            if (responseCode != HttpURLConnection.HTTP_OK) {
+                return null;
+            }
         }else{
             result.setReadTimeout(10000);
             result.setConnectTimeout(15000);
-            result.setRequestMethod("GET");
+            try {
+                result.setRequestMethod("GET");
+            } catch (ProtocolException e) {
+                return null;
+            }
             result.setDoInput(true);
-            return result;
         }
-        result.setRequestProperty("Authorization", "Basic " + base64EncodedCredentials);
-        result.setRequestMethod("POST");
-        result.setDoOutput(true);
-        result.setDoInput(true);
-        try {
-            responseCode = result.getResponseCode();
-        } catch (IOException e) {
-            throw new IOException("Невозможно установить Интернет-соединение с источником данных");
-        }
-
-        if (responseCode == HttpURLConnection.HTTP_OK) {
-            return result;
-        }else{
-            throw new IOException("Доступ к источнику данных невозможен. Ошибка "+ responseCode);
-        }
-
+        return result;
     }
 }
