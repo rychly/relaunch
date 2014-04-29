@@ -791,7 +791,7 @@ public class Advanced extends Activity {
 	protected void onResume() {
 		super.onResume();
         EinkScreen.setEinkController(prefs);
-		app.generalOnResume(TAG, this);
+		app.generalOnResume(TAG);
 	}
 
 }
