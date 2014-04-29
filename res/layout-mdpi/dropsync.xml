@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="fill_parent"
+              android:layout_height="fill_parent" android:background="@color/normal_bg" android:padding="8dp">
+
+    <LinearLayout android:id="@+id/linearLayout" android:layout_width="fill_parent" android:layout_height="56dp"
+                  android:minHeight="32dp" android:layout_gravity="center">
+        <ImageView android:id="@+id/imageView1" android:layout_width="wrap_content" android:layout_height="fill_parent"
+                   android:background="@color/normal_bg_gray" android:src="@drawable/ci_dropbox"/>
+        <EditText android:id="@+id/prefernces_title" android:layout_width="fill_parent"
+                  android:layout_height="fill_parent" android:layout_weight="1"
+                  android:background="@color/normal_bg_gray" android:editable="false" android:focusable="false"
+                  android:gravity="left|center_vertical" android:inputType="textMultiLine" android:paddingLeft="8dp"
+                  android:text="DropBox" android:textAppearance="?android:attr/textAppearanceMedium"
+                  android:textColor="@color/normal_fg" android:textStyle="bold" android:textSize="24dp">
+        </EditText>
+        <ImageButton android:id="@+id/exitdb_btn" android:layout_width="fill_parent" android:layout_height="fill_parent"
+                     android:layout_gravity="center" android:layout_marginLeft="4dp" android:layout_marginRight="1dp"
+                     android:layout_weight="2.8" android:background="@drawable/main_button" android:minWidth="96dp"
+                     android:src="@drawable/ci_exit" android:longClickable="true"/>
+    </LinearLayout>
+    <LinearLayout
+            android:orientation="horizontal"
+            android:layout_width="fill_parent"
+            android:layout_height="56dp" android:layout_gravity="left|center_vertical" android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp">
+        <Button
+                android:layout_width="wrap_content"
+                android:layout_height="fill_parent"
+                android:text="@string/db_link"
+                android:id="@+id/dblink_btn" android:layout_gravity="right" android:layout_marginLeft="5dp"
+                android:layout_marginRight="5dp" android:layout_weight="1" android:background="@drawable/main_button"
+                android:textSize="24dp" android:textStyle="normal"/>
+        <Button
+                android:layout_width="wrap_content"
+                android:layout_height="fill_parent"
+                android:id="@+id/bdunlink_btn" android:layout_gravity="left" android:text="@string/db_unlink"
+                android:layout_marginLeft="5dp" android:layout_marginRight="5dp" android:layout_weight="1"
+                android:background="@drawable/main_button" android:textSize="24dp" android:textStyle="normal"/>
+    </LinearLayout>
+    <LinearLayout android:orientation="horizontal" android:layout_width="fill_parent" android:layout_height="50dp"
+                  android:layout_gravity="left|center_vertical" android:layout_marginTop="10dp"
+                  android:layout_marginBottom="10dp" android:id="@+id/linearLayout2">
+        <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:id="@+id/tV_dropbox_folder" android:textColor="#000000"
+                android:layout_marginTop="10dp" android:layout_marginBottom="10dp" android:textSize="18dp"
+                android:layout_marginLeft="5dp" android:clickable="false"
+                android:layout_weight="1" android:autoText="false"/>
+        <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Изменить"
+                android:id="@+id/bt_selectDropboxFolder" android:layout_gravity="center_horizontal|top"
+                android:clickable="false" android:background="@drawable/main_button" android:textSize="24dp"
+                android:visibility="invisible"/>
+    </LinearLayout>
+    <LinearLayout android:orientation="horizontal" android:layout_width="fill_parent" android:layout_height="50dp"
+                  android:layout_gravity="left|center_vertical" android:layout_marginTop="10dp"
+                  android:layout_marginBottom="10dp" android:id="@+id/linearLayout3">
+        <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="22dp"
+                android:id="@+id/tV_local_folder"
+                android:textColor="#000000" android:layout_marginTop="10dp" android:layout_marginBottom="10dp"
+                android:textSize="18dp" android:layout_marginLeft="5dp" android:layout_gravity="center"
+                android:layout_weight="1"/>
+        <Button android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Изменить"
+                android:id="@+id/bt_selectLocalFolder" android:layout_gravity="center_horizontal|top"
+                android:clickable="false" android:background="@drawable/main_button" android:textSize="24dp"
+                android:visibility="invisible"/>
+    </LinearLayout>
+    <LinearLayout android:orientation="horizontal" android:layout_width="fill_parent" android:layout_height="56dp"
+                  android:layout_gravity="left|center_vertical" android:layout_marginTop="10dp"
+                  android:layout_marginBottom="10dp" android:id="@+id/linearLayout1">
+        <Button
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:text="@string/str_download_btn"
+                android:id="@+id/dowload_btn" android:layout_gravity="right" android:background="@drawable/main_button"
+                android:textSize="24dp"
+                android:singleLine="true"
+                android:layout_weight="1"
+                android:layout_marginRight="5dp" android:layout_marginLeft="5dp" android:textStyle="normal"/>
+        <Button
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:text="@string/str_uploadToDropbox"
+                android:id="@+id/upload_btn" android:background="@drawable/main_button"
+                android:layout_weight="1"
+                android:layout_marginLeft="5dp" android:layout_marginRight="5dp" android:layout_gravity="left"
+                android:textSize="24dp" android:textStyle="normal"/>
+    </LinearLayout>
+    <Button
+            android:layout_width="wrap_content"
+            android:layout_height="56dp"
+            android:text="@string/str_SelectAndDownload"
+            android:id="@+id/select_and_dowload" android:layout_gravity="center" android:background="@drawable/main_button"
+            android:longClickable="false" android:layout_marginTop="10dp" android:enabled="false"
+            android:visibility="visible" android:textStyle="normal" android:textSize="24dp"
+            android:layout_marginLeft="5dp" android:layout_marginRight="5dp" android:paddingLeft="10dp"
+            android:paddingRight="10dp"/>
+</LinearLayout>
