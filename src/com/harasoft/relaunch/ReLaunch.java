@@ -88,21 +88,17 @@ public class ReLaunch extends Activity {
 	final static int CNTXT_MENU_PASTE = 13;
 	final static int CNTXT_MENU_RENAME = 14;
 	final static int CNTXT_MENU_CREATE_DIR = 15;
-	final static int CNTXT_MENU_COPY_DIR = 16;
-	//final static int CNTXT_MENU_MOVE_DIR = 17;
-	final static int CNTXT_MENU_SWITCH_TITLES = 18;
-	final static int CNTXT_MENU_TAGS_RENAME = 19;
-	final static int CNTXT_MENU_ADD_STARTDIR = 20;
-	final static int CNTXT_MENU_SHOW_BOOKINFO = 21;
-	final static int CNTXT_MENU_FILE_INFO = 22;
-	final static int CNTXT_MENU_SET_STARTDIR = 23;
-    final static int CNTXT_MENU_COPY_DROPBOX = 24;
-    final static int CNTXT_MENU_COPY_DIR_DROPBOX = 25;
-    final static int CNTXT_MENU_SETTINGS = 26;
-    final static int CNTXT_MENU_SELECTE = 27;
-	//final static int BROWSE_FILES = 0;
-	//final static int BROWSE_TITLES = 1;
-	//final static int BROWSE_COVERS = 2;
+	final static int CNTXT_MENU_SWITCH_TITLES = 16;
+	final static int CNTXT_MENU_TAGS_RENAME = 17;
+	final static int CNTXT_MENU_ADD_STARTDIR = 18;
+	final static int CNTXT_MENU_SHOW_BOOKINFO = 19;
+	final static int CNTXT_MENU_FILE_INFO = 20;
+	final static int CNTXT_MENU_SET_STARTDIR = 21;
+    final static int CNTXT_MENU_COPY_DROPBOX = 22;
+    final static int CNTXT_MENU_COPY_DIR_DROPBOX = 23;
+    final static int CNTXT_MENU_SETTINGS = 24;
+    final static int CNTXT_MENU_SELECTE = 25;
+
 	final static int SORT_FILES_ASC = 0;
 	final static int SORT_FILES_DESC = 1;
 	final static int SORT_TITLES_ASC = 2;
@@ -1316,8 +1312,8 @@ public class ReLaunch extends Activity {
         }
 
         if (showOnePanel) {
-            app.readFile("lastOpened", LRU_FILE);
-            app.readFile("favorites", FAV_FILE);
+            app.readFile("lastOpened", LRU_FILE, "/");
+            app.readFile("favorites", FAV_FILE, "/");
             // Home button
             final ImageButton home_button = (ImageButton) findViewById(R.id.home_btn);
             class HomeSimpleOnGestureListener extends
@@ -2012,7 +2008,7 @@ public class ReLaunch extends Activity {
                         aList.add(getString(R.string.jv_relaunch_create_folder));
                         aList.add(getString(R.string.jv_relaunch_rename));
                         aList.add(getString(R.string.jv_relaunch_move));
-                        aList.add(getString(R.string.jv_relaunch_copy_dir));
+                        aList.add(getString(R.string.jv_relaunch_copy));
                         if (fileOp != 0) {
                             aList.add(getString(R.string.jv_relaunch_paste));
                         }
@@ -2141,8 +2137,6 @@ public class ReLaunch extends Activity {
                             onContextMenuSelected(CNTXT_MENU_OPENWITH, pos);
                         else if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_copy)))
                             onContextMenuSelected(CNTXT_MENU_COPY_FILE, pos);
-                        else if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_copy_dir)))
-                            onContextMenuSelected(CNTXT_MENU_COPY_DIR, pos);
                         else if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_move)))
                             onContextMenuSelected(CNTXT_MENU_MOVE_FILE, pos);
                         else if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_paste)))
@@ -2624,7 +2618,7 @@ public class ReLaunch extends Activity {
                                 public void onClick(DialogInterface dialog,
                                                     int whichButton) {
                                     dialog.dismiss();
-                                    delAll(fullName, dname, fname, pos);
+                                    delAll(fullName, dname, fname);
                                 }
                             }
                     );
@@ -2639,7 +2633,7 @@ public class ReLaunch extends Activity {
                     );
                     builder.show();
                 } else {
-                    delAll(fullName, dname, fname, pos);
+                    delAll(fullName, dname, fname);
                 }
             }else{
                 delSelect();
@@ -2664,7 +2658,7 @@ public class ReLaunch extends Activity {
                                 public void onClick(DialogInterface dialog,
                                         int whichButton) {
                                     dialog.dismiss();
-                                    delAll(fullName, dname, fname, pos);
+                                    delAll(fullName, dname, fname);
                                 }
                             });
                     // "No"
@@ -2677,7 +2671,7 @@ public class ReLaunch extends Activity {
                             });
                     builder.show();
                 } else {
-                    delAll(fullName, dname, fname, pos);
+                    delAll(fullName, dname, fname);
                 }
             }else{
                 delSelect();
@@ -2704,7 +2698,7 @@ public class ReLaunch extends Activity {
                                 public void onClick(DialogInterface dialog,
                                         int whichButton) {
                                     dialog.dismiss();
-                                    delAll(fullName, dname, fname, pos);
+                                    delAll(fullName, dname, fname);
                                 }
                             });
                     // "No"
@@ -2718,7 +2712,7 @@ public class ReLaunch extends Activity {
                             });
                     builder.show();
                 } else{
-                    delAll(fullName, dname, fname, pos);
+                    delAll(fullName, dname, fname);
                 }
             }else{
                 delSelect();
@@ -2765,53 +2759,16 @@ public class ReLaunch extends Activity {
             fileOp = CNTXT_MENU_MOVE_FILE;
 			break;
 
-        case CNTXT_MENU_COPY_DIR:
-            if(arrSelItem.size() < 1) {
-                fileOpFile = new String[1];
-                fileOpDir = new String[1];
-                fileOpFile[0] =  fname;
-                fileOpDir[0] = dname;
-            }else{
-                HashMap<String, String> i2;
-                int k = arrSelItem.size();
-                fileOpFile = new String[k];
-                fileOpDir = new String[k];
-                for(int i1=0; i1 < k; i1++){
-                    i2 = itemsArray.get(arrSelItem.get(i1));
-                    fileOpDir[i1] = i2.get("dname");
-                    fileOpFile[i1] = i2.get("name");
-                }
-            }
-            fileOp = CNTXT_MENU_COPY_DIR;
-            break;
-
 		case CNTXT_MENU_PASTE:
             String src;
             String dst;
-            int flagOp = fileOp;
-            for(int l=0; l < fileOpDir.length; l++) {
 
+            for(int l=0; l < fileOpDir.length; l++) {
                 if (fileOpDir[l].equalsIgnoreCase("/"))
                     src = fileOpDir[l] + fileOpFile[l];
                 else
                     src = fileOpDir[l] + "/" + fileOpFile[l];
                 dst = dname + "/" + fileOpFile[l];
-                if(fileOpDir.length > 1 && flagOp != CNTXT_MENU_MOVE_FILE){
-                    File f = new File(src);
-                    if(f.isDirectory()) {
-                        if (flagOp == CNTXT_MENU_COPY_FILE || flagOp == CNTXT_MENU_COPY_DIR){
-                            fileOp = CNTXT_MENU_COPY_DIR;
-                        }else {
-                            fileOp = CNTXT_MENU_MOVE_FILE;
-                        }
-                    }else{
-                        if(flagOp == CNTXT_MENU_COPY_FILE || flagOp == CNTXT_MENU_COPY_DIR) {
-                            fileOp = CNTXT_MENU_COPY_FILE;
-                        }else{
-                            fileOp = CNTXT_MENU_MOVE_FILE;
-                        }
-                    }
-                }
 
                 boolean dropSrc = src.startsWith("Dropbox| ");// источник в дропе?
                 boolean dropDst = dst.startsWith("Dropbox| ");// приемник в дропе?
@@ -2819,7 +2776,7 @@ public class ReLaunch extends Activity {
                 boolean retCode = false;
                 // если источник и приемник в дропе.
                 if (dropSrc && dropDst) {
-                    if (fileOp == CNTXT_MENU_COPY_FILE || fileOp == CNTXT_MENU_COPY_DIR) {
+                    if (fileOp == CNTXT_MENU_COPY_FILE) {
                         retCode = DBmoveORcopy(src, dst, true);
                     } else if (fileOp == CNTXT_MENU_MOVE_FILE) {
                         retCode = DBmoveORcopy(src, dst, false);
@@ -2827,36 +2784,27 @@ public class ReLaunch extends Activity {
                 }
                 // если источник лосально, а приемник в дропе.
                 if (!dropSrc && dropDst) {
-                    if (fileOp == CNTXT_MENU_COPY_FILE || fileOp == CNTXT_MENU_COPY_DIR) {
-                        retCode = DBupload(src, dname);
-                    } else if (fileOp == CNTXT_MENU_MOVE_FILE) {
-                        retCode = DBupload(src, dname);
+                    retCode = DBupload(src, dname);
+                    if (fileOp == CNTXT_MENU_MOVE_FILE) {
                         app.removeFile(fileOpDir[l], fileOpFile[l]);
                     }
                 }
                 // если источник в дропе, а приемник локально.
                 if (dropSrc && !dropDst) {
-                    if (fileOp == CNTXT_MENU_COPY_FILE || fileOp == CNTXT_MENU_COPY_DIR) {
-                        retCode = DBdownload(src, dname);
-                    } else if (fileOp == CNTXT_MENU_MOVE_FILE) {
-                        retCode = DBdownload(src, dname);
+                    retCode = DBdownload(src, dname);
+                    if (fileOp == CNTXT_MENU_MOVE_FILE) {
                         DBdelete(src);
                     }
                 }
                 // если файлы находяться локально
                 if (!dropDst && !dropSrc) {
                     if (fileOp == CNTXT_MENU_COPY_FILE) {
-                        retCode = app.copyFile(src, dst, false);
+                        retCode = app.copyDirOrFile(src, dst, false);
                     } else if (fileOp == CNTXT_MENU_MOVE_FILE) {
                         retCode = app.moveFile(src, dst);
-                    } else if (fileOp == CNTXT_MENU_COPY_DIR) {
-                        retCode = app.copyDir(src, dst);
                     }
                 }
-                if (retCode) {
-                    fileOp = 0;
-                    drawDirectory(dname, currentPosition);
-                } else {
+                if (!retCode) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(this);
                     builder.setTitle(getResources().getString(R.string.jv_relaunch_error_title));
                     builder.setMessage(getResources().getString(R.string.jv_relaunch_paste_fail_text) + " " + fileOpFile[l]);
@@ -2871,6 +2819,8 @@ public class ReLaunch extends Activity {
                     builder.show();
                 }
             }
+            fileOp = 0;
+            drawDirectory(dname, currentPosition);
 			break;
 
 		case CNTXT_MENU_TAGS_RENAME: {
@@ -3131,8 +3081,8 @@ public class ReLaunch extends Activity {
 		} catch (NumberFormatException e) {
             //emply
 		}
-		app.writeFile("lastOpened", LRU_FILE, lruMax);
-		app.writeFile("favorites", FAV_FILE, favMax);
+		app.writeFile("lastOpened", LRU_FILE, lruMax, "/");
+		app.writeFile("favorites", FAV_FILE, favMax, "/");
 		app.writeFile("app_last", APP_LRU_FILE, appLruMax, ":");
 		app.writeFile("app_favorites", APP_FAV_FILE, appFavMax, ":");
 		List<String[]> h = new ArrayList<String[]>();
@@ -3648,9 +3598,9 @@ public class ReLaunch extends Activity {
             src = dirname + "/" + filename;
             File toDir = new File(src);
             if(toDir.isDirectory()){
-                app.copyDir(src, dst);
+                app.copyDirOrFile(src, dst, false);
             }else{
-                app.copyFile(src, dst, false);
+                app.copyDirOrFile(src, dst, false);
             }
         }
     }
@@ -4380,15 +4330,11 @@ public class ReLaunch extends Activity {
     }
     // ================ =============================
     // небольшой модуль для удалени файла или папки
-    private void delAll(String fullName, String dname, String fname, int pos) {
+    private void delAll(String fullName, String dname, String fname) {
         if(fullName.startsWith("Dropbox| ")) {
-            if(DBdelete(fullName)){
-                itemsArray.remove(pos);
-            }
+            DBdelete(fullName);
         }else{
-            if (app.removeDirAndFile(dname, fname)) {
-                itemsArray.remove(pos);
-            }
+            app.removeDirAndFile(dname, fname);
         }
         drawDirectory(currentRoot, currentPosition);
     }
@@ -4399,7 +4345,6 @@ public class ReLaunch extends Activity {
         final String arrFullName[] = new String[j];
         final String arrDName[] = new String[j];
         final String arrFName[] = new String[j];
-        final int arrPos[] = new int[j];
 
         String listFiles = "";
 
@@ -4408,7 +4353,6 @@ public class ReLaunch extends Activity {
             arrFullName[i1] = i.get("fname");
             arrDName[i1] = i.get("dname");
             arrFName[i1] = i.get("name");
-            arrPos[i1] = arrSelItem.get(i1);
             listFiles = listFiles + "\n" + arrFName[i1];
         }
 
@@ -4427,7 +4371,7 @@ public class ReLaunch extends Activity {
                         public void onClick(DialogInterface dialog, int whichButton) {
                             dialog.dismiss();
                             for(int h = 0, k = arrFullName.length; h < k; h++) {
-                                delAll(arrFullName[h], arrDName[h], arrFName[h], arrPos[h]);
+                                delAll(arrFullName[h], arrDName[h], arrFName[h]);
                             }
                         }
                     }
@@ -4443,7 +4387,7 @@ public class ReLaunch extends Activity {
             builder.show();
         } else {
             for(int h = 0, k = arrFullName.length; h < k; h++) {
-                delAll(arrFullName[h], arrDName[h], arrFName[h], arrPos[h]);
+                delAll(arrFullName[h], arrDName[h], arrFName[h]);
             }
         }
 

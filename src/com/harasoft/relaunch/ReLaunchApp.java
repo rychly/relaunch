@@ -117,18 +117,6 @@ public class ReLaunchApp extends Application {
 		}
 		return rc;
 	}
-    /*
-	public List<String> extNames() {
-		List<String> rc = new ArrayList<String>();
-		for (HashMap<String, String> r : readers) {
-			for (String key : r.keySet()) {
-				if (!rc.contains(key))
-					rc.add(key);
-			}
-		}
-		return rc;
-	}   */
-
 	/*
 	 * Misc lists management (list is identified by name)
 	 * --------------------------------------------------
@@ -166,7 +154,7 @@ public class ReLaunchApp extends Application {
 			} catch (NumberFormatException e) {
                 //emply
 			}
-			this.writeFile("favorites", ReLaunch.FAV_FILE, favMax);
+			this.writeFile("favorites", ReLaunch.FAV_FILE, favMax, "/");
 		}
 		if (listName.equals("lastOpened")) {
 			int lruMax = 30;
@@ -175,7 +163,7 @@ public class ReLaunchApp extends Application {
 			} catch (NumberFormatException e) {
                 //emply
 			}
-			this.writeFile("lastOpened", ReLaunch.LRU_FILE, lruMax);
+			this.writeFile("lastOpened", ReLaunch.LRU_FILE, lruMax, "/");
 		}
 		if (listName.equals("app_last")) {
 			int appLruMax = 30;
@@ -288,14 +276,6 @@ public class ReLaunchApp extends Application {
 		removeFromList_internal(listName, dr, fn);
 	}
 
-	/*public void removeFromList(String listName, String fullName) {
-		File f = new File(fullName);
-		if (!f.exists())
-			return;
-		removeFromList_internal(listName, f.getParent(), f.getName());
-
-	} */
-
 	public void removeFromList_internal(String listName, String dr, String fn) {
 		if (!m.containsKey(listName))
 			return;
@@ -322,10 +302,6 @@ public class ReLaunchApp extends Application {
 	}
 
 	// Read misc. lists
-	public boolean readFile(String listName, String fileName) {
-		return readFile(listName, fileName, "/");
-	}
-
 	public boolean readFile(String listName, String fileName, String delimiter) {
 		FileInputStream fis = null;
 		try {
@@ -368,10 +344,6 @@ public class ReLaunchApp extends Application {
 	}
 
 	// Save to file miscellaneous lists
-	public void writeFile(String listName, String fileName, int maxEntries) {
-		writeFile(listName, fileName, maxEntries, "/");
-	}
-
 	public void writeFile(String listName, String fileName, int maxEntries, String delimiter) {
 		if (!m.containsKey(listName))
 			return;
@@ -401,11 +373,6 @@ public class ReLaunchApp extends Application {
 	}
 
 	// Remove file
-	public boolean removeFile(String fullname) {
-		File f = new File(fullname);
-		return removeFile(f.getParent(), f.getName());
-	}
-
 	public boolean removeFile(String dr, String fn) {
 		boolean rc = false;
 		String fullName = dr + "/" + fn;
@@ -426,13 +393,6 @@ public class ReLaunchApp extends Application {
 		}
 		return rc;
 	}
-
-	// Remove directory
-    /*public boolean removeDirectory(String fullname) {
-        File f = new File(fullname);
-        return removeDirectory(f.getParent(), f.getName());
-    }*/
-
 	public boolean removeDirectory(String dr, String fn) {
 		boolean rc = false;
 		String dname = dr + "/" + fn;
@@ -457,7 +417,6 @@ public class ReLaunchApp extends Application {
 		}
 		return rc;
 	}
-    // универсальный вход для удаления
     public boolean removeDirAndFile(String dir, String file) {
         String dname = dir + "/" + file;
         File d = new File(dname);
@@ -516,7 +475,19 @@ public class ReLaunchApp extends Application {
         }
         return true;
     }
-
+    public boolean copyDirOrFile(String from, String to, boolean rewrite) {
+        File source = new File(from);
+        if (source.isFile()) {
+            if (!copyFile(from, to, rewrite)){
+                return false;
+            }
+        } else {
+            if (!copyDir(from, to)){
+                return false;
+            }
+        }
+        return true;
+    }
 	//Move file src to dst
 	public boolean moveFile(String from, String to) {
 		boolean ret = false;
@@ -525,12 +496,14 @@ public class ReLaunchApp extends Application {
 			File dst = new File(to);
 			ret = src.renameTo(dst);
 		} else {
-			if (copyFile(from, to, false))
-				ret = removeFile(from);
+			if (copyFile(from, to, false)) {
+                File f = new File(from);
+                ret = removeFile(f.getParent(), f.getName());
+            }
 		}
 		return ret;
 	}
-	
+    //
 	public boolean createDir(String dst) {
 		File dir = new File(dst);
 		return dir.mkdirs();
@@ -591,21 +564,6 @@ public class ReLaunchApp extends Application {
 		}
 		return null;
 	}
- /*
-	// compare by second element of String[]
-	public class o1Comparator implements java.util.Comparator<String[]> {
-		public int compare(String[] o1, String[] o2) {
-			int rc = o1[1].compareTo(o2[1]);
-			if (rc == 0)
-				return o1[0].compareTo(o2[0]);
-			else
-				return rc;
-		}
-	}
-
-	public o1Comparator getO1Comparator() {
-		return new o1Comparator();
-	} */
 
 	// FILTER
 	public boolean filterFile1(String dname, String fname, Integer method, String value) {

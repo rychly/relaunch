@@ -15,6 +15,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 import com.dropbox.client2.DropboxAPI;
 import com.dropbox.client2.android.AndroidAuthSession;
 import com.dropbox.client2.android.AuthActivity;
@@ -45,6 +46,7 @@ public class DropBoxActivity extends Activity {
     Button dropunlink_btn;
     Button download_btn;
     Button upload_btn;
+    Button dbselect_btn;
     TextView str_dropbox_folder;
     TextView str_local_folder;
     static private int flag_download=0;
@@ -102,6 +104,7 @@ public class DropBoxActivity extends Activity {
             dropunlink_btn = (Button) findViewById(R.id.bdunlink_btn);
             download_btn = (Button) findViewById(R.id.dowload_btn);
             upload_btn = (Button) findViewById(R.id.upload_btn);
+            dbselect_btn = (Button) findViewById(R.id.select_and_dowload);
 
             ImageButton exit_btn = (ImageButton) findViewById(R.id.exitdb_btn);
             str_dropbox_folder = (TextView) findViewById(R.id.tV_dropbox_folder);
@@ -129,6 +132,7 @@ public class DropBoxActivity extends Activity {
                     dropunlink_btn.setEnabled(false);
                     download_btn.setEnabled(false);
                     upload_btn.setEnabled(false);
+                    dbselect_btn.setEnabled(false);
                 }
             } );
             exit_btn.setOnClickListener( new View.OnClickListener() {
@@ -168,12 +172,21 @@ public class DropBoxActivity extends Activity {
                 dropunlink_btn.setEnabled(false);
                 download_btn.setEnabled(false);
                 upload_btn.setEnabled(false);
+                dbselect_btn.setEnabled(false);
                 app.showToast(getString(R.string.srt_dbactivity_warn_no_config));//WARNING! No configure! Exit for configure.
             }
             if (flag_download == 1){
                 download_btn.setEnabled(false);
                 upload_btn.setEnabled(false);
+                dbselect_btn.setEnabled(false);
             }
+            dbselect_btn.setOnClickListener( new View.OnClickListener() {
+                public void onClick(View v) {
+                    Intent intent = new Intent(DropBoxActivity.this, DropboxSelect.class);
+                    intent.putExtra("DBLocalPath", DBLocalPath);
+                    startActivity(intent);
+                }
+            } );
         }
     }
 
@@ -193,9 +206,11 @@ public class DropBoxActivity extends Activity {
                 if (flag_download == 1){
                     download_btn.setEnabled(false);
                     upload_btn.setEnabled(false);
+                    dbselect_btn.setEnabled(false);
                 }else{
                     download_btn.setEnabled(true);
                     upload_btn.setEnabled(true);
+                    dbselect_btn.setEnabled(true);
                 }
             } catch (IllegalStateException e) {
                 app.showToast(getString(R.string.srt_dbactivity_err_authent));//"Error connect for Authentication");
@@ -242,6 +257,7 @@ public class DropBoxActivity extends Activity {
             if (flag_download == 0){
                 download_btn.setEnabled(true);
                 upload_btn.setEnabled(true);
+                dbselect_btn.setEnabled(true);
             }
             AccessTokenPair accessToken = new AccessTokenPair(stored[0], stored[1]);
             session = new AndroidAuthSession(appKeyPair, ACCESS_TYPE, accessToken);
@@ -250,6 +266,7 @@ public class DropBoxActivity extends Activity {
             dropunlink_btn.setEnabled(false);
             download_btn.setEnabled(false);
             upload_btn.setEnabled(false);
+            dbselect_btn.setEnabled(false);
             session = new AndroidAuthSession(appKeyPair, ACCESS_TYPE);
         }
 
@@ -312,6 +329,7 @@ public class DropBoxActivity extends Activity {
             download_btn.setEnabled(false);
             dropunlink_btn.setEnabled(false);
             upload_btn.setEnabled(false);
+            dbselect_btn.setEnabled(false);
             flag_download = 1;
         }
 
@@ -321,6 +339,7 @@ public class DropBoxActivity extends Activity {
             download_btn.setEnabled(true);
             dropunlink_btn.setEnabled(true);
             upload_btn.setEnabled(true);
+            dbselect_btn.setEnabled(true);
             if(flagErrorDownload){
                 app.showToast(getString(R.string.srt_dbactivity_err_down_dropbox));//"Error dowload files from DropBox");
             }
@@ -427,6 +446,7 @@ public class DropBoxActivity extends Activity {
             download_btn.setEnabled(false);
             dropunlink_btn.setEnabled(false);
             upload_btn.setEnabled(false);
+            dbselect_btn.setEnabled(false);
             flag_download = 1;
         }
 
@@ -436,6 +456,7 @@ public class DropBoxActivity extends Activity {
             download_btn.setEnabled(true);
             dropunlink_btn.setEnabled(true);
             upload_btn.setEnabled(true);
+            dbselect_btn.setEnabled(true);
             if(flagErrorDownload){
                 app.showToast(getString(R.string.srt_dbactivity_err_upl_dropbox));//"Error upload files from DropBox");
             }
