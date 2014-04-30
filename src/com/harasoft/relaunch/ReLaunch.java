@@ -7,7 +7,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Rect;
 import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -24,7 +23,6 @@ import android.text.SpannableString;
 import android.text.TextUtils.TruncateAt;
 import android.text.style.StyleSpan;
 
-import android.util.Log;
 import android.util.TypedValue;
 import android.view.*;
 import android.view.GestureDetector.SimpleOnGestureListener;
@@ -64,8 +62,7 @@ public class ReLaunch extends Activity {
 			+ "|.png:Intent:image/png"
             + "|.pdf:Intent:application/pdf"
             + "|.djvu:Intent:application/djvu"
-            + "|.djv:Intent:application/djv"
-			+ "|.djv,.djvu:Intent:image/vnd.djvu"
+            + "|.djv:Intent:application/djvu"
             + "|.doc:Intent:application/msword"
 			+ "|.chm,.pdb,.prc,.mobi,.azw:org.coolreader%org.coolreader.CoolReader%Cool Reader"
 			+ "|.cbz,.cb7:Intent:application/x-cbz"
