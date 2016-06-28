@@ -87,11 +87,16 @@
         <item>SEARCH</item>
         <item>LOCK</item>
         <item>POWEROFF</item>
+        <item>REBOOT</item>
         <item>SWITCHWIFI</item>
         <item>RUN</item>
         <item>DROPBOX</item>
         <item>OPDS</item>
+        <item>FTP</item>
         <item>SYSSETTINGS</item>
+        <item>UPDIR</item>
+        <item>UPSCROOL</item>
+        <item>DOWNSCROOL</item>
     </string-array>
     <string-array name="arr_button_actions_names">
         <item>@string/app_settings_nothing</item>
@@ -114,11 +119,16 @@
         <item>@string/app_settings_search</item>
         <item>@string/app_settings_lock</item>
         <item>@string/app_settings_power_off</item>
+        <item>@string/app_settings_reboot</item>
         <item>@string/app_settings_switch_wifi</item>
         <item>@string/app_settings_run</item>
         <item>@string/app_settings_dropbox</item>
         <item>@string/app_settings_opds</item>
+        <item>@string/app_settings_ftp</item>
         <item>@string/app_settings_sys_settings</item>
+        <item>@string/app_settings_up_dir</item>
+        <item>@string/app_settings_up_scrool</item>
+        <item>@string/app_settings_down_scrool</item>
     </string-array>
     <string-array name="output_columns_values">
         <item>-1</item>
@@ -240,5 +250,14 @@
         <item>@string/pref_i_searchButtonDT_title</item>
         <item>@string/pref_i_searchButtonLT_title</item>
     </string-array>
-    <string name="app_settings_sys_settings">Системные настройки</string>
+
+    <string-array name="array_panel_names">
+        <item>@string/pref_i_add_new</item>
+        <item>@string/pref_i_showOnePanel_name</item>
+        <item>@string/pref_i_showTwoPanel_name</item>
+        <item>@string/pref_i_showThreePanel_name</item>
+        <item>@string/pref_i_showFourPanel_name</item>
+        <item>@string/pref_i_showFifthPanel_name</item>
+    </string-array>
+
 </resources>

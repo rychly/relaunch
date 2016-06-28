@@ -72,18 +72,17 @@
             android:id="@+id/search_case"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="" >
+            android:layout_weight="1" >
         </CheckBox>
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/linearLayout6"
+        android:id="@+id/linearLayout2"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content" >
 
         <TextView
-            android:id="@+id/textView6"
+            android:id="@+id/textView2"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -98,18 +97,17 @@
             android:id="@+id/search_books_only"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="" >
+            android:layout_weight="1" >
         </CheckBox>
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/linearLayout8"
+        android:id="@+id/linearLayout3"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content" >
 
         <TextView
-            android:id="@+id/textView8"
+            android:id="@+id/textView3"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -124,18 +122,17 @@
             android:id="@+id/search_sort"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="" >
+            android:layout_weight="1" >
         </CheckBox>
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/linearLayout2"
+        android:id="@+id/linearLayout4"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content" >
 
         <TextView
-            android:id="@+id/textView2"
+            android:id="@+id/textView4"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -156,12 +153,12 @@
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/linearLayout2"
+        android:id="@+id/linearLayout5"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content" >
 
         <TextView
-            android:id="@+id/textView2"
+            android:id="@+id/textView5"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -182,19 +179,19 @@
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/linearLayout3"
+        android:id="@+id/linearLayout6"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content" >
 
         <LinearLayout
-            android:id="@+id/linearLayout3"
+            android:id="@+id/linearLayout7"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1.2"
             android:orientation="vertical" >
 
             <TextView
-                android:id="@+id/textView3"
+                android:id="@+id/textView6"
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
                 android:layout_gravity="center"
@@ -205,7 +202,7 @@
             </TextView>
 
             <TextView
-                android:id="@+id/textView3"
+                android:id="@+id/textView7"
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
                 android:layout_gravity="center"
@@ -221,14 +218,12 @@
             android:layout_height="fill_parent"
             android:layout_gravity="center"
             android:layout_weight="1" >
-
-            <requestFocus >
-            </requestFocus>
+            <requestFocus />
         </EditText>
     </LinearLayout>
 
     <TextView
-        android:id="@+id/textView5"
+        android:id="@+id/textView8"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="left"
@@ -240,7 +235,7 @@
     </TextView>
 
     <LinearLayout
-        android:id="@+id/linearLayout4"
+        android:id="@+id/linearLayout8"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content" >
 

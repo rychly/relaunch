@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:layout_width="wrap_content"
+	android:layout_width="fill_parent"
 	android:layout_height="wrap_content"
 	android:layout_gravity="top|left"
 	android:background="@color/normal_bg"
@@ -15,7 +15,7 @@
 		android:src="@drawable/flist_separator" />
 
 	<LinearLayout
-		android:layout_width="wrap_content"
+		android:layout_width="fill_parent"
 		android:layout_height="wrap_content"
 		android:layout_gravity="top|left"
 		android:background="@android:color/transparent"
@@ -29,8 +29,7 @@
 			android:layout_height="wrap_content"
 			android:layout_gravity="top|left"
 			android:layout_marginLeft="4dp"
-			android:background="@android:color/transparent"
-			android:src="@drawable/dir_ok" >
+			android:background="@android:color/transparent" >
 		</ImageView>
 
 		<LinearLayout
@@ -64,7 +63,6 @@
 				android:layout_weight="1"
 				android:background="@android:color/transparent"
 				android:gravity="center_vertical"
-				android:text=""
 				android:textAppearance="?android:attr/textAppearanceSmall"
 				android:textColor="@color/normal_fg" />
 		</LinearLayout>

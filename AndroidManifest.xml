@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.harasoft.relaunch"
-          android:versionName="1.3.9.0" android:versionCode="100309000">
+      package="com.harasoft.relaunch"
+      android:versionName="1.4.4" android:versionCode="100404000">
     <uses-sdk android:minSdkVersion="7"
-              android:maxSdkVersion="19"
-              android:targetSdkVersion="7"/>
+              android:maxSdkVersion="19"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.GET_TASKS" />
     <uses-permission android:name="android.permission.RESTART_PACKAGES" />
@@ -15,30 +14,20 @@
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.WRITE_SETTINGS" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <supports-screens android:anyDensity="true" android:smallScreens="true" android:normalScreens="true" android:largeScreens="true" />
+    <supports-screens android:anyDensity="true" android:smallScreens="true" android:normalScreens="true" android:largeScreens="true" />  
     <application android:icon="@drawable/icon" android:label="@string/app_name" android:name=".ReLaunchApp" android:allowBackup="true">
 
         <activity android:name=".Home"
                   android:launchMode="singleInstance"
                   android:stateNotNeeded="true"
-                  android:exported="false"
-                  android:configChanges="orientation|locale">
+                  android:exported="true"
+				  android:configChanges="orientation|locale">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.HOME"/>
-                <category android:name="android.intent.category.DEFAULT" />
-            </intent-filter>
-        </activity>
-
-        <activity android:name=".Home1"
-                  android:launchMode="singleInstance"
-                  android:stateNotNeeded="true"
-                  android:exported="false"
-                  android:configChanges="orientation|locale">
-            <intent-filter>
                 <action android:name="com.bn.intent.action.home" />
                 <action android:name="com.bn.intent.action.library"/>
                 <action android:name="com.bn.intent.action.shop" />
+                <category android:name="android.intent.category.HOME"/>
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
             <meta-data android:name="quicknav.view" android:value="true" />
@@ -48,33 +37,33 @@
                   android:launchMode="singleInstance"
                   android:stateNotNeeded="true"
                   android:label="@string/app_name"
-                  android:configChanges="orientation|locale">
+				  android:configChanges="orientation|locale">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
+       </activity>
 
-        <activity android:name="ReLaunch"
-                  android:configChanges="orientation|locale">
+       <activity android:name="ReLaunch"
+				android:configChanges="orientation|locale">
             <intent-filter>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name="Advanced"
-                  android:configChanges="orientation|locale">
+       <activity android:name="Advanced"
+				android:configChanges="orientation|locale">
             <intent-filter>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name="AllApplications"
-                  android:configChanges="orientation|locale">
+       <activity android:name="AllApplications"
+				android:configChanges="orientation|locale">
             <intent-filter>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
         <activity android:name="TypesActivity"
-                  android:configChanges="orientation|locale">
+					android:configChanges="orientation|locale">
             <intent-filter>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
@@ -87,37 +76,37 @@
             </intent-filter>
         </activity>
         <activity android:name="SearchActivity"
-                  android:configChanges="orientation|locale">
+				android:configChanges="orientation|locale">
             <intent-filter>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
         <activity android:name="ResultsActivity"
-                  android:configChanges="orientation|locale">
+					android:configChanges="orientation|locale">
             <intent-filter>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
         <activity android:name="FiltersActivity"
-                  android:configChanges="orientation|locale">
+					android:configChanges="orientation|locale">
             <intent-filter>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
         <activity android:name="TaskManager"
-                  android:configChanges="orientation|locale">
+					android:configChanges="orientation|locale">
             <intent-filter>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
         <activity android:name="Viewer"
-                  android:configChanges="orientation|locale">
+					android:configChanges="orientation|locale">
             <intent-filter>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
         <activity android:name="Editor"
-                  android:configChanges="orientation|locale">
+					android:configChanges="orientation|locale">
             <intent-filter>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
@@ -134,17 +123,20 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.BROWSABLE"/>
                 <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
         <activity android:name=".OPDSActivity"
                   android:label="OPDSActivity"
                   android:configChanges="orientation|locale">
-            <intent-filter>
-                <category android:name="android.intent.category.LAUNCHER"/>
-            </intent-filter>
+        <intent-filter>
+            <category android:name="android.intent.category.LAUNCHER"/>
+        </intent-filter>
         </activity>
-        <activity android:name=".DropboxSelect"/>
+ <activity android:name=".DropboxSelect"/>
         <activity android:name=".ExtendedInfoBook"/>
+        <activity android:name=".PanelSettingsActivity"/>
+        <activity android:name=".ScreenSettingActivity"/>
+        <activity android:name=".NookShadowSettings"/>
+        <activity android:name=".ButtonSettingActivity"/>
     </application>
 </manifest>

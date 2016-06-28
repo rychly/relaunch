@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:id="@+id/panel_lL"
+              android:layout_width="fill_parent"
+              android:layout_height="wrap_content"
+              android:background="@color/normal_bg"
+              android:orientation="horizontal"
+              android:paddingBottom="8dp" >
+
+        <TextView
+                android:id="@+id/button_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right|center_vertical"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="@color/normal_fg"
+                android:textStyle="bold" >
+        </TextView>
+
+        <ImageView
+                android:id="@+id/icon_img"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right|center_vertical"
+                android:background="@drawable/main_button" android:layout_marginLeft="4dp">
+        </ImageView>
+
+        <TextView
+        android:id="@+id/button_name_title"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center|center_vertical"
+        android:gravity="center|center_vertical"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="@color/normal_fg"
+        android:layout_weight="1"
+        android:textStyle="bold" >
+    </TextView>
+    <ImageButton
+            android:id="@+id/types_edit"
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+            android:layout_gravity="right|center_vertical"
+            android:layout_marginLeft="4dp"
+            android:background="@drawable/main_button"
+            android:src="@drawable/ci_edit_mini" >
+    </ImageButton>
+        <ImageButton
+                android:id="@+id/types_up"
+                android:layout_width="42dp"
+                android:layout_height="42dp"
+                android:layout_gravity="right|center_vertical"
+                android:layout_marginLeft="4dp"
+                android:background="@drawable/main_button"
+                android:src="@drawable/ci_arrowup" >
+        </ImageButton>
+
+        <ImageButton
+                android:id="@+id/types_down"
+                android:layout_width="42dp"
+                android:layout_height="42dp"
+                android:layout_gravity="right|center_vertical"
+                android:layout_marginLeft="4dp"
+                android:background="@drawable/main_button"
+                android:src="@drawable/ci_arrowdown" >
+        </ImageButton>
+
+        <ImageButton
+                    android:id="@+id/types_delete"
+                    android:layout_width="42dp"
+                    android:layout_height="42dp"
+                    android:layout_gravity="right|center_vertical"
+                    android:layout_marginLeft="4dp"
+                    android:background="@drawable/main_button"
+                    android:src="@drawable/ci_delsmall" >
+            </ImageButton>
+
+</LinearLayout>

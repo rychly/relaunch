@@ -2,12 +2,10 @@ package com.harasoft.relaunch;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.content.ActivityNotFoundException;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
-import android.widget.Toast;
 
 import java.util.*;
 
@@ -43,19 +41,6 @@ public class ListActions {
 		}
 	}
 
-	private void start(Intent i) {
-		if (i != null)
-			try {
-				act.startActivity(i);
-			} catch (ActivityNotFoundException e) {
-				Toast.makeText(
-						act,
-						app.getResources().getString(
-								R.string.jv_results_activity_not_found),
-						Toast.LENGTH_LONG).show();
-			}
-	}
-
 	public ListActions(ReLaunchApp application, Activity activity) {
 		app = application;
 		act = activity;
@@ -68,7 +53,7 @@ public class ListActions {
 		createItemsArray();
 		if (itemsArray.size() > 0) {
 			// exts dirs sorter
-			final class ExtsComparator implements Comparator<String> {
+			final class ExtsComparator implements java.util.Comparator<String> {
 				public int compare(String a, String b) {
 					if (a == null && b == null)
 						return 0;
@@ -115,11 +100,11 @@ public class ListActions {
 					}
 				}
 				if (dname.equals("")) {
-					dname = "/";
+					//dname = "/";
 					if (fname.equals("")) {
-						fname = "/";
+						//fname = "/";
 						sname = "/";
-						dname = "";
+						//dname = "";
 					}
 				}
 				lnames[i] = sname;
@@ -162,8 +147,7 @@ public class ListActions {
 		if (item.get("type").equals("dir")) {
 			Intent intent = new Intent(act, ReLaunch.class);
 			intent.putExtra("start_dir", fullName);
-			intent.putExtra("home", ReLaunch.useHome);
-			intent.putExtra("home1", ReLaunch.useHome1);
+			//intent.putExtra("home", ReLaunch.useHome);
 			act.startActivityForResult(intent, ReLaunch.DIR_ACT);
 		} else {
 			String fileName = item.get("fname");
@@ -172,46 +156,7 @@ public class ListActions {
 					app.defaultAction(act, fullName);
 				else {
 					// Launch reader
-					if (app.askIfAmbiguous) {
-						List<String> rdrs = app.readerNames(item.get("fname"));
-						if (rdrs.size() < 1)
-							return;
-						else if (rdrs.size() == 1)
-							start(app.launchReader(rdrs.get(0), fullName));
-						else {
-							final CharSequence[] applications = rdrs
-									.toArray(new CharSequence[rdrs.size()]);
-							CharSequence[] happlications = app.getApps()
-									.toArray(
-											new CharSequence[app.getApps()
-													.size()]);
-							for (int j = 0; j < happlications.length; j++) {
-								String happ = (String) happlications[j];
-								String[] happp = happ.split("\\%");
-								happlications[j] = happp[2];
-							}
-							final String rdr1 = fullName;
-							AlertDialog.Builder builder = new AlertDialog.Builder(
-									act);
-							// "Select application"
-							builder.setTitle(app.getResources().getString(
-									R.string.jv_results_select_application));
-							builder.setSingleChoiceItems(happlications, -1,
-									new DialogInterface.OnClickListener() {
-										public void onClick(
-												DialogInterface dialog, int i) {
-											start(app.launchReader(
-													(String) applications[i],
-													rdr1));
-											dialog.dismiss();
-										}
-									});
-							AlertDialog alert = builder.create();
-							alert.show();
-						}
-					} else
-						start(app.launchReader(app.readerName(fileName),
-								fullName));
+					app.LaunchReader(fullName);
 				}
 			}
 		}

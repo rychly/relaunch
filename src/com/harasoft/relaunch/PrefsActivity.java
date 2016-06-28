@@ -3,10 +3,7 @@ package com.harasoft.relaunch;
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.SharedPreferences;
+import android.content.*;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
 import android.os.SystemClock;
@@ -18,6 +15,7 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ListView;
 
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -28,11 +26,13 @@ public class PrefsActivity extends PreferenceActivity implements
 	final String TAG = "PreferenceActivity";
 	final static public int TYPES_ACT = 1;
 	final static public int FILTS_ACT = 2;
+	private static String BACKUP_DIR;
 
 	ReLaunchApp app;
 	List<String> applicationsArray;
 	CharSequence[] applications;
 	CharSequence[] happlications;
+    static boolean baseChange = false;
 
 	SharedPreferences prefs;
 	boolean do_pref_subrequest = true;
@@ -78,7 +78,7 @@ public class PrefsActivity extends PreferenceActivity implements
                 p.setSummary(listPref.getEntry() + prefs.getString(p.getKey()+"openN", "1"));
             }else if(listPref.getValue().equals("RUN")){
 
-                String[] appa = prefs.getString(p.getKey()+"app", "%%").split("\\%");
+                String[] appa = prefs.getString(p.getKey()+"app", "%%").split("%");
 
                 if(appa.length > 2 && appa[2] != null && appa[2].length() > 0){
                     p.setSummary(listPref.getEntry() + " \"" + appa[2] + "\"");
@@ -115,24 +115,23 @@ public class PrefsActivity extends PreferenceActivity implements
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		app = ((ReLaunchApp) getApplicationContext());
-		app.setFullScreenIfNecessary(this);
-
-		applicationsArray = app.getApps();
+        if(app == null) {
+            finish();
+        }
+        app.setFullScreenIfNecessary(this);
+		List<String>  applicationsArray = app.getAppList();
 		applications = applicationsArray.toArray(new CharSequence[applicationsArray.size()]);
-		happlications = app.getApps().toArray(new CharSequence[app.getApps().size()]);
-		for (int j = 0; j < happlications.length; j++) {
-			String happ = (String) happlications[j];
-			String[] happp = happ.split("\\%");
-			happlications[j] = happp[2];
-		}
+		happlications = app.getAppList().toArray(new CharSequence[app.getAppList().size()]);
 
         prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
 		super.onCreate(savedInstanceState);
 		addPreferencesFromResource(R.xml.prefs);
-
+		BACKUP_DIR = prefs.getString("backupDir", "/sdcard/.relaunch");
 		setContentView(R.layout.prefs_main);
-
 		PreferenceScreen prefAdvancedScreen = (PreferenceScreen) findPreference("screenAdvanced");
+        if(prefAdvancedScreen == null){
+            finish();
+        }
 		prefAdvancedScreen.setOnPreferenceClickListener(prefScreenListener);
 
 		for (int i = 0; i < prefAdvancedScreen.getPreferenceCount(); i++) {
@@ -142,6 +141,8 @@ public class PrefsActivity extends PreferenceActivity implements
             }
 		}
 
+        //---------------------
+
 		// Save items value
 //		setDefaults();
 
@@ -149,7 +150,7 @@ public class PrefsActivity extends PreferenceActivity implements
 
 		findViewById(R.id.LLbuttons).setVisibility(View.GONE);
 
-		findPreference("cleanupDatabase").setOnPreferenceClickListener(
+		findPreference("cleanupDatabaseBooks").setOnPreferenceClickListener(
 				new Preference.OnPreferenceClickListener() {
 					public boolean onPreferenceClick(Preference pref) {
 						AlertDialog.Builder builder = new AlertDialog.Builder(
@@ -163,7 +164,14 @@ public class PrefsActivity extends PreferenceActivity implements
 								new DialogInterface.OnClickListener() {
 									public void onClick(DialogInterface dialog,
 											int whichButton) {
-										app.dataBase.resetDb();
+										String[] DBlist = databaseList();
+										File DBf;
+										for (String aDBlist : DBlist) {
+											DBf = getDatabasePath(aDBlist);
+											if (DBf.getName().equals("BOOKS.db")) {
+												DBf.delete();
+											}
+										}
 										dialog.dismiss();
 									}
 								});
@@ -180,6 +188,157 @@ public class PrefsActivity extends PreferenceActivity implements
 						return true;
 					}
 				});
+        findPreference("cleanupDatabaseOPDS").setOnPreferenceClickListener(
+                new Preference.OnPreferenceClickListener() {
+                    public boolean onPreferenceClick(Preference pref) {
+                        AlertDialog.Builder builder = new AlertDialog.Builder(
+                                PrefsActivity.this);
+                        builder.setTitle(getResources().getString(
+                                R.string.jv_prefs_cleanup_database_title));
+                        builder.setMessage(getResources().getString(
+                                R.string.jv_prefs_cleanup_databaseOPDS_text));
+                        builder.setPositiveButton(
+                                getResources().getString(R.string.app_yes),
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog,
+                                                        int whichButton) {
+										String[] DBlist = databaseList();
+										File DBf;
+										for (String aDBlist : DBlist) {
+											DBf = getDatabasePath(aDBlist);
+											if (DBf.getName().equals("OPDS.db")) {
+												DBf.delete();
+											}
+										}
+                                        dialog.dismiss();
+                                    }
+                                });
+                        builder.setNegativeButton(
+                                getResources().getString(
+                                        R.string.app_no),
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog,
+                                                        int whichButton) {
+                                        dialog.dismiss();
+                                    }
+                                });
+                        builder.show();
+                        return true;
+                    }
+                });
+        findPreference("cleanupDatabaseFTP").setOnPreferenceClickListener(
+                new Preference.OnPreferenceClickListener() {
+                    public boolean onPreferenceClick(Preference pref) {
+                        AlertDialog.Builder builder = new AlertDialog.Builder(
+                                PrefsActivity.this);
+                        builder.setTitle(getResources().getString(
+                                R.string.jv_prefs_cleanup_database_title));
+                        builder.setMessage(getResources().getString(
+                                R.string.jv_prefs_cleanup_databaseFTP_text));
+                        builder.setPositiveButton(
+                                getResources().getString(R.string.app_yes),
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog,
+                                                        int whichButton) {
+										String[] DBlist = databaseList();
+										File DBf;
+										for (String aDBlist : DBlist) {
+											DBf = getDatabasePath(aDBlist);
+											if (DBf.getName().equals("FTP.db")) {
+												DBf.delete();
+											}
+										}
+                                        dialog.dismiss();
+                                    }
+                                });
+                        builder.setNegativeButton(
+                                getResources().getString(
+                                        R.string.app_no),
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog,
+                                                        int whichButton) {
+                                        dialog.dismiss();
+                                    }
+                                });
+                        builder.show();
+                        return true;
+                    }
+                });
+		findPreference("cleanupDatabasePANELS").setOnPreferenceClickListener(
+				new Preference.OnPreferenceClickListener() {
+					public boolean onPreferenceClick(Preference pref) {
+						AlertDialog.Builder builder = new AlertDialog.Builder(
+								PrefsActivity.this);
+						builder.setTitle(getResources().getString(
+								R.string.jv_prefs_cleanup_database_title));
+						builder.setMessage(getResources().getString(
+								R.string.jv_prefs_cleanup_databasePANELS_text));
+						builder.setPositiveButton(
+								getResources().getString(R.string.app_yes),
+								new DialogInterface.OnClickListener() {
+									public void onClick(DialogInterface dialog,
+														int whichButton) {
+										String[] DBlist = databaseList();
+										File DBf;
+										for (String aDBlist : DBlist) {
+											DBf = getDatabasePath(aDBlist);
+											if (DBf.getName().equals("PANELS.db") || DBf.getName().equals("SCREEN.db") || DBf.getName().equals("LIST_PANELS.db")) {
+												DBf.delete();
+											}
+										}
+										PrefsActivity.baseChange = true;
+										dialog.dismiss();
+									}
+								});
+						builder.setNegativeButton(
+								getResources().getString(
+										R.string.app_no),
+								new DialogInterface.OnClickListener() {
+									public void onClick(DialogInterface dialog,
+														int whichButton) {
+										dialog.dismiss();
+									}
+								});
+						builder.show();
+						return true;
+					}
+				});
+        findPreference("deleteDatabaseAll").setOnPreferenceClickListener(
+                new Preference.OnPreferenceClickListener() {
+                    public boolean onPreferenceClick(Preference pref) {
+                        AlertDialog.Builder builder = new AlertDialog.Builder(
+                                PrefsActivity.this);
+                        builder.setTitle(getResources().getString(
+                                R.string.jv_prefs_cleanup_database_title));
+                        builder.setMessage(getResources().getString(
+                                R.string.jv_prefs_delete_databaseALL_text));
+                        builder.setPositiveButton(
+                                getResources().getString(R.string.app_yes),
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog,
+                                                        int whichButton) {
+                                        String[] DBlist = databaseList();
+                                        File DBf;
+										for (String aDBlist : DBlist) {
+											DBf = getDatabasePath(aDBlist);
+											DBf.delete();
+										}
+                                        dialog.dismiss();
+                                    }
+                                });
+                        builder.setNegativeButton(
+                                getResources().getString(
+                                        R.string.app_no),
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog,
+                                                        int whichButton) {
+                                        dialog.dismiss();
+                                    }
+                                });
+                        builder.show();
+                        return true;
+                    }
+                });
 
 		findPreference("cleanupLRU").setOnPreferenceClickListener(
 				new Preference.OnPreferenceClickListener() {
@@ -248,8 +407,7 @@ public class PrefsActivity extends PreferenceActivity implements
 		findPreference("fileFilter").setOnPreferenceClickListener(
 				new Preference.OnPreferenceClickListener() {
 					public boolean onPreferenceClick(Preference pref) {
-						Intent intent = new Intent(PrefsActivity.this,
-								FiltersActivity.class);
+						Intent intent = new Intent(PrefsActivity.this, FiltersActivity.class);
 						startActivityForResult(intent, FILTS_ACT);
 						return true;
 					}
@@ -258,12 +416,19 @@ public class PrefsActivity extends PreferenceActivity implements
 		findPreference("fileAssociations").setOnPreferenceClickListener(
 				new Preference.OnPreferenceClickListener() {
 					public boolean onPreferenceClick(Preference pref) {
-						Intent intent = new Intent(PrefsActivity.this,
-								TypesActivity.class);
+						Intent intent = new Intent(PrefsActivity.this, TypesActivity.class);
 						startActivityForResult(intent, TYPES_ACT);
 						return true;
 					}
 				});
+        findPreference("screenManualPanel").setOnPreferenceClickListener(
+                new Preference.OnPreferenceClickListener() {
+                    public boolean onPreferenceClick(Preference pref) {
+                        Intent intent = new Intent(PrefsActivity.this, ScreenSettingActivity.class);
+                        startActivityForResult(intent, TYPES_ACT);
+                        return true;
+                    }
+                });
 
 		findPreference("resetSettings").setOnPreferenceClickListener(
 				new Preference.OnPreferenceClickListener() {
@@ -305,10 +470,8 @@ public class PrefsActivity extends PreferenceActivity implements
 		findPreference("saveSettings").setOnPreferenceClickListener(
 				new Preference.OnPreferenceClickListener() {
 					public boolean onPreferenceClick(Preference pref) {
-						boolean ret = app.copyPrefs(app.DATA_DIR,
-                                ReLaunch.BACKUP_DIR);
-						AlertDialog.Builder builder = new AlertDialog.Builder(
-								context);
+						boolean ret = app.copyPrefs(app.DATA_DIR, BACKUP_DIR);
+						AlertDialog.Builder builder = new AlertDialog.Builder(context);
 						if (ret) {
 							builder.setTitle(getResources().getString(
 									R.string.jv_prefs_rsr_ok_title));
@@ -336,8 +499,7 @@ public class PrefsActivity extends PreferenceActivity implements
 		findPreference("loadSettings").setOnPreferenceClickListener(
 				new Preference.OnPreferenceClickListener() {
 					public boolean onPreferenceClick(Preference pref) {
-						boolean ret = app.copyPrefs(ReLaunch.BACKUP_DIR,
-								app.DATA_DIR);
+						boolean ret = app.copyPrefs(BACKUP_DIR,	app.DATA_DIR);
 						AlertDialog.Builder builder = new AlertDialog.Builder(
 								context);
 						if (ret) {
@@ -373,9 +535,7 @@ public class PrefsActivity extends PreferenceActivity implements
 				new Preference.OnPreferenceClickListener() {
 					public boolean onPreferenceClick(Preference pref) {
 						AlarmManager mgr = (AlarmManager) getSystemService(ALARM_SERVICE);
-						mgr.set(AlarmManager.RTC,
-								System.currentTimeMillis() + 500,
-								app.RestartIntent);
+						mgr.set(AlarmManager.RTC, System.currentTimeMillis() + 500, app.RestartIntent);
 						System.exit(0);
 						return true;
 					}
@@ -384,8 +544,7 @@ public class PrefsActivity extends PreferenceActivity implements
 		// final Activity pact = this;
 
 		// back button - work as cancel
-		( findViewById(R.id.back_btn))
-				.setOnClickListener(new View.OnClickListener() {
+		( findViewById(R.id.back_btn)).setOnClickListener(new View.OnClickListener() {
 					public void onClick(View v) {
 						if (isPreferencesChanged()) {
 							AlertDialog.Builder builder = new AlertDialog.Builder(
@@ -447,13 +606,13 @@ public class PrefsActivity extends PreferenceActivity implements
 		}
 
 		ScreenOrientation.set(this, prefs);
+		// доступность кнопок листания настроек
 	}
 
 	@Override
 	protected void onResume() {
 		super.onResume();
-		getPreferenceScreen().getSharedPreferences()
-				.registerOnSharedPreferenceChangeListener(this);
+		getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
 		app.generalOnResume(TAG);
 	}
 
@@ -497,41 +656,28 @@ public class PrefsActivity extends PreferenceActivity implements
 				String value = sharedPreferences.getString(key, "UNKNOWN");
 				if (value.equals("LAUNCHER")) {
 					do_pref_subrequest = false;
-					((CheckBoxPreference) findPreference("fullScreen"))
-							.setChecked(true);
-					((CheckBoxPreference) findPreference("homeMode"))
-							.setChecked(true);
-					((CheckBoxPreference) findPreference("libraryMode"))
-							.setChecked(true);
-					((CheckBoxPreference) findPreference("shopMode"))
-							.setChecked(true);
+					((CheckBoxPreference) findPreference("fullScreen")).setChecked(true);
+					((CheckBoxPreference) findPreference("homeMode")).setChecked(true);
+					((CheckBoxPreference) findPreference("libraryMode")).setChecked(true);
+					((CheckBoxPreference) findPreference("shopMode")).setChecked(true);
 					do_pref_subrequest = false;
 				} else if (value.equals("PROGRAM")) {
 					do_pref_subrequest = false;
-					((CheckBoxPreference) findPreference("fullScreen"))
-							.setChecked(false);
-					((CheckBoxPreference) findPreference("homeMode"))
-							.setChecked(false);
-					((CheckBoxPreference) findPreference("libraryMode"))
-							.setChecked(false);
-					((CheckBoxPreference) findPreference("shopMode"))
-							.setChecked(false);
+					((CheckBoxPreference) findPreference("fullScreen")).setChecked(false);
+					((CheckBoxPreference) findPreference("homeMode")).setChecked(false);
+					((CheckBoxPreference) findPreference("libraryMode")).setChecked(false);
+					((CheckBoxPreference) findPreference("shopMode")).setChecked(false);
 					do_pref_subrequest = true;
 				}
 			} else if (key.equals("workMode")) {
 				String value = sharedPreferences.getString(key, "UNKNOWN");
 				if (value.equals("FILES")) {
 					do_pref_subrequest = false;
-					((CheckBoxPreference) findPreference("showBookTitles"))
-							.setChecked(false);
-					((CheckBoxPreference) findPreference("rowSeparator"))
-							.setChecked(false);
-					((CheckBoxPreference) findPreference("useFileManagerFunctions"))
-							.setChecked(true);
-					((CheckBoxPreference) findPreference("openWith"))
-					.setChecked(true);
-					((CheckBoxPreference) findPreference("showFullDirPath"))
-					.setChecked(true);
+					((CheckBoxPreference) findPreference("showBookTitles")).setChecked(false);
+					((CheckBoxPreference) findPreference("rowSeparator")).setChecked(false);
+					((CheckBoxPreference) findPreference("useFileManagerFunctions")).setChecked(true);
+					((CheckBoxPreference) findPreference("openWith")).setChecked(true);
+					((CheckBoxPreference) findPreference("showFullDirPath")).setChecked(true);
 					SharedPreferences.Editor editor = prefs.edit();
 					editor.putInt("sortMode", 0);
 					editor.putBoolean("showBookTitles", false);
@@ -543,16 +689,11 @@ public class PrefsActivity extends PreferenceActivity implements
 					do_pref_subrequest = true;
 				} else if (value.equals("BOOKS")) {
 					do_pref_subrequest = false;
-					((CheckBoxPreference) findPreference("showBookTitles"))
-							.setChecked(true);
-					((CheckBoxPreference) findPreference("rowSeparator"))
-							.setChecked(true);
-					((CheckBoxPreference) findPreference("useFileManagerFunctions"))
-							.setChecked(false);
-					((CheckBoxPreference) findPreference("openWith"))
-							.setChecked(false);
-					((CheckBoxPreference) findPreference("showFullDirPath"))
-					.setChecked(false);
+					((CheckBoxPreference) findPreference("showBookTitles")).setChecked(true);
+					((CheckBoxPreference) findPreference("rowSeparator")).setChecked(true);
+					((CheckBoxPreference) findPreference("useFileManagerFunctions")).setChecked(false);
+					((CheckBoxPreference) findPreference("openWith")).setChecked(false);
+					((CheckBoxPreference) findPreference("showFullDirPath")).setChecked(false);
 					SharedPreferences.Editor editor = prefs.edit();
 					editor.putInt("sortMode", 2);
 					editor.putBoolean("showBookTitles", true);
@@ -566,32 +707,26 @@ public class PrefsActivity extends PreferenceActivity implements
 			} else if (key.equals("screenUpdateMode")) {
 				boolean value = sharedPreferences.getBoolean(key, true);
 				if (value) {
-					((ListPreference) findPreference("einkUpdateMode"))
-							.setValueIndex(2);
+					((ListPreference) findPreference("einkUpdateMode")).setValueIndex(2);
 				} else {
-					((ListPreference) findPreference("einkUpdateMode"))
-							.setValueIndex(1);
+					((ListPreference) findPreference("einkUpdateMode")).setValueIndex(1);
 				}
 			} else if (key.equals("fileFontSize")) {
 				do_pref_subrequest = false;
 				String sValue = sharedPreferences.getString("fileFontSize", "20");
-				int f1Size = new Integer(sValue);
+				int f1Size = Integer.valueOf(sValue);
 				int f2Size = f1Size*4/5;
-				((EditTextPreference) findPreference("firstLineFontSizePx"))
-					.setText(((Integer) f1Size).toString());
-				((EditTextPreference) findPreference("secondLineFontSizePx"))
-					.setText(((Integer) f2Size).toString());
+				((EditTextPreference) findPreference("firstLineFontSizePx")).setText(((Integer) f1Size).toString());
+				((EditTextPreference) findPreference("secondLineFontSizePx")).setText(((Integer) f2Size).toString());
 				do_pref_subrequest = true;
 			}
 
-			if ((key.equals("fullScreen")) || (key.equals("homeMode"))
-					|| (key.equals("libraryMode")) || (key.equals("shopMode"))) {
+			if ((key.equals("fullScreen")) || (key.equals("homeMode")) || (key.equals("libraryMode")) || (key.equals("shopMode"))) {
 				do_pref_subrequest = false;
 				((ListPreference) findPreference("startMode")).setValueIndex(2);
 				do_pref_subrequest = true;
 			}
-			if ((key.equals("showBookTitles"))
-					|| (key.equals("useFileManagerFunctions"))) {
+			if ((key.equals("showBookTitles")) || (key.equals("useFileManagerFunctions"))) {
 				do_pref_subrequest = false;
 				((ListPreference) findPreference("workMode")).setValueIndex(2);
 				do_pref_subrequest = true;
@@ -601,10 +736,10 @@ public class PrefsActivity extends PreferenceActivity implements
             //=======================================================================================================
             if (key.equals("dropboxSetButton")) {
                 checkSetDropboxAndOpds("dropboxSetButton", sharedPreferences.getString(key, "none"), sharedPreferences);
-
             }else if (key.equals("opdsSetButton")) {
                 checkSetDropboxAndOpds("opdsSetButton", sharedPreferences.getString(key, "none"), sharedPreferences);
-
+            }else if (key.equals("ftpSetButton")) {
+                checkSetDropboxAndOpds("ftpSetButton", sharedPreferences.getString(key, "none"), sharedPreferences);
             }else if(key.equals("homeButtonST") || key.equals("homeButtonDT") || key.equals("homeButtonLT") ||
                     key.equals("lruButtonST") || key.equals("lruButtonDT") || key.equals("lruButtonLT") ||
                     key.equals("favButtonST") || key.equals("favButtonDT") || key.equals("favButtonLT") ||
@@ -727,7 +862,20 @@ public class PrefsActivity extends PreferenceActivity implements
 
 			final ListView prefListView = (ListView) prefView.findViewById(android.R.id.list);
 			prefScreen.bind(prefListView);
+			// доступность кнопок листания настроек------------
+			int total = prefListView.getCount();
+			int last = prefListView.getLastVisiblePosition();
 
+			final ImageButton upBtn = (ImageButton) prefView.findViewById(R.id.btn_scrollup);
+			final ImageButton downBtn = (ImageButton) prefView.findViewById(R.id.btn_scrolldown);
+
+			upBtn.setEnabled(false);
+			upBtn.setImageDrawable(getResources().getDrawable(R.drawable.ci_arrowup_gray));
+			if (last == total -1){
+				downBtn.setEnabled(false);
+				downBtn.setImageDrawable(getResources().getDrawable(R.drawable.ci_arrowdown_gray));
+			}
+			//-------------------------------------------------
 			EditText tEdit = (EditText) prefView.findViewById(R.id.prefernces_title);
 			tEdit.setText(pref.getTitle());
 
@@ -742,6 +890,22 @@ public class PrefsActivity extends PreferenceActivity implements
 			bu.setOnClickListener(new View.OnClickListener() {
 
 				public void onClick(View v) {
+					int first = prefListView.getFirstVisiblePosition();
+					int total = prefListView.getCount();
+					int last = prefListView.getLastVisiblePosition();
+					int visible = last - first + 1;
+					first -= visible;
+					if (first < 0) {
+						first = 0;
+					}
+					if (total != first + visible + 1) {
+						downBtn.setEnabled(true);
+						downBtn.setImageDrawable(getResources().getDrawable(R.drawable.ci_arrowdown));
+					}
+					if (first == 0){
+						upBtn.setEnabled(false);
+						upBtn.setImageDrawable(getResources().getDrawable(R.drawable.ci_arrowup_gray));
+					}
 					if (N2DeviceInfo.EINK_NOOK) {
 						MotionEvent ev;
 						ev = MotionEvent.obtain(SystemClock.uptimeMillis(),
@@ -758,12 +922,6 @@ public class PrefsActivity extends PreferenceActivity implements
 								MotionEvent.ACTION_UP, 200, 200, 0);
 						prefListView.dispatchTouchEvent(ev);
 					} else {
-						int first = prefListView.getFirstVisiblePosition();
-						int visible = prefListView.getLastVisiblePosition()
-								- prefListView.getFirstVisiblePosition() + 1;
-						first -= visible;
-						if (first < 0)
-							first = 0;
 						final int finfirst = first;
 						prefListView.clearFocus();
 						prefListView.post(new Runnable() {
@@ -773,14 +931,31 @@ public class PrefsActivity extends PreferenceActivity implements
 							}
 						});
 					}
+
+
+
 				}
 			});
 
-			ImageButton bd = (ImageButton) prefView
-					.findViewById(R.id.btn_scrolldown);
+			ImageButton bd = (ImageButton) prefView.findViewById(R.id.btn_scrolldown);
 			bd.setOnClickListener(new View.OnClickListener() {
 
 				public void onClick(View v) {
+					int first = prefListView.getFirstVisiblePosition();
+					int total = prefListView.getCount();
+					int last = prefListView.getLastVisiblePosition();
+					int target = last + 1;
+					if (target > (total - 1)){
+						target = total - 1;
+					}
+					if (target + (last - first) > total - 1) {
+						downBtn.setEnabled(false);
+						downBtn.setImageDrawable(getResources().getDrawable(R.drawable.ci_arrowdown_gray));
+					}
+					if (target > 0){
+						upBtn.setEnabled(true);
+						upBtn.setImageDrawable(getResources().getDrawable(R.drawable.ci_arrowup));
+					}
 					if (N2DeviceInfo.EINK_NOOK) {
 						MotionEvent ev;
 						ev = MotionEvent.obtain(SystemClock.uptimeMillis(),
@@ -797,20 +972,17 @@ public class PrefsActivity extends PreferenceActivity implements
 								MotionEvent.ACTION_UP, 200, 100, 0);
 						prefListView.dispatchTouchEvent(ev);
 					} else {
-						int total = prefListView.getCount();
-						int last = prefListView.getLastVisiblePosition();
-						if (total == last + 1)
-							return;
-						int target = last + 1;
-						if (target > (total - 1))
-							target = total - 1;
-						final int ftarget = target;
-						prefListView.clearFocus();
-						prefListView.post(new Runnable() {
-							public void run() {
-								prefListView.setSelection(ftarget);
-							}
-						});
+						if (total != last + 1) {
+
+
+							final int ftarget = target;
+							prefListView.clearFocus();
+							prefListView.post(new Runnable() {
+								public void run() {
+									prefListView.setSelection(ftarget);
+								}
+							});
+						}
 					}
 
 				}
@@ -833,6 +1005,9 @@ public class PrefsActivity extends PreferenceActivity implements
 				break;
 			}
 		}
+        if (baseChange){
+            changed = true;
+        }
 		return changed;
 	}
 
@@ -880,7 +1055,8 @@ public class PrefsActivity extends PreferenceActivity implements
                                 "appAllButtonDT", "appAllButtonLT",
                                 "appLastButtonDT", "appLastButtonLT",
                                 "searchButtonDT", "searchButtonLT",
-                                "opdsSetButton", "dropboxSetButton"};
+                                "opdsSetButton", "dropboxSetButton",
+                                "ftpSetButton"};
         boolean f_butt = false;
         for (String aButtonName : buttonName) {
             if (aButtonName.equals(button)) {
@@ -894,6 +1070,7 @@ public class PrefsActivity extends PreferenceActivity implements
 
         boolean newOPDS = false;
         boolean newDropbox = false;
+        boolean newFTP = false;
         SharedPreferences.Editor editor = prefs.edit();
 
         if("OPDS".equals(key)){
@@ -902,7 +1079,10 @@ public class PrefsActivity extends PreferenceActivity implements
         if("DROPBOX".equals(key)){
             newDropbox = true;
         }
-        if(!"dropboxSetButton".equals(button) && !"opdsSetButton".equals(button)){
+        if("FTP".equals(key)){
+            newFTP = true;
+        }
+        if(!"dropboxSetButton".equals(button) && !"opdsSetButton".equals(button) && !"ftpSetButton".equals(button)){
             // действия при выборе из меню кнопок экрана
             do_pref_subrequest = false;
             String tempValue = ((ListPreference) findPreference("dropboxSetButton")).getValue();
@@ -918,9 +1098,15 @@ public class PrefsActivity extends PreferenceActivity implements
                     editor.putString("opdsSetButton", "NOTHING");
                 }
             }
+            if(button.equals(((ListPreference) findPreference("ftpSetButton")).getValue())){
+                if(!key.equals("OPDS")){
+                    ((ListPreference) findPreference("ftpSetButton")).setValueIndex(0);
+                    editor.putString("ftpSetButton", "NOTHING");
+                }
+            }
 
             // если новые настройки
-            if(newDropbox || newOPDS){
+            if(newDropbox || newOPDS || newFTP){
                 //сбрасываем на всех остальных настройки
                 for (int i = 0, j=buttonName.length; i < j; i++) {
                     if(!buttonName[i].equals(button)){
@@ -938,6 +1124,10 @@ public class PrefsActivity extends PreferenceActivity implements
                             ((ListPreference) findPreference("dropboxSetButton")).setValueIndex(i);
                             editor.putString("dropboxSetButton",buttonName[i]);
                         }
+                        if(newFTP){
+                            ((ListPreference) findPreference("ftpSetButton")).setValueIndex(i);
+                            editor.putString("ftpSetButton",buttonName[i]);
+                        }
                     }
                 }
             }
@@ -947,28 +1137,48 @@ public class PrefsActivity extends PreferenceActivity implements
             // действия при выборе в самих настройках модулей
             do_pref_subrequest = false;
             int indexValue = 0;
-            if("dropboxSetButton".equals(button)){
+            if("dropboxSetButton".equals(button)){// если нажат выбор действия для DROPBOX
                 indexValue = ((ListPreference) findPreference(key)).findIndexOfValue("DROPBOX");
                 editor.putString(key, "DROPBOX");
                 if(sharedPreferences.getString("opdsSetButton", "none").equals(key)){
                     ((ListPreference) findPreference("opdsSetButton")).setValueIndex(0);
                     editor.putString("opdsSetButton", "NOTHING");
                 }
+                if(sharedPreferences.getString("ftpSetButton", "none").equals(key)){
+                    ((ListPreference) findPreference("ftpSetButton")).setValueIndex(0);
+                    editor.putString("ftpSetButton", "NOTHING");
+                }
                 button = key;
                 key = "DROPBOX";
-            }
-            if("opdsSetButton".equals(button)){
+            }else if("opdsSetButton".equals(button)){// если нажат выбор действия для OPDS
                 indexValue = ((ListPreference) findPreference(key)).findIndexOfValue("OPDS");
                 editor.putString(key, "OPDS");
                 if(sharedPreferences.getString("dropboxSetButton", "none").equals(key)){
                     ((ListPreference) findPreference("dropboxSetButton")).setValueIndex(0);
                     editor.putString("dropboxSetButton", "NOTHING");
                 }
+                if(sharedPreferences.getString("ftpSetButton", "none").equals(key)){
+                    ((ListPreference) findPreference("ftpSetButton")).setValueIndex(0);
+                    editor.putString("ftpSetButton", "NOTHING");
+                }
                 button = key;
                 key = "OPDS";
+            }else if("ftpSetButton".equals(button)){// если нажат выбор действия для FTP
+                indexValue = ((ListPreference) findPreference(key)).findIndexOfValue("FTP");
+                editor.putString(key, "FTP");
+                if(sharedPreferences.getString("dropboxSetButton", "none").equals(key)){
+                    ((ListPreference) findPreference("dropboxSetButton")).setValueIndex(0);
+                    editor.putString("dropboxSetButton", "NOTHING");
+                }
+                if(sharedPreferences.getString("opdsSetButton", "none").equals(key)){
+                    ((ListPreference) findPreference("opdsSetButton")).setValueIndex(0);
+                    editor.putString("opdsSetButton", "NOTHING");
+                }
+                button = key;
+                key = "FTP";
             }
             //сбрасываем на всех остальных настройки
-            if("OPDS".equals(key) || "DROPBOX".equals(key)){
+            if("OPDS".equals(key) || "DROPBOX".equals(key) || "FTP".equals(key)){
                 for (String aButtonName : buttonName) {
                     if (!aButtonName.equals(button)) {
                         // сбрасываем настройки если совпадают с проверяемыми
@@ -985,5 +1195,6 @@ public class PrefsActivity extends PreferenceActivity implements
         }
 
     }
+
 
 }

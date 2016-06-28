@@ -32,8 +32,8 @@ import java.util.*;
 
 public class TaskManager extends Activity {
 	final String TAG = "TaskManager";
-	final int DIALOG_TASK_DETAILS = 1;
-	final int DIALOG_SERVICE_DETAILS = 2;
+	//final int DIALOG_TASK_DETAILS = 1;
+	//final int DIALOG_SERVICE_DETAILS = 2;
 
 	String[] doNotKillLabels;
 	String[] doNotKillNames;
@@ -126,7 +126,7 @@ public class TaskManager extends Activity {
 	HashMap<Integer, PInfo> newPinfo;
 
 
-	public class cpuComparator implements Comparator<Integer> {
+	public class cpuComparator implements java.util.Comparator<Integer> {
 		public int compare(Integer o1, Integer o2) {
 			PInfo p1 = pinfo.get(o1);
 			PInfo p2 = pinfo.get(o2);
@@ -146,7 +146,7 @@ public class TaskManager extends Activity {
 		}
 	}
 
-	public class sizeComparator implements Comparator<Integer> {
+	public class sizeComparator implements java.util.Comparator<Integer> {
 		public int compare(Integer o1, Integer o2) {
 			PInfo p1 = pinfo.get(o1);
 			PInfo p2 = pinfo.get(o2);
@@ -162,7 +162,7 @@ public class TaskManager extends Activity {
 		}
 	}
 
-	public class abcComparator implements Comparator<Integer> {
+	public class abcComparator implements java.util.Comparator<Integer> {
 		public int compare(Integer o1, Integer o2) {
 			PInfo p1 = pinfo.get(o1);
 			PInfo p2 = pinfo.get(o2);
@@ -502,7 +502,8 @@ public class TaskManager extends Activity {
 								+ getResources().getString(
 										R.string.jv_taskman_free)
 								+ " <b>"
-								+ memUsage / 1048576 + "</b>M"),
+								+ memUsage / 1048576
+                                + "</b>M"),
 						TextView.BufferType.SPANNABLE);
 				title2.setText(Html.fromHtml("<b>" + CPUUsage + "</b>%"),
 						TextView.BufferType.SPANNABLE);
@@ -539,6 +540,7 @@ public class TaskManager extends Activity {
 					+ Long.parseLong(toks[6]) + Long.parseLong(toks[7])
 					+ Long.parseLong(toks[8]);
 		} catch (IOException ex) {
+			//emply
 		}
 	}
 
@@ -615,20 +617,20 @@ public class TaskManager extends Activity {
 		((TextView) dialog.findViewById(R.id.tm1_label)).setText(p.label);
 		((TextView) dialog.findViewById(R.id.tm1_name)).setText(p.name);
 		((TextView) dialog.findViewById(R.id.tm1_extra)).setText(p.extra);
-		((Button) dialog.findViewById(R.id.tm1_ok))
-				.setOnClickListener(new OnClickListener() {
+		(dialog.findViewById(R.id.tm1_ok)).setOnClickListener(new View.OnClickListener() {
 					public void onClick(View v) {
 						dialog.dismiss();
 					}
 				});
 		Button killBtn = (Button) dialog.findViewById(R.id.tm1_kill);
-		killBtn.setOnClickListener(new OnClickListener() {
+		killBtn.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				try {
 					ActivityManager am = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
 					ApplicationInfo ai = pm.getApplicationInfo(localName, 0);
 					am.restartPackage(ai.packageName);
 				} catch (PackageManager.NameNotFoundException e) {
+					//emply
 				}
 
 				dialog.dismiss();
@@ -687,13 +689,13 @@ public class TaskManager extends Activity {
 				.setText(p.clientLabel);
 		((TextView) dialog.findViewById(R.id.tm2_clientd)).setText(p.descr);
 		((Button) dialog.findViewById(R.id.tm2_ok))
-				.setOnClickListener(new OnClickListener() {
+				.setOnClickListener(new View.OnClickListener() {
 					public void onClick(View v) {
 						dialog.dismiss();
 					}
 				});
 		Button killBtn = (Button) dialog.findViewById(R.id.tm2_kill);
-		killBtn.setOnClickListener(new OnClickListener() {
+		killBtn.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				try {
 					ActivityManager am = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
@@ -915,26 +917,19 @@ public class TaskManager extends Activity {
 				switch (pi.imp) {
 				case 1:
 					SpannableString s = new SpannableString(label);
-					s.setSpan(new StyleSpan(Typeface.BOLD), 0, label.length(),
-							0);
-					tv1.setBackgroundColor(getResources().getColor(
-							R.color.foreground_task_bg));
-					tv1.setTextColor(getResources().getColor(
-							R.color.foreground_task_fg));
+					s.setSpan(new StyleSpan(Typeface.BOLD), 0, label.length(),0);
+					tv1.setBackgroundColor(getResources().getColor(R.color.foreground_task_bg));
+					tv1.setTextColor(getResources().getColor(R.color.foreground_task_fg));
 					tv1.setText(s);
 					break;
 				case 2:
-					tv1.setBackgroundColor(getResources().getColor(
-							R.color.background_task_bg));
-					tv1.setTextColor(getResources().getColor(
-							R.color.backgorund_task_fg));
+					tv1.setBackgroundColor(getResources().getColor(R.color.background_task_bg));
+					tv1.setTextColor(getResources().getColor(R.color.backgorund_task_fg));
 					tv1.setText(label);
 					break;
 				case 3:
-					tv1.setBackgroundColor(getResources().getColor(
-							R.color.nonactive_task_bg));
-					tv1.setTextColor(getResources().getColor(
-							R.color.nonactive_task_fg));
+					tv1.setBackgroundColor(getResources().getColor(R.color.nonactive_task_bg));
+					tv1.setTextColor(getResources().getColor(R.color.nonactive_task_fg));
 					tv1.setText(label);
 					break;
 				}
@@ -951,8 +946,7 @@ public class TaskManager extends Activity {
 								+ pi.mem + "</b>K"),
 						TextView.BufferType.SPANNABLE);
 				if (pi.icon == null)
-					iv.setImageDrawable(getResources().getDrawable(
-							android.R.drawable.sym_def_app_icon));
+					iv.setImageDrawable(getResources().getDrawable(android.R.drawable.sym_def_app_icon));
 				else
 					iv.setImageDrawable(pi.icon);
 			}
@@ -968,7 +962,10 @@ public class TaskManager extends Activity {
         EinkScreen.setEinkController(prefs);
 
 		app = ((ReLaunchApp) getApplicationContext());
-		app.setFullScreenIfNecessary(this);
+        if(app == null ) {
+            finish();
+        }
+        app.setFullScreenIfNecessary(this);
 		pm = getPackageManager();
 		setContentView(R.layout.taskmanager_layout);
 
@@ -1092,25 +1089,25 @@ public class TaskManager extends Activity {
 		tasks_title = (TextView) findViewById(R.id.tm_tasks_title);
 		serv_title = (TextView) findViewById(R.id.tm_services_title);
 		((ImageButton) findViewById(R.id.tm_back))
-				.setOnClickListener(new OnClickListener() {
+				.setOnClickListener(new View.OnClickListener() {
 					public void onClick(View v) {
 						finish();
 					}
 				});
 		sortSizeBtn = (Button) findViewById(R.id.sort_size);
-		sortSizeBtn.setOnClickListener(new OnClickListener() {
+		sortSizeBtn.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				setSorting(sortSize);
 			}
 		});
 		sortCpuBtn = (Button) findViewById(R.id.sort_cpu);
-		sortCpuBtn.setOnClickListener(new OnClickListener() {
+		sortCpuBtn.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				setSorting(sortCpu);
 			}
 		});
 		sortAbcBtn = (Button) findViewById(R.id.sort_abc);
-		sortAbcBtn.setOnClickListener(new OnClickListener() {
+		sortAbcBtn.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				setSorting(sortAbc);
 			}

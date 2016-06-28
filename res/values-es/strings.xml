@@ -5,6 +5,7 @@
     <string name="app_cancel">Cancelar</string>
     <string name="app_yes">SÍ</string>
     <string name="app_no">NO</string>
+    <string name="app_and">Y</string>
 
     <string name="app_settings_opds">OPDS</string>
     <string name="app_settings_dropbox">Dropbox</string>
@@ -41,10 +42,8 @@
 	<string name="editor_layout_viewtitle">== EDICIÓN ==</string>
 	<string name="filters_item_layout_rule">Condición:</string>
 	<string name="filters_item_layout_value">Valor:</string>
-	<string name="filters_item_layout_and">Y</string>
 	<string name="filters_view_layout_title">Filtrar ajustes</string>
 	<string name="filters_view_layout_add_new">Añadir nuevo</string>
-	<string name="filters_view_layout_and">Y</string>
 	<string name="main_launcher_nb_layout_go_one_level_up">Subir un nivel</string>
 	<string name="main_launcher_nb_layout_memory">Memoria</string>
 	<string name="main_launcher_nb_layout_mem">Mem:</string>
@@ -126,7 +125,6 @@
 	<string name="jv_editor_file_too_big">Archivo demasiado grande</string>
 	<string name="jv_editor_file">Archivo</string>
 	<string name="jv_editor_too_big">es demasiado grande para editar</string>
-	<string name="jv_editor_bytes">bytes</string>
 	<string name="jv_editor_maximum">El tamaño máximo permitido es</string>
 	<string name="jv_editor_save_title">Guardar cambios en alertas</string>
 	<string name="jv_editor_save_text">¿Quiere guardar los cambios?</string>
@@ -139,8 +137,6 @@
 	<string name="jv_editor_closerr_text">No se puede cerrar el archivo</string>
 	<string name="jv_filters_value">Valores de filtrado:</string>
 	<string name="jv_filters_cant_be_empty">¡No puede estar vacío!</string>
-	<string name="jv_filters_and">Y</string>
-	<string name="jv_filters_or">OR</string>
 	<string name="jv_prefs_select_number">Seleccione el número de</string>
 	<string name="jv_prefs_select_application">Seleccione la aplicación</string>
 	<string name="jv_prefs_decline_changes_title">Cambios disminución de alerta</string>

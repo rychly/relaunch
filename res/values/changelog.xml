@@ -2,37 +2,79 @@
 <resources>
 
     <string name="about_help">
-        &lt;b>HELP&lt;/b>&lt;br>
-        ReLaunch is a versatile reading programs launcher and system-wide shell for Nook Simple Touch (also supported by Sony PRS-T1).&lt;br>
-        It is assumed that the user library is organized in an ordered structure
-        of folders and files have names of books that match their names.&lt;br>
-        ReLaunch supports flexible configuration of many on-screen buttons for quick
-        access to certain features of the program and run third party applications.&lt;br>
-        Non-obvious possibilities:&lt;br>
-        - Some functions of the program available only with run as a desktop shell for system.&lt;br>
-        - Some functions require a device with root-access, or only implemented for
-        Nook Simple Touch (you will receive appropriate notice).&lt;br>
-        - On-screen scrolling buttons support double click to navigate to the specified
-        number of percents in list and long-click to quickly move to the end (beginning) of the file list.
-        This feature often will not work properly, be careful (you need to enable it in settings).&lt;br>
-        - If you open with the button, for example, the second-to-read book, it will be after the opening of the first.
-        Thus, you will start in round fashion two (three, etc., depending on the configuration), the last-readed books.&lt;br>
-        &lt;br>
+        &lt;b>ABOUT RELAUNCH&lt;/b>&lt;br> 
+	ReLaunch is a versatile launcher application for the Nook Simple Touch (Sony PRS-T1 is also supported). It provides a complete replacement of the Home screen functionality, and can be used with any number and combination of book-reading applications.&lt;br>
+	ReLaunch allows extensive customization of the user interface, which gives you quick access to the features and third-party applications you use most. For best experience, your library should be organized into folders, and book files should have meaningful names that match their titles.&lt;br>
+	For certain features to become available, ReLaunch must be run in launcher mode. Some other features require superuser access to work, or they might only be implemented for the Nook Simple Touch (a notice will be displayed where applicable).&lt;br>&lt;br>
     </string>
     <string name="about_appr">
-        &lt;b>APPRECIATIONS&lt;/b>&lt;br>
+        &lt;b> ACKNOWLEDGEMENTS&lt;/b>&lt;br>
         - CoolReader Engine project (Eink support code)&lt;br> 
         &amp;nbsp;&amp;nbsp;&lt;a href="http://sourceforge.net/projects/crengine/">http://sourceforge.net/projects/crengine/&lt;/a>&lt;br>
-        - Interactivemania (icons pack)&lt;br>
-        &amp;nbsp;&amp;nbsp;&lt;a href="http://www.interactivemania.com/">http://www.interactivemania.com/&lt;/a>&lt;br>
-        &amp;nbsp;&amp;nbsp;&lt;a href="http://www.defaulticon.com/">http://www.defaulticon.com/&lt;/a>&lt;br> 
+        - Dropbox (Core API)&lt;br>
+        &amp;nbsp;&amp;nbsp;&lt;a href="http://www.dropbox.com/">http://www.dropbox.com/&lt;/a>&lt;br>
+        - ftp4j library&lt;br>
+        &amp;nbsp;&amp;nbsp;&lt;a href="http://www.sauronsoftware.it/projects/ftp4j/">http://www.sauronsoftware.it/projects/ftp4j/&lt;/a>&lt;br>
+        - Simple Explorer project (root commands)&lt;br>
+        &amp;nbsp;&amp;nbsp;&lt;a href="http://forum.xda-developers.com/showthread.php?t=2330864">Simple Explorer (Xda-developers.com)&lt;/a>&lt;br>
+        - RootTools (Stericson)&lt;br>
+        &amp;nbsp;&amp;nbsp;&lt;a href="https://code.google.com/p/roottools/wiki/RootTools">https://code.google.com/p/roottools/wiki/RootTools&lt;/a>&lt;br>
         &lt;br>
         </string>
     <string name="whats_new">
         &lt;b>CHANGELOG&lt;/b>&lt;br>
+        &lt;b>1.4.4&lt;/b>&lt;br>
+        - выделен код на запуск файла по ассоциации, теперь он общий для всей программы&lt;br>
+        - заработал родная читалка нука&lt;br>
+        - мелкие правки кода&lt;br>
+        &lt;b>1.4.3&lt;/b>&lt;br>
+        - поправлен код в OPDS при скачивании обложки книги&lt;br>
+        - загрузка OPDS теперь происходит в фоне&lt;br>
+        - поправлен кусок кода отвечающий за соединение&lt;br>
+        - добавлены в список поддерживаемых модели Onyx - Magellan, Newton и Cleopatra&lt;br>
+        - загрузка списка файлов в отдельной активити Dropbox происходит в фоне&lt;br>
+        &lt;b>1.4.2&lt;/b>&lt;br>
+        - код листания собран в одном месте для всех экранов кроме настроек&lt;br>
+        - небольшая правка в коде листания для Onyx\'ов и некоторых др. устройств&lt;br>
+        - изменена иконка приложения&lt;br>
+        - поправлен возрат из папки для Onyx\'ов и некоторых др. устройств (криво, но работает)&lt;br>
+        - чистка кода&lt;br>
+        &lt;b>1.4.1&lt;/b>&lt;br>
+        - вид меню по длинному тапу зависит от настроек (Aqq123)&lt;br>
+        - new icons (krakozawr)&lt;br>
+        - возможность назначать на создаваемую кнопку три действия&lt;br>
+        - minor fixes and improvements&lt;br>
+        - добавлена опция показа выхода в родительскую папку в списке файлов&lt;br>
+        - добавлена опция показа файлов с созданными ассоциациями&lt;br>
+        - правка английского перевода (Aqq123 and krakozawr)&lt;br>
+        - изменена работа меню (по длинному тапу) в списке домашних папок, OPDS, FTP и т.д.&lt;br>
+        - реорганизация меню в файловом менеджере (krakozawr)&lt;br>
+        &lt;b>1.4.0&lt;/b>&lt;br>
+        - English translation rewrite (Aqq123)&lt;br>
+        - New icon pack (krakozawr)&lt;br>
+        - Local proxy (127.0.0.1:8118) will be used for OPDS for sites in the .onion zone&lt;br>
+        - Basic root support&lt;br>
+        - Dropbox Core API updated up to version 1.6.3&lt;br>
+        - Start folders handling updated&lt;br>
+        - ZIP archives unpacking support added&lt;br>
+        - Nook GlowLight 2013 screen\'s support added&lt;br>
+        - Nook\'s hidden settings dialog will show by long-tab to Setup WiFi (mergen3107 and Renate NST)&lt;br>
+        - Small fixes and updates&lt;br>
+        &lt;b>1.3.11&lt;/b>&lt;br>
+        - rewritten panels management&lt;br>
+        - updated English translation (tivasyk)&lt;br>
+        - full new icons(krakozawr)&lt;br>
+        - numerous code rewrites&lt;br>
+        &lt;b>1.3.10&lt;/b>&lt;br>
+        - added FTP support&lt;br>
+        - added panels management&lt;br>
+        - updated English translation (tivasyk)&lt;br>
+        - revised OPDS code&lt;br>
+        - minor fixes and improvements&lt;br>
+        - numerous code rewrites&lt;br>
         &lt;b>1.3.9&lt;/b>&lt;br>
         - fixed NST identification on firmware versions 1.2.0 and 1.2.1&lt;br>
-        - fixed hanging up when re-entering WiFi settings, this fixes opening settings on Sony ebooks, calls Android system settings applet on other devices&lt;br>
+        - fixed hanging up when re-entering WiFi settings, this fixes opening settings on Sony ebooks, calls Android system settings applet on other devices (lucifervrn000)&lt;br>
         - fixed problems with file filtering&lt;br>
         - fixed hanging up when calling empty application link&lt;br>
         - updated English translation (tivasyk)&lt;br>
@@ -80,7 +122,7 @@
         - save/restore settings function implemented&lt;br>
         - show book titles in Favorites and Last recent opened lists&lt;br>
         - a new mechanism of context menu implementation&lt;br>
-        - fixed bug with battery status intent reciever&lt;br>
+        - fixed bug with battery status intent receiver&lt;br>
         - fixed bug of incorrect book series sorting&lt;br>
         - fixed some minor bugs&lt;br>
         &lt;b>1.3.2&lt;/b>&lt;br>
@@ -116,7 +158,7 @@
         - Configurable hiding of known (via associations) file extensions (user can enable).&lt;br>
 		- Configurable hiding of known (via home dirs) parts of directories names (user can enable).&lt;br>
 		- Fixes in context menu creation for empty dir and leaking of mount sdcard broadcast receiver.&lt;br>
-		&lt;b>1.2.10&lt;/b>&lt;br>
+        &lt;b>.2.10&lt;/b>&lt;br>
 		- skipped due quick development&lt;br>
         &lt;b>1.2.9&lt;/b>&lt;br>
         - Home icon changed.&lt;br>
@@ -129,13 +171,13 @@
         - Font size for files and directory names (configurable).&lt;br>
         - User may have now many home folders.&lt;br>
         - User may disable to go up from home folders.&lt;br>
-		- Smart configurable Home button with distinct reaction to tap, double tap and long tap introduced.&lt;br>                
+		- Smart configurable Home button with distinct reaction to tap, double tap and long tap introduced.&lt;br>
         - Fixes: "scroll buttons" sometimes not working; invocation dir from favorites and search results, now shown in main window; search results representation when search from root.&lt;br>
         &lt;b>1.2.7&lt;/b>&lt;br>
         - Preferences Light Theme for Sony reader and mobiles.&lt;br>
         - Application and readers invocation code fixes.&lt;br>
         - Small layout and visual fixes.&lt;br>
-    	&lt;b>1.2.6&lt;/b>&lt;br>
+        &lt;b>1.2.6&lt;/b>&lt;br>
         - Source code and resources reformatted, caused by i18n.&lt;br>
         - Russian translation.&lt;br>
 		- WiFi signal strength receive fixed, now with dBm level and "classic" visual output.&lt;br>
@@ -143,34 +185,34 @@
 		- Fully redesigned to original White NOOK ST "look and feel".&lt;br>
         - Startup as launcher at boot fixes.&lt;br>
         - History supporting fixes.&lt;br>
-    	&lt;b>1.2.5&lt;/b>&lt;br>
+        &lt;b>1.2.5&lt;/b>&lt;br>
         - Source code cleaned, now compiled without warnings.&lt;br>
         - Source code prepared to i18n.&lt;br>
         - Reading Lists (i.e. FAVs, LRUs) with full UTF8 support.&lt;br>
-		- Writing Lists (i.e. FAVs, LRUs) now is more frequent.&lt;br>        
+		- Writing Lists (i.e. FAVs, LRUs) now is more frequent.&lt;br>
 		- Added \"Power Off\" functionality (in complement to \"Reboot\") and rewriting implementation.&lt;br>
-    	&lt;b>1.2.4&lt;/b>&lt;br>
+        &lt;b>1.2.4&lt;/b>&lt;br>
     	- Sony PRS-T1 support is added, some layout changes.&lt;br>
     	- Optional return to main window after application starts from \"All Applications\" window.&lt;br>
         &lt;b>1.2.3&lt;/b>&lt;br>
-        - Context menu items \'Open with ...\' and \'Create intent ...\' added. Note that these items can be disabled via configuration settings.&lt;br>
-        - Search root can be comma separated directories list as well as a single directory.
-        &lt;br>&lt;b>1.2.2&lt;/b>&lt;br>
-        - All configured networks now are present in advanced screen.
-        &lt;br>&lt;b>1.2.1&lt;/b>&lt;br>
+        - Context menu items \'Open with …\' and \'Create intent …\' added. Note that these items can be disabled via configuration settings.&lt;br>
+        - Search root can be comma separated directories list as well as a single directory.&lt;br>
+        &lt;b>1.2.2&lt;/b>&lt;br>
+        - All configured networks now are present in advanced screen.&lt;br>
+        &lt;b>1.2.1&lt;/b>&lt;br>
          - New buttons: scroll up/down by big steps. Note that the step length is configurable.&lt;br>
-         - New advanced information screen (marked with \'#\' character).
-        &lt;br>&lt;b>1.2.0&lt;/b>&lt;br>
+         - New advanced information screen (marked with \'#\' character).&lt;br>
+        &lt;b>1.2.0&lt;/b>&lt;br>
         - New directory navigation, visible scrollbar (see settings).&lt;br>
-        - gl16 mode (eInk refresh mode) may be set now via settings.
-        &lt;br>&lt;b>1.1.3&lt;/b>&lt;br>
-        - Check HW and warn if it isn\'t NookSimpleTouch.
-        &lt;br>&lt;b>1.1.2&lt;/b>&lt;br>
+        - gl16 mode (eInk refresh mode) may be set now via settings.&lt;br>
+        &lt;b>1.1.3&lt;/b>&lt;br>
+        - Check HW and warn if it isn\'t NookSimpleTouch.&lt;br>
+        &lt;b>1.1.2&lt;/b>&lt;br>
         - Associations settings allows now to configure explicit applications invocation  as well as general intent creation.&lt;br>
-        - Obsolete \'how to call readers\' setting removed.
-        &lt;br>&lt;b>1.1.1&lt;/b>&lt;br>
-        - New Cancel/Revert buttons in settings screen.
-        &lt;br>&lt;b>1.1.0&lt;/b>&lt;br>
+        - Obsolete \'how to call readers\' setting removed.&lt;br>
+        &lt;b>1.1.1&lt;/b>&lt;br>
+        - New Cancel/Revert buttons in settings screen.&lt;br>
+        &lt;b>1.1.0&lt;/b>&lt;br>
         - Task manager / battery manager - just tap on memory or battery status (bottom of the main screen, launcher mode only).
         </string>
 

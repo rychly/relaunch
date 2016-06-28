@@ -76,7 +76,7 @@ class SOP {
 		epubDescription = Pattern
 				.compile("(?s)<dc:description>(.*?)</dc:description>");
 		epubTitle = Pattern
-				.compile("(?s)<dc:title>(.*?)</dc:title>");
+				.compile("(?s)<dc:title.*?>(.*?)</dc:title>");
 		epubAuthor = Pattern
 				.compile("(?s)<dc:creator.*?>(.*?)</dc:creator>");
 		epubLanguage = Pattern
@@ -86,7 +86,7 @@ class SOP {
 		epubCover = Pattern
 				.compile("(?s)<embeddedcover>(.*?)</embeddedcover>");
         epubMeta = Pattern
-                .compile("(?s)<meta (.*?) />");
+                .compile("(?s)<meta(.*?)/>");
         epubSequenceName = Pattern
                 .compile("name=\"calibre:series\"");
         epubSequenceNumber = Pattern

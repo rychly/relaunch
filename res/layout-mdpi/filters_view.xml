@@ -103,7 +103,7 @@
             android:layout_weight="1"
             android:background="@drawable/main_button"
             android:gravity="center"
-            android:text="@string/filters_view_layout_and" >
+            android:text="@string/app_and" >
         </Button>
 
         <Button

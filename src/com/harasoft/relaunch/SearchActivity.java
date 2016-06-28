@@ -21,10 +21,8 @@ import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -43,7 +41,6 @@ public class SearchActivity extends Activity {
 	CheckBox searchSort;
 	EditText searchRoot;
 	EditText searchTxt;
-	Button searchButton;
 	InputMethodManager imm;
 	ReLaunchApp app;
 
@@ -91,8 +88,7 @@ public class SearchActivity extends Activity {
 			int searchReport;
 			int searchSize;
 
-			private void addToResults(String dname, String fname,
-					String fullPath, boolean is_dir) {
+			private void addToResults(String dname, String fname, boolean is_dir) {
 				String[] n = new String[2];
 
 				if (is_dir) {
@@ -114,8 +110,7 @@ public class SearchActivity extends Activity {
 				}
 			}
 
-			private void compareAdd(String dname, String fname,
-					String fullPath, boolean is_dir) {
+			private void compareAdd(String dname, String fname, String fullPath, boolean is_dir) {
 				String item; // Item for comparison
 				if (search_mode == SEARCH_FILE) {
 					if (known_only && app.readerName(fname).equals("Nope"))
@@ -143,15 +138,15 @@ public class SearchActivity extends Activity {
 				if (regexp) {
 					// Regular expression
 					if (item.matches(pattern))
-						addToResults(dname, fname, fullPath, is_dir);
+						addToResults(dname, fname,  is_dir);
 				} else {
 					// String
 					if (case_sens) {
 						if (item.contains(pattern))
-							addToResults(dname, fname, fullPath, is_dir);
+							addToResults(dname, fname, is_dir);
 					} else {
 						if (item.toLowerCase().contains(pattern.toLowerCase()))
-							addToResults(dname, fname, fullPath, is_dir);
+							addToResults(dname, fname, is_dir);
 					}
 				}
 			}
@@ -208,7 +203,7 @@ public class SearchActivity extends Activity {
 				stop_search = false;
 
 				// Save all general search settings
-				String root = searchRoot.getText().toString();
+				String root = String.valueOf(searchRoot.getText());
 				search_sort = searchSort.isChecked();
 				SharedPreferences.Editor editor = prefs.edit();
 				editor.putBoolean("searchSort", search_sort);
@@ -225,16 +220,14 @@ public class SearchActivity extends Activity {
 					case_sens = searchCase.isChecked();
 					known_only = searchKnown.isChecked();
 					regexp = searchAs.getSelectedItemPosition() == 1;
-					pattern = searchTxt.getText().toString();
+					pattern = String.valueOf(searchTxt.getText());
 					search_mode = searchIn.getSelectedItemPosition();
 
 					// Save all specific search settings
 					editor.putBoolean("searchCase", case_sens);
 					editor.putBoolean("searchKnown", known_only);
-					editor.putInt("searchAs",
-							searchAs.getSelectedItemPosition());
-					editor.putInt("searchIn",
-							searchIn.getSelectedItemPosition());
+					editor.putInt("searchAs", searchAs.getSelectedItemPosition());
+					editor.putInt("searchIn", searchIn.getSelectedItemPosition());
 					editor.putString("searchRoot", root);
 					editor.putString("searchPrev", pattern);
 					editor.commit();
@@ -252,16 +245,16 @@ public class SearchActivity extends Activity {
 				pd.dismiss();
 				stop_search = false;
 				if (search_sort) {
-					final class SRComparator implements
-							java.util.Comparator<String[]> {
+					final class SRComparator implements java.util.Comparator<String[]> {
 						public int compare(String[] o1, String[] o2) {
-							int rc = o1[1].compareTo(o2[1]);
+							/*int rc = o1[1].compareTo(o2[1]);
 							// next commented, reason - sometimes don't work
 							// with russian on Nook 8()
 							// if (rc == 0)
 							// return o1[0].compareTo(o2[0]);
 							// else
-							return rc;
+							return rc;*/
+                            return o1[1].compareTo(o2[1]);
 						}
 					}
 					SRComparator o1c = new SRComparator();
@@ -293,7 +286,10 @@ public class SearchActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		app = ((ReLaunchApp) getApplicationContext());
-		app.setFullScreenIfNecessary(this);
+        if(app == null ) {
+            finish();
+        }
+        app.setFullScreenIfNecessary(this);
 		setContentView(R.layout.search);
 
 		SEARCH_FILE = getResources().getInteger(R.integer.SEARCH_FILE);
@@ -312,23 +308,20 @@ public class SearchActivity extends Activity {
 		searchIn = (Spinner) findViewById(R.id.search_in);
 		searchRoot = (EditText) findViewById(R.id.search_root);
 		searchTxt = (EditText) findViewById(R.id.search_txt);
-		searchTxt
-				.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-					public boolean onEditorAction(TextView v, int actionId,
-							KeyEvent event) {
-						if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-							imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
-							resetSearch();
-							createAsyncTask().execute(false);
-							return true;
-						}
-						return false;
-					}
-				});
+		searchTxt.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                    imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                    resetSearch();
+                    createAsyncTask().execute(false);
+                    return true;
+                }
+                return false;
+            }
+        });
 
 		// Set main search button
-		((Button) findViewById(R.id.search_btn))
-				.setOnClickListener(new View.OnClickListener() {
+		(findViewById(R.id.search_btn)).setOnClickListener(new View.OnClickListener() {
 					public void onClick(View v) {
 						resetSearch();
 						createAsyncTask().execute(false);
@@ -336,8 +329,7 @@ public class SearchActivity extends Activity {
 				});
 
 		// Search all button
-		((Button) findViewById(R.id.search_all))
-				.setOnClickListener(new View.OnClickListener() {
+		(findViewById(R.id.search_all)).setOnClickListener(new View.OnClickListener() {
 					public void onClick(View v) {
 						resetSearch();
 						createAsyncTask().execute(true);
@@ -345,8 +337,7 @@ public class SearchActivity extends Activity {
 				});
 
 		// Back button - work as cancel
-		((ImageButton) findViewById(R.id.back_btn))
-				.setOnClickListener(new View.OnClickListener() {
+		( findViewById(R.id.back_btn)).setOnClickListener(new View.OnClickListener() {
 					public void onClick(View v) {
 						finish();
 					}
@@ -385,7 +376,10 @@ public class SearchActivity extends Activity {
 		searchIn.setSelection(prefs.getInt("searchIn", 0), false);
 
 		// set search root
-		searchRoot.setText(prefs.getString("searchRoot", "/sdcard"));
+		searchRoot.setText(prefs.getString("searchRoot", ReLaunch.currentRoot));
+        if (String.valueOf(searchRoot.getText()).equals("")){
+            searchRoot.setText(ReLaunch.currentRoot);
+        }
 
 		// Set search text
 		searchTxt.setText(prefs.getString("searchPrev", ""));
@@ -402,7 +396,6 @@ public class SearchActivity extends Activity {
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		;
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.searchmenu, menu);
 		return true;

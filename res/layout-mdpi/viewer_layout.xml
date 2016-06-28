@@ -52,13 +52,9 @@
                 android:paddingLeft="8dp"
                 android:paddingRight="2dp"
                 android:paddingTop="2dp"
-                android:text="Filename"
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:textColor="@color/normal_fg"
                 android:textStyle="bold" >
-
-                <requestFocus >
-                </requestFocus>
             </EditText>
         </LinearLayout>
 
@@ -111,9 +107,7 @@
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textColor="@color/normal_fg"
         android:typeface="monospace" >
-
-        <requestFocus >
-        </requestFocus>
+        <requestFocus />
     </EditText>
 
 </LinearLayout>

@@ -68,7 +68,10 @@ public class Viewer extends Activity {
 
 		prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
 		app = (ReLaunchApp) getApplicationContext();
-		app.setFullScreenIfNecessary(this);
+        if(app == null ) {
+            finish();
+        }
+        app.setFullScreenIfNecessary(this);
 		setContentView(R.layout.viewer_layout);
 
 		// Read parameters

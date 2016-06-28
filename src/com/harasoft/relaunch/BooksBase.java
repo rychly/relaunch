@@ -1,6 +1,5 @@
 package com.harasoft.relaunch;
 
-import java.io.ByteArrayOutputStream;
 import java.util.regex.Pattern;
 import ebook.EBook;
 import ebook.Person;
@@ -11,67 +10,19 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 
 public class BooksBase {
 	Context context;
-	DbHelper dbHelper;
+    MyDBHelper dbHelper;
 	public static SQLiteDatabase db;
 
     // private Pattern purgeBracketsPattern = Pattern.compile("\\[[\\s\\.\\-_]*\\]");
-	 private Pattern purgeBracketsPattern = Pattern.compile("\\[[\\[\\]\\s\\.\\-_]*\\]");
-
-	private class DbHelper extends SQLiteOpenHelper {
-		final static int VERSION = 1;
-
-		public DbHelper(Context context) {
-			super(context, "library.db", null, VERSION);
-		}
-
-		public DbHelper(Context context, String name) {
-			super(context, name, null, VERSION);
-		}
-
-		@Override
-		public void onCreate(SQLiteDatabase db) {
-			db.execSQL("create table if not exists BOOKS ("
-					+ "ID integer primary key autoincrement, "
-					+ "FILE text unique, "
-                    + "TITLE text default '', "
-					+ "FIRSTNAME text default '', "
-					+ "LASTNAME text default '', " + "SERIES text default '', "
-					+ "NUMBER text default '')");
-			db.execSQL("create table if not exists COVERS ("
-					+ "ID integer primary key autoincrement, "
-					+ "BOOK integer unique, " + "COVER blob)");
-			db.execSQL("create index if not exists INDEX1 on BOOKS(FILE)");
-			db.execSQL("create index if not exists INDEX3 on COVERS(BOOK)");
-		}
-
-		@Override
-		public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-		}
-	}
+	private Pattern purgeBracketsPattern = Pattern.compile("\\[[\\[\\]\\s\\.\\-_]*\\]");
 
 	public BooksBase(Context context) {
 		this.context = context;
-		dbHelper = new DbHelper(context);
+		dbHelper = new MyDBHelper(context, "BOOKS");
 		db = dbHelper.getWritableDatabase();
-	}
-
-	public BooksBase(Context context, String path) {
-		this.context = context;
-		String dbName = (path.replaceAll("\\/", "_")).concat(".db");
-		dbHelper = new DbHelper(context, dbName);
-		db = dbHelper.getWritableDatabase();
-	}
-
-	private void open() {
-		if (!db.isOpen())
-			db = SQLiteDatabase.openDatabase("library.db", null,
-					SQLiteDatabase.OPEN_READWRITE);
 	}
 
 	public long addBook(EBook book) {
@@ -104,42 +55,6 @@ public class BooksBase {
 			id = -1;
 		cursor.close();
 		return id;
-	}
-
-	public long getBookIdByFileName(String fileName) {
-		long id;
-		Cursor cursor = db.rawQuery("select ID from BOOKS where FILE=?",
-				new String[] { fileName });
-		if (cursor.moveToFirst())
-			id = cursor.getLong(0);
-		else
-			id = -1;
-		cursor.close();
-		return id;
-	}
-
-	public EBook getBookById(long id) {
-		EBook book = new EBook();
-		Person author = new Person();
-		Cursor cursor = db.rawQuery("select * from BOOKS where id=?",
-				new String[] { "" + id });
-		if (cursor.moveToFirst()) {
-			book.fileName = cursor.getString(cursor.getColumnIndex("FILE"));
-			book.title = cursor.getString(cursor.getColumnIndex("TITLE"));
-			author.firstName = cursor.getString(cursor
-					.getColumnIndex("FIRSTNAME"));
-			author.lastName = cursor.getString(cursor
-					.getColumnIndex("LASTNAME"));
-			book.authors.add(author);
-			book.sequenceName = cursor.getString(cursor
-					.getColumnIndex("SERIES"));
-			book.sequenceNumber = cursor.getString(cursor
-					.getColumnIndex("NUMBER"));
-			book.isOk = true;
-		} else
-			book.isOk = false;
-		cursor.close();
-		return book;
 	}
 
 	public EBook getBookByFileName(String fileName) {
@@ -208,12 +123,4 @@ public class BooksBase {
 	public String getEbookName(String dir, String file, String format) {
 		return getEbookName(dir + "/" + file, format);
 	}
-
-	public void resetDb() {
-		db.execSQL("delete from BOOKS");
-		db.execSQL("delete from COVERS");
-		db.execSQL("reindex INDEX1");
-		db.execSQL("reindex INDEX3");
-	}
-
 }

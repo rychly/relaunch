@@ -24,11 +24,9 @@
             android:layout_height="fill_parent"
             android:layout_weight="1"
             android:background="@color/normal_bg_gray"
-            android:editable="false"
             android:focusable="false"
             android:gravity="left|center_vertical"
             android:paddingLeft="8dp"
-            android:text="Text View"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textColor="@color/normal_fg"
             android:textStyle="bold" >
@@ -52,7 +50,6 @@
         android:layout_width="fill_parent"
         android:layout_height="0dp"
         android:background="@color/normal_transparent"
-        android:text="TextView"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:textColor="@color/normal_transparent" >
     </TextView>
@@ -83,8 +80,7 @@
             android:layout_weight="1"
             android:background="@drawable/main_button"
             android:drawableLeft="@drawable/ci_arrowup"
-            android:paddingLeft="8dp"
-            android:text="0%" >
+            android:paddingLeft="8dp" >
         </Button>
 
         <Button
@@ -95,8 +91,7 @@
             android:layout_weight="1"
             android:background="@drawable/main_button"
             android:drawableLeft="@drawable/ci_arrowdown"
-            android:paddingLeft="8dp"
-            android:text="0%" >
+            android:paddingLeft="8dp" >
         </Button>
 
         <ImageButton
@@ -112,9 +107,10 @@
 
     <LinearLayout
         android:id="@+id/results_fl"
-        android:layout_width="fill_parent"
+        android:layout_width="wrap_content"
         android:layout_height="fill_parent"
-        android:layout_marginTop="8dp" >
+        android:layout_weight="1"
+        android:layout_marginTop="8dp" android:baselineAligned="false">
 
         <GridView
             android:id="@+id/results_list"

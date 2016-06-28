@@ -55,8 +55,7 @@ public class InstantParser extends ebook.parser.Parser {
 			parser.parse();
 			inputStream.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 	}
 
@@ -71,8 +70,7 @@ public class InstantParser extends ebook.parser.Parser {
 			inputStream.close();
 			zipFile.close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 	}
 
@@ -81,8 +79,7 @@ public class InstantParser extends ebook.parser.Parser {
 			EpubInstantParser parser = new EpubInstantParser(this.eBook);
 			parser.parse();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			//e.printStackTrace();
 		}
 	}
 }

@@ -9,7 +9,6 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
@@ -27,9 +26,7 @@ import android.widget.Toast;
 public class TypesActivity extends Activity {
 	final String TAG = "Types";
 	final String INTENT_PREFIX = "Intent:";
-	HashMap<String, Drawable> icons;
 
-	List<String> applicationsArray;
 	CharSequence[] applications;
 	CharSequence[] happlications;
 	List<HashMap<String, String>> itemsArray;
@@ -59,11 +56,11 @@ public class TypesActivity extends Activity {
 		public View getView(final int position, View convertView, ViewGroup parent) {
 			View v = convertView;
 			if (v == null) {
-				LayoutInflater vi = (LayoutInflater) getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-				v = vi.inflate(R.layout.types_layout, null);
+				LayoutInflater vi = (LayoutInflater) app.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+				v = vi.inflate(R.layout.types_layout, parent, false);
 			}
 			final HashMap<String, String> item = itemsArray.get(position);
-			if (item != null) {
+			if (item != null && v != null) {
 				ImageView iv = (ImageView) v.findViewById(R.id.types_img);
 
 				// Setting up button
@@ -129,8 +126,7 @@ public class TypesActivity extends Activity {
 				extName.setOnClickListener(new View.OnClickListener() {
 
 					public void onClick(View v) {
-						AlertDialog.Builder builder = new AlertDialog.Builder(
-								cntx);
+						AlertDialog.Builder builder = new AlertDialog.Builder(cntx);
 						// "File suffix"
 						builder.setTitle(getResources().getString(
 								R.string.jv_types_file_suffix));
@@ -154,8 +150,7 @@ public class TypesActivity extends Activity {
 																	R.string.jv_types_cant_be_empty),
 													Toast.LENGTH_LONG).show();
 										else {
-											itemsArray.get(position).put("ext",
-													value);
+											itemsArray.get(position).put("ext",value);
 											adapter.notifyDataSetChanged();
 											dialog.dismiss();
 										}
@@ -179,17 +174,18 @@ public class TypesActivity extends Activity {
 
 				// Setting application name
 				Button appName = (Button) v.findViewById(R.id.types_app);
-				String app = item.get("rdr");
-				String[] appp = app.split("\\%");
+				String appR = item.get("rdr");
+				String[] appp = appR.split("%");
 				if (appp.length > 2) {
 					appName.setText(appp[2]);
 				} else {
-					appName.setText(app);
+					appName.setText(appR);
 				}
-				if (icons.containsKey(app)) {
-                    iv.setImageDrawable(icons.get(app));
+				ReLaunchApp.AppInfo findApp = app.searchApp(appR);
+				if (findApp != null) {
+                    iv.setImageDrawable(findApp.appIcon);
                 }else {
-                    iv.setImageDrawable(getResources().getDrawable(R.drawable.icon));
+                    iv.setImageDrawable(getResources().getDrawable(R.drawable.icon_list));
                 }
 				appName.setOnClickListener(new View.OnClickListener() {
 
@@ -238,13 +234,10 @@ public class TypesActivity extends Activity {
 
 						// "General intent"
 						builder1.setNeutralButton(
-								getResources().getString(
-										R.string.jv_types_general_intent),
+								getResources().getString(R.string.jv_types_general_intent),
 								new DialogInterface.OnClickListener() {
-									public void onClick(DialogInterface dialog,
-											int which) {
-										AlertDialog.Builder builder3 = new AlertDialog.Builder(
-												cntx);
+									public void onClick(DialogInterface dialog, int which) {
+										AlertDialog.Builder builder3 = new AlertDialog.Builder(cntx);
 										// "Intent type"
 										builder3.setTitle(getResources()
 												.getString(
@@ -324,20 +317,15 @@ public class TypesActivity extends Activity {
 		prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
 		// Global storage
 		app = ((ReLaunchApp) getApplicationContext());
-		app.setFullScreenIfNecessary(this);
+        if(app == null ) {
+            finish();
+        }
+        app.setFullScreenIfNecessary(this);
 		setContentView(R.layout.types_view);
-		icons = app.getIcons();
 
-		applicationsArray = app.getApps();
-		applications = applicationsArray
-				.toArray(new CharSequence[applicationsArray.size()]);
-		happlications = app.getApps().toArray(
-				new CharSequence[app.getApps().size()]);
-		for (int j = 0; j < happlications.length; j++) {
-			String happ = (String) happlications[j];
-			String[] happp = happ.split("\\%");
-			happlications[j] = happp[2];
-		}
+        List<String> applicationsArray = app.getAppList();
+		applications = applicationsArray.toArray(new CharSequence[applicationsArray.size()]);
+		happlications = app.getAppList().toArray(new CharSequence[app.getAppList().size()]);
 
 		// Fill listview with our info
 		ListView lv = (ListView) findViewById(R.id.types_lv);

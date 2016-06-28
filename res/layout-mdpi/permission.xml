@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="wrap_content"
+              android:layout_height="wrap_content"
+              android:background="@color/normal_bg"
+              android:padding="8dp" android:gravity="center_horizontal">
+    <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:orientation="vertical" >
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/normal_fg"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:id="@+id/tVFileName"
+                android:layout_column="1"/>
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="@color/normal_fg"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:id="@+id/tvOwner"
+                android:layout_column="1"/>
+    </LinearLayout>
+    <TableLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.35" android:layout_gravity="center_horizontal">
+        <TableRow
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent">
+
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/textView10"
+                    android:layout_column="1"/>
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="30dp"
+                    android:text="R"
+                    android:id="@+id/textView11"
+                    android:textColor="@color/normal_fg"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:layout_column="2"/>
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="25dp"
+                    android:text="W"
+                    android:id="@+id/textView12"
+                    android:textColor="@color/normal_fg"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:layout_column="3"/>
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="25dp"
+                    android:text="X"
+                    android:id="@+id/textView13"
+                    android:textColor="@color/normal_fg"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:layout_column="4"/>
+
+        </TableRow>
+        <TableRow
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent" android:layout_column="0"
+                android:layout_gravity="center_horizontal" android:layout_marginBottom="15dp">
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Owner"
+                    android:id="@+id/textView20"
+                    android:textColor="@color/normal_fg"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:layout_column="1"/>
+            <CheckBox
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:id="@+id/cBur" android:layout_column="2" android:layout_marginRight="10dp"/>
+            <CheckBox
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:id="@+id/cBuw" android:layout_column="3" android:layout_marginRight="10dp"/>
+            <CheckBox
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:id="@+id/cBux" android:layout_column="4" android:layout_marginRight="10dp"/>
+        </TableRow>
+        <TableRow
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent" android:layout_column="0"
+                android:layout_gravity="center_horizontal" android:layout_marginBottom="15dp">
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Group"
+                    android:id="@+id/textView30"
+                    android:textColor="@color/normal_fg"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:layout_column="1"/>
+            <CheckBox
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:id="@+id/cBgr" android:layout_column="2" android:layout_marginRight="10dp"/>
+            <CheckBox
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:id="@+id/cBgw" android:layout_column="3" android:layout_marginRight="10dp"/>
+            <CheckBox
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:id="@+id/cBgx" android:layout_column="4" android:layout_marginRight="10dp"/>
+        </TableRow>
+        <TableRow
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent" android:layout_column="0"
+                android:layout_gravity="center_horizontal" android:layout_marginBottom="15dp">
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Other"
+                    android:id="@+id/textView40"
+                    android:textColor="@color/normal_fg"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:layout_column="1"/>
+            <CheckBox
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:id="@+id/cBor" android:layout_column="2" android:layout_marginRight="10dp"/>
+            <CheckBox
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:id="@+id/cBow" android:layout_column="3" android:layout_marginRight="10dp"/>
+            <CheckBox
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="10dp"
+                    android:id="@+id/cBox" android:layout_column="4" android:layout_marginRight="10dp"/>
+        </TableRow>
+        <TableRow
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent" android:layout_column="0"
+                android:layout_gravity="center_horizontal" android:layout_marginBottom="15dp">
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Recursively"
+                    android:id="@+id/textView50"
+                    android:textColor="@color/normal_fg"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:layout_column="1"/>
+            <CheckBox
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="20dp"
+                    android:id="@+id/cBdr" android:layout_column="2" android:layout_marginRight="10dp"/>
+
+        </TableRow>
+    </TableLayout>
+    <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:orientation="horizontal" android:layout_gravity="center_horizontal">
+
+        <Button
+                android:id="@+id/btnCancel"
+                android:layout_width="110dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:text="@string/app_cancel" />
+        <Button
+                android:id="@+id/btnOk"
+                android:layout_width="110dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:text="@string/app_ok" android:layout_marginLeft="10dp"/>
+
+    </LinearLayout>
+</LinearLayout>

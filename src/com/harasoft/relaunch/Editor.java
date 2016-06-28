@@ -22,7 +22,7 @@ import android.widget.Button;
 import android.widget.EditText;
 
 public class Editor extends Activity implements TextWatcher {
-	final String TAG = "Viewer";
+	final String TAG = "Editor";
 
 	ReLaunchApp app;
 	Button saveBtn;
@@ -53,6 +53,7 @@ public class Editor extends Activity implements TextWatcher {
 		try {
 			br.close();
 		} catch (IOException e) {
+            //emply
 		}
 
 		// Set text
@@ -155,7 +156,10 @@ public class Editor extends Activity implements TextWatcher {
 		prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
 
 		app = (ReLaunchApp) getApplicationContext();
-		app.setFullScreenIfNecessary(this);
+        if(app == null ) {
+            finish();
+        }
+        app.setFullScreenIfNecessary(this);
 		setContentView(R.layout.editor_layout);
 
 		// Read parameters
@@ -189,7 +193,7 @@ public class Editor extends Activity implements TextWatcher {
 					+ "\" "
 					+ getResources().getString(R.string.jv_editor_too_big)
 					+ " ("
-					+ f.length()
+					+ f.length()/1024
 					+ " "
 					+ getResources().getString(R.string.jv_editor_bytes)
 					+ ")\n"
@@ -212,7 +216,7 @@ public class Editor extends Activity implements TextWatcher {
 			saveBtn = (Button) findViewById(R.id.edit_save);
 			saveBtn.setOnClickListener(new View.OnClickListener() {
 				public void onClick(View v) {
-					final String newBuf = editTxt.getText().toString();
+					final String newBuf = String.valueOf(editTxt.getText());
 					if (newBuf.equals(textBuffer)) {
 						// No changes
 						setResult(Activity.RESULT_CANCELED);
@@ -227,7 +231,7 @@ public class Editor extends Activity implements TextWatcher {
 			cancelBtn = (Button) findViewById(R.id.edit_cancel);
 			cancelBtn.setOnClickListener(new View.OnClickListener() {
 				public void onClick(View v) {
-					final String newBuf = editTxt.getText().toString();
+					final String newBuf = String.valueOf(editTxt.getText());
 					if (newBuf.equals(textBuffer)) {
 						// No changes
 						setResult(Activity.RESULT_CANCELED);
@@ -285,7 +289,7 @@ public class Editor extends Activity implements TextWatcher {
 	}
 
 	public void afterTextChanged(Editable s) {
-		final String newBuf = editTxt.getText().toString();
+		final String newBuf = String.valueOf(editTxt.getText());
 		if (newBuf.equals(textBuffer)) {
 			saveBtn.setEnabled(false);
 			// "Back"

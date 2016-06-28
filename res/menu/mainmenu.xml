@@ -3,38 +3,38 @@
 
     <item
         android:id="@+id/setting"
-        android:icon="@drawable/ci_gear2"
-        android:title="Settings">
+        android:icon="@drawable/relaunch_settings"
+        android:title="@string/prefs_layout_title">
     </item>
 
     <item
         android:id="@+id/mime_types"
         android:icon="@drawable/ci_associations"
-        android:title="Associations">
+        android:title="@string/types_view_layout_title">
     </item>
 
     <item
         android:id="@+id/search"
         android:icon="@drawable/ci_search"
-        android:title="Search">
+        android:title="@string/search_layout_title">
     </item>
 
     <item
         android:id="@+id/lastopened"
         android:icon="@drawable/ci_lre"
-        android:title="Last opened">
+        android:title="@string/jv_relaunch_lru">
     </item>
 
     <item
         android:id="@+id/favorites"
         android:icon="@drawable/ci_fav"
-        android:title="Favorites">
+        android:title="@string/jv_relaunch_fav">
     </item>
 
     <item
         android:id="@+id/about"
         android:icon="@drawable/ci_question"
-        android:title="Informatoin">
+        android:title="@string/jv_rla_see_changelog">
     </item>
 
 </menu>

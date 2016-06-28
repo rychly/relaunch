@@ -19,27 +19,13 @@ import java.lang.reflect.Method;
 
 @SuppressWarnings("rawtypes")
 public class N2EpdController {
-	public static final int REGION_APP_1 = 0;
-	public static final int REGION_APP_2 = 1;
 	public static final int REGION_APP_3 = 2;
-	public static final int REGION_APP_4 = 3;
 
 	public static final int WAVE_GC = 0;
 	public static final int WAVE_GU = 1;
-	public static final int WAVE_DU = 2;
-	public static final int WAVE_A2 = 3;
 	public static final int WAVE_GL16 = 4;
-	public static final int WAVE_AUTO = 5;
-
-	public static final int MODE_BLINK = 0;
-	public static final int MODE_ACTIVE = 1;
-	public static final int MODE_ONESHOT = 2;
-	public static final int MODE_CLEAR = 3;
 	public static final int MODE_ACTIVE_ALL = 4;
 	public static final int MODE_ONESHOT_ALL = 5;
-	public static final int MODE_CLEAR_ALL = 6;
-
-	public static String strN2EpdInit = " N2EpdInit: ";
 
 	private static Method mtSetRegion = null;
 	private static Constructor RegionParamsConstructor = null;
@@ -54,17 +40,14 @@ public class N2EpdController {
 	static {
 		if (N2DeviceInfo.EINK_NOOK) {
 			try {
-				Class clEpdController = Class
-						.forName("android.hardware.EpdController");
+				Class clEpdController = Class.forName("android.hardware.EpdController");
 				Class clEpdControllerWave;
                 if (N2DeviceInfo.EINK_NOOK_120)
                    clEpdControllerWave = Class.forName("android.hardware.EpdRegionParams$Wave");
                 else
                    clEpdControllerWave = Class.forName("android.hardware.EpdController$Wave");
-				Class clEpdControllerMode = Class
-						.forName("android.hardware.EpdController$Mode");
-				Class clEpdControllerRegion = Class
-						.forName("android.hardware.EpdController$Region");
+				Class clEpdControllerMode = Class.forName("android.hardware.EpdController$Mode");
+				Class clEpdControllerRegion = Class.forName("android.hardware.EpdController$Region");
 
 				Class clEpdControllerRegionParams;
                 if (N2DeviceInfo.EINK_NOOK_120)
@@ -87,12 +70,8 @@ public class N2EpdController {
 						clEpdControllerRegionParams, clEpdControllerMode);
 	            if (N2DeviceInfo.EINK_NOOK_120)
 	                   EpdControllerConstructors = clEpdController.getConstructors();
-				strN2EpdInit += "Ok!";
 			} catch (Exception e) {
-				System.err.println("Failed to init refresh EPD");
-				System.err.println(e.toString());
-				strN2EpdInit += "Failed: " + e.toString();
-				e.printStackTrace();
+                //
 			}
 		}
 	}
@@ -107,10 +86,7 @@ public class N2EpdController {
 								enumsWave[wave] });
 				mtSetRegion.invoke(mEpdController, "ReLaunch", enumsRegion[region], regionParams, enumsMode[mode]);
 			} catch (Exception e) {
-				System.err.println("Failed: SetMode");
-				System.err.println(e.toString());
-				strN2EpdInit += "Failed: setMode: " + e.toString();
-				e.printStackTrace();
+				//
 			}
 		}
 	}

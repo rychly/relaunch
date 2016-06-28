@@ -28,7 +28,6 @@
             android:gravity="left|center_vertical"
             android:inputType="textMultiLine"
             android:paddingLeft="8dp"
-            android:text="TextView"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textColor="@color/normal_fg"
             android:textStyle="bold" >

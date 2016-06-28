@@ -18,8 +18,7 @@
         android:layout_marginTop="2dp"
         android:background="@color/normal_bg"
         android:clickable="false"
-        android:focusable="false"
-        android:src="@drawable/dir_ok" >
+        android:focusable="false" >
     </ImageView>
 
     <LinearLayout
@@ -42,7 +41,6 @@
             android:focusable="false"
             android:gravity="center_vertical"
             android:inputType="textMultiLine"
-            android:text="Filename"
             android:textAppearance="?android:attr/textAppearanceLarge"
             android:textColor="#000000" >
         </EditText>
@@ -59,7 +57,6 @@
             android:focusable="false"
             android:gravity="center_vertical"
             android:inputType="textMultiLine"
-            android:text="Full path"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:textColor="#000000" >
         </EditText>
@@ -76,7 +73,6 @@
             android:focusable="false"
             android:gravity="center_vertical"
             android:inputType="textMultiLine"
-            android:text="Full path"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textColor="#000000" >
         </EditText>

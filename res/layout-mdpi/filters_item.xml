@@ -10,12 +10,11 @@
     <TableLayout
         android:id="@+id/tableLayout1"
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
+        android:layout_height="fill_parent"
         android:paddingBottom="0dp"
         android:paddingRight="10dp"
         android:paddingTop="5dp"
-        android:stretchColumns="1" >
+        android:stretchColumns="1" android:layout_gravity="center">
 
         <TableRow
             android:id="@+id/tableRow1"
@@ -30,7 +29,7 @@
                 android:layout_gravity="right|center_vertical"
                 android:gravity="center_horizontal"
                 android:text="@string/filters_item_layout_rule"
-                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textAppearance="@android:style/TextAppearance.Medium"
                 android:textColor="@color/normal_fg"
                 android:textStyle="bold" >
             </TextView>
@@ -78,13 +77,13 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="right|center_vertical"
                 android:text="@string/filters_item_layout_value"
-                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textAppearance="@android:style/TextAppearance.Medium"
                 android:textColor="@color/normal_fg"
                 android:textStyle="bold" >
             </TextView>
 
             <LinearLayout
-                android:id="@+id/linearLayout2"
+                android:id="@+id/linearLayout3"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_vertical"
@@ -107,28 +106,19 @@
             android:id="@+id/tableRow3"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
-            android:layout_marginTop="8dp" >
-
-            <TextView
-                android:id="@+id/filters_pad1"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:text="Value:"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:visibility="invisible" >
-            </TextView>
+            android:layout_marginTop="8dp"
+            android:layout_gravity="center">
 
             <TextView
                 android:id="@+id/filters_condition"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:gravity="center"
-                android:text="@string/filters_item_layout_and"
-                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:text="@string/app_and"
                 android:textColor="@color/normal_fg"
-                android:textStyle="bold" >
+                android:textStyle="bold"
+                android:layout_weight="1" android:textAppearance="@android:style/TextAppearance.Medium">
             </TextView>
         </TableRow>
     </TableLayout>

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="vertical"
+              android:layout_width="fill_parent"
+              android:background="@color/normal_bg"
+              android:layout_height="wrap_content" android:id="@+id/ll_ftp">
+
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/jv_results_server_ftp"
+            android:id="@+id/tv_serverNameFtp"/>
+    <EditText
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/et_serverNameFtp"
+            android:textColor="@color/file_unknown_bg"
+            android:inputType="text"/>
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/jv_results_port_ftp"
+            android:id="@+id/tv_portFtp"/>
+    <EditText
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/et_portFtp"
+            android:textColor="@color/file_unknown_bg"
+            android:inputType="numberDecimal"/>
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/jv_results_path_ftp"
+            android:id="@+id/tv_pathFtp"/>
+    <EditText
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/et_pathFtp"
+            android:textColor="@color/file_unknown_bg"
+            android:inputType="text"/>
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/jv_results_login_opds"
+            android:id="@+id/tv_loginFtp"/>
+    <EditText
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/et_loginFtp"
+            android:textColor="@color/file_unknown_bg"
+            android:inputType="text"/>
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/jv_results_pass_opds"
+            android:id="@+id/tv_passFtp"/>
+    <EditText
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textPassword"
+            android:ems="10"
+            android:id="@+id/et_passFtp" android:textColor="@color/file_unknown_bg"/>
+</LinearLayout>

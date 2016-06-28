@@ -7,4 +7,17 @@
     <integer name="SORT_CPU">  2 </integer>
     <integer name="SORT_ABC">  3 </integer>
 
+    <string name="minus_one">-1</string>
+    <string name="one">1</string>
+    <string name="ten">10</string>
+    <string name="sixteen">16</string>
+    <string name="twenty">20</string>
+    <string name="twenty_five">25</string>
+    <string name="thirty">30</string>
+    <string name="forty_eight">48</string>
+    <string name="one_hundred">100</string>
+    <string name="fifty">5000</string>
+    <string name="twenty_six">262144</string>
+    <string name="ten_many">1048576</string>
+
 </resources>

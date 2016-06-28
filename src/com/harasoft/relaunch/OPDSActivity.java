@@ -3,18 +3,17 @@ package com.harasoft.relaunch;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.text.Html;
 import android.util.TypedValue;
@@ -28,217 +27,103 @@ import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
 
 import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
-import java.util.Locale;
+import java.util.List;
 
 public class OPDSActivity extends Activity {
     public ArrayList<Item> names = new ArrayList<Item>();
     public ArrayList<BookInfo> books = new ArrayList<BookInfo>();
-    public ArrayList<Item> names_tmp = new ArrayList<Item>();
-    public ArrayList<BookInfo> books_tmp = new ArrayList<BookInfo>();
+
     public ArrayList<String> list_book_steps = new ArrayList<String>();
     public ArrayList<String> list_path_steps = new ArrayList<String>();
     String_Search_Tag search_site;
-    String login_opds;
-    String pass_opds;
-    int eventType;
+    // db
+    int opdsID;
+
     XmlPullParser xpp;
-    private boolean flag_book = false;
-    public static String URLstr;
-    public static String URLdomen = "";
-    public static String URLtemp = "";
-    public String OPDS_Path_Download = "/sdcard/";
-    //private SharedPreferences prefs;
+    private String URL_START_LINK; // стартовая страница каталога
+    private String OPDS_URL_CURRENT = ""; // текущая страница каталога
+
+    private String OPDS_Path_Download;
+    public static List<String> sCookie =null;
+
     Activity test;
     ReLaunchApp app;
-    int size_icon;
-    int size_text;
-    int size_text2;
     OPDS_adapter adapter;
-    int count_login = 0;
     boolean addSView = true;
+    private int countDownload;
+    static GridView lvMain;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        app = ((ReLaunchApp) getApplicationContext());
+        if(app == null ) {
+            finish();
+        }
         if(!ReLaunch.haveNetworkConnection(getApplicationContext())){
             app.showToast(getString(R.string.srt_dbactivity_no_inet));
             finish();
         }else{
-            app = ((ReLaunchApp) getApplicationContext());
-            if (app != null) {
-                app.setFullScreenIfNecessary(this);
-            }
+            app.setFullScreenIfNecessary(this);
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-            size_icon = Integer.parseInt(prefs.getString("firstLineIconSizePx", "48"));
-            size_text = Integer.parseInt(prefs.getString("firstLineFontSizePx", "20"));
-            size_text2 = Integer.parseInt(prefs.getString("secondLineFontSizePx", "16"));
-
-            setContentView(R.layout.prefs_main);
-            ((ImageView) findViewById(R.id.imageView1)).setImageResource(R.drawable.ci_books);
+            countDownload = 0;
+            setContentView(R.layout.results_layout);
+            ((ImageView) findViewById(R.id.results_icon)).setImageResource(R.drawable.ci_books);
 
             N2EpdController.n2MainActivity = this;
             test = this;
-            Locale locale;
-            String lang;
-            lang = prefs.getString("lang", "default");
-            if (lang.equals("default")) {
-                locale = getResources().getConfiguration().locale.getDefault();
-            }else {
-                locale = new Locale(lang);
-            }
-            Locale.setDefault(locale);
-            Configuration config = new Configuration();
-            config.locale = locale;
-            getBaseContext().getResources().updateConfiguration(config, null);
-            login_opds = prefs.getString("OPDS login", "");
-            pass_opds = prefs.getString("OPDS password", "");
-            if(N2DeviceInfo.EINK_ONYX){
-                OPDS_Path_Download = "/mnt/storage";
-            }
-            String OPDSPath;
-            String OPDSLocalPath;
+
+            
+            //=======================================================================
+            // проверяем наличие интента
             final Intent data = getIntent();
             if (data.getExtras() == null) {
                 setResult(Activity.RESULT_CANCELED);
                 finish();
             }
-            OPDSPath = data.getExtras().getString("opdscat");
-            login_opds = data.getExtras().getString("login");
-            pass_opds = data.getExtras().getString("password");
-
-            OPDSLocalPath = prefs.getString("Local folder OPDS", "none").trim();
-            if(OPDSPath == null || OPDSPath.equals("none")){
+            // получаем переданные данные
+            opdsID = data.getExtras().getInt("dbID");
+            URL_START_LINK = data.getExtras().getString("opdscat");
+            if(URL_START_LINK == null || URL_START_LINK.equals("none") || !(URL_START_LINK.startsWith("http"))){
                 app.showToast(getString(R.string.srt_opdsactivity_err_url));
                 finish();
             }
-            URLstr = OPDSPath;
-            if(!OPDSLocalPath.equals("none")){
+
+            OPDS_Path_Download = prefs.getString("Local folder OPDS", "none").trim();
+            if(!OPDS_Path_Download.equals("none")){
                 File folder_check;
-                folder_check = new File(OPDSLocalPath);
+                folder_check = new File(OPDS_Path_Download);
                 if (!folder_check.exists()) {
                     if(!folder_check.mkdirs()){
                         app.showToast(getString(R.string.srt_opdsactivity_err_folder));//"Невозможно создать локальный каталог или неверный путь");
                         finish();
                     }
                 }
-                OPDS_Path_Download = OPDSLocalPath;
-            }
-
-            URLdomen = URLstr.substring(0,URLstr.lastIndexOf("/"));
-            if(!(URLdomen.contains("http://"))){
-                app.showToast(getString(R.string.srt_opdsactivity_err_url));//"Неполный адрес каталога");
+            }else if(N2DeviceInfo.EINK_ONYX){
+                OPDS_Path_Download = "/mnt/storage";
+            }else{
                 finish();
             }
-            final ListView lvMain = (ListView) findViewById(android.R.id.list);
 
+            lvMain = (GridView) findViewById(R.id.results_list);
+            lvMain.setHorizontalSpacing(0);
+            lvMain.setNumColumns(1);
             // создаем адаптер
             adapter = new OPDS_adapter(this, names);
             lvMain.setAdapter(adapter);
-            lvMain.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View itemClicked, int position, long id) {
-                    String url_next;
-                    if(names.get(position).imgHeader.equals("2")){
-                        try {
-                            showBookInfo(position);
-                        } catch (MalformedURLException e) {
-                            //e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-                        }
-                    }else if(names.get(position).header.equalsIgnoreCase("Моя полка") || names.get(position).subHeader.equalsIgnoreCase("Вход для зарегистрированных пользователей")){
-                        url_next =  names.get(position).urllink;
-
-
-                        if(load_opds(url_next, names_tmp, books_tmp, login_opds, pass_opds)){
-                            names_tmp.clear();
-                            books_tmp.clear();
-                        }else{
-                            count_login = 1;
-                            list_path_steps.add(url_next);
-                            URLtemp = url_next;
-                            names.clear();
-                            books.clear();
-                            names.addAll(names_tmp);
-                            books.addAll(books_tmp);
-                            names_tmp.clear();
-                            books_tmp.clear();
-                            adapter.notifyDataSetChanged();
-                            lvMain.setSelection(0);
-                        }
-                    }else{
-                        url_next =  names.get(position).urllink;
-
-                        boolean start_pos = true;
-                        if(names.get(position).header.equalsIgnoreCase("Далее")){
-                            list_book_steps.add(URLtemp);
-                        }else if(names.get(position).header.equalsIgnoreCase("Назад")){
-                            list_book_steps.remove(list_book_steps.size()-1);
-                            start_pos = false;
-                        }else {
-                            list_path_steps.add(url_next);
-                            count_login ++;
-                        }
-
-                        if(load_opds(url_next, names_tmp, books_tmp, login_opds, pass_opds)){
-                            names_tmp.clear();
-                            books_tmp.clear();
-                            if(names.get(position).header.equalsIgnoreCase("Далее")){
-                                list_book_steps.remove(list_book_steps.size()-1);
-                            }else if(names.get(position).header.equalsIgnoreCase("Назад")){
-                                list_book_steps.add(URLtemp);
-                            }else {
-                                list_path_steps.remove(list_path_steps.size()-1);
-                            }
-                        }else{
-                            URLtemp = url_next;
-                            names.clear();
-                            books.clear();
-                            names.addAll(names_tmp);
-                            books.addAll(books_tmp);
-                            names_tmp.clear();
-                            books_tmp.clear();
-                            adapter.notifyDataSetChanged();
-                            if(start_pos){
-                                lvMain.setSelection(0);
-                            }else{
-                                lvMain.setSelection(names.size()-1);
-                            }
-                        }
-                    }
-
-                }
-            });
-
-            lvMain.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-                @Override
-                public boolean onItemLongClick(AdapterView<?> parent, View itemClicked, int position, long id) {
-                    if(flag_book){
-                        AlertDialog dialog = DowloadDialog(test, position);
-                        dialog.show();
-                    }else{
-                        AlertDialog dialog = ViewDialog(test, position);
-                        dialog.show();
-                    }
-                    return false;
-                }
-            });
-            //===========================================================================
             if (prefs.getBoolean("customScroll", app.customScrollDef)) {
                 if (addSView) {
                     int scrollW;
                     try {
-                        scrollW = Integer.parseInt(prefs.getString("scrollWidth",
-                                "25"));
+                        scrollW = Integer.parseInt(prefs.getString("scrollWidth","25"));
                     } catch (NumberFormatException e) {
                         scrollW = 25;
                     }
 
-                    LinearLayout ll = (LinearLayout) findViewById(R.id.LLlist);
+                    LinearLayout ll = (LinearLayout) findViewById(R.id.results_fl);
                     final SView sv = new SView(getBaseContext());
                     LinearLayout.LayoutParams pars = new LinearLayout.LayoutParams(
-                            scrollW, ViewGroup.LayoutParams.FILL_PARENT, 2f);
+                            scrollW, ViewGroup.LayoutParams.FILL_PARENT, 1f);
                     sv.setLayoutParams(pars);
                     ll.addView(sv);
                     lvMain.setOnScrollListener(new AbsListView.OnScrollListener() {
@@ -270,233 +155,238 @@ public class OPDSActivity extends Activity {
                     }
                 });
             }
-            //============================================================================
-            ImageButton back_btn = (ImageButton) findViewById(R.id.back_btn);
-            back_btn.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View v) {
-                    String url_next;
-
-                    if (list_path_steps.size() > 1) {
-                        url_next = list_path_steps.get(list_path_steps.size() - 2);
-                    } else {
-                        url_next = URLstr;
-                    }
-
-                    if (load_opds(url_next, names_tmp, books_tmp, login_opds, pass_opds)) {
-                        names_tmp.clear();
-                        books_tmp.clear();
-                    } else {
-                        if (list_path_steps.size() > 1) {
-                            list_path_steps.remove(list_path_steps.size() - 1);
-                            if (count_login > 0)
-                                count_login--;
-                        } else {
-                            list_path_steps.clear();
-                            count_login = 0;
-                            login_opds = "";
-                            pass_opds = "";
+            lvMain.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View itemClicked, int position, long id) {
+                    if(names.get(position).imgHeader.equals("2")){
+                        showBookInfo(position);
+                    }else{
+                        For_Load_OPDS tempFLO = new For_Load_OPDS();
+                        tempFLO.url_next = names.get(position).urllink;
+                        tempFLO.ID = opdsID;
+                        //========выбор действия=======================================================
+                        if(names.get(position).header.equalsIgnoreCase("Далее")){
+                            tempFLO.action = "next"; // следующая часть списка книг
+                        }else if(names.get(position).header.equalsIgnoreCase("Назад")){
+                            tempFLO.action = "prev"; // предыдущая часть списка книг
+                        }else {
+                            tempFLO.action = "enter"; // в дочернюю папку
                         }
-                        names.clear();
-                        books.clear();
-                        names.addAll(names_tmp);
-                        books.addAll(books_tmp);
-                        names_tmp.clear();
-                        books_tmp.clear();
-                        list_book_steps.clear();
-                        adapter.notifyDataSetChanged();
+                        LoadOPDS foneLoadOPDS = new LoadOPDS(tempFLO);
+                        foneLoadOPDS.execute();
                     }
                 }
             });
-            back_btn.setOnLongClickListener(new View.OnLongClickListener() {
-                public boolean onLongClick(View v) {
+
+            lvMain.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+                @Override
+                public boolean onItemLongClick(AdapterView<?> parent, View itemClicked, int position, long id) {
+                    if(names.get(position).imgHeader.equals("2")){
+                        AlertDialog dialog = DowloadDialog(test, position);
+                        dialog.show();
+                    }else{
+                        AlertDialog dialog = ViewDialog(test, position);
+                        dialog.show();
+                    }
+                    return false;
+                }
+            });
+            //===========================================================================
+            //  up scroll
+            final Button upScroll = (Button) findViewById(R.id.upscroll_btn);
+            if (!ReLaunch.disableScrollJump) {
+                upScroll.setText(app.scrollStep + "%");
+            } else {
+                upScroll.setText(getResources().getString(R.string.jv_relaunch_prev));
+            }
+            class upScrlSimpleOnGestureListener extends GestureDetector.SimpleOnGestureListener {
+                @Override
+                public boolean onSingleTapConfirmed(MotionEvent e) {
+                    if (lvMain.getFirstVisiblePosition() == 0) {
+                        if (names.get(0).header.equalsIgnoreCase("Назад")) {
+                            For_Load_OPDS tempFLO = new For_Load_OPDS();
+                            tempFLO.url_next = names.get(0).urllink;
+                            tempFLO.ID = opdsID;
+                            tempFLO.action = "prev";
+                            LoadOPDS foneLoadOPDS = new LoadOPDS(tempFLO);
+                            foneLoadOPDS.execute();
+                        }
+                    }else {
+                        app.TapUpScrool(lvMain, names.size());
+                    }
+                    return true;
+                }
+
+                @Override
+                public boolean onDoubleTap(MotionEvent e) {
+                    if (!ReLaunch.disableScrollJump) {
+                        int first = lvMain.getFirstVisiblePosition();
+                        int total = names.size();
+                        first -= (total * app.scrollStep) / 100;
+                        if (first < 0)
+                            first = 0;
+                        lvMain.setSelection(first);
+                        // some hack workaround against not scrolling in some cases
+                        if (total > 0) {
+                            lvMain.requestFocusFromTouch();
+                            lvMain.setSelection(first);
+                        }
+                    }
+                    return true;
+                }
+
+                @Override
+                public void onLongPress(MotionEvent e) {
+                    if (upScroll.hasWindowFocus()) {
+                        if (!ReLaunch.disableScrollJump) {
+                            int first = 0;// = gv.getFirstVisiblePosition();
+                            int total = names.size();
+                            lvMain.setSelection(first);
+                            // some hack workaround against not scrolling in some
+                            // cases
+                            if (total > 0) {
+                                lvMain.requestFocusFromTouch();
+                                lvMain.setSelection(first);
+                            }
+                        }
+                    }
+                }
+            }
+
+            upScrlSimpleOnGestureListener upscrl_gl = new upScrlSimpleOnGestureListener();
+            final GestureDetector upscrl_gd = new GestureDetector(upscrl_gl);
+            upScroll.setOnTouchListener(new View.OnTouchListener() {
+                public boolean onTouch(View v, MotionEvent event) {
+                    upscrl_gd.onTouchEvent(event);
+                    return false;
+                }
+            });
+
+            final Button downScroll = (Button) findViewById(R.id.downscroll_btn);
+            if (!ReLaunch.disableScrollJump) {
+                downScroll.setText(app.scrollStep + "%");
+            } else {
+                downScroll.setText(getResources().getString(
+                        R.string.jv_relaunch_next));
+            }
+            class dnScrlSimpleOnGestureListener extends GestureDetector.SimpleOnGestureListener {
+                @Override
+                public boolean onSingleTapConfirmed(MotionEvent e) {
+                    int last1 = lvMain.getLastVisiblePosition();
+                    if (lvMain.getCount() == lvMain.getLastVisiblePosition() + 1) {
+                        if(names.get(last1).header.equalsIgnoreCase("Далее")){
+                            For_Load_OPDS tempFLO = new For_Load_OPDS();
+                            tempFLO.url_next = names.get(last1).urllink;
+                            tempFLO.ID = opdsID;
+                            tempFLO.action = "next";
+                            LoadOPDS foneLoadOPDS = new LoadOPDS(tempFLO);
+                            foneLoadOPDS.execute();
+                        }
+                    } else{
+                        app.TapDownScrool(lvMain, names.size());
+                    }
+                    return true;
+                }
+
+                @Override
+                public boolean onDoubleTap(MotionEvent e) {
+                    if (!ReLaunch.disableScrollJump) {
+                        int first = lvMain.getFirstVisiblePosition();
+                        int total = names.size();
+                        int last = lvMain.getLastVisiblePosition();
+                        if (total == last + 1)
+                            return true;
+                        int target = first + (total * app.scrollStep) / 100;
+                        if (target <= last)
+                            target = last + 1; // Special for NOOK, otherwise it
+                        // won't redraw the listview
+                        if (target > (total - 1))
+                            target = total - 1;
+                        //RepeatedDownScroll ds = new RepeatedDownScroll();
+                        //ds.doIt(first, target, 0);
+                        app.RepeatedDownScroll(lvMain, first, target, 0);
+                    }
+                    return true;
+                }
+
+                @Override
+                public void onLongPress(MotionEvent e) {
+                    if (downScroll.hasWindowFocus()) {
+                        if (!ReLaunch.disableScrollJump) {
+                            int first = lvMain.getFirstVisiblePosition();
+                            int total = names.size();
+                            int last = lvMain.getLastVisiblePosition();
+                            if (total == last + 1)
+                                return;
+                            int target = total - 1;
+                            if (target <= last)
+                                target = last + 1; // Special for NOOK, otherwise it
+                            // won't redraw the listview
+                            if (target > (total - 1))
+                                target = total - 1;
+                            //RepeatedDownScroll ds = new RepeatedDownScroll();
+                            //ds.doIt(first, target, 0);
+                            app.RepeatedDownScroll(lvMain, first, target, 0);
+                        }
+                    }
+                }
+            }
+
+            dnScrlSimpleOnGestureListener dnscrl_gl = new dnScrlSimpleOnGestureListener();
+            final GestureDetector dnscrl_gd = new GestureDetector(dnscrl_gl);
+            downScroll.setOnTouchListener(new View.OnTouchListener() {
+                public boolean onTouch(View v, MotionEvent event) {
+                    dnscrl_gd.onTouchEvent(event);
+                    return false;
+                }
+            });
+            //============================================================================
+            Button goup = (Button) findViewById(R.id.goup_btn);
+            goup.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {// На предыдущий раздел каталога
+                    For_Load_OPDS tempFLO = new For_Load_OPDS();
+                    if (list_path_steps.size() > 0) {
+                        tempFLO.url_next = list_path_steps.get(list_path_steps.size() - 1);
+                        tempFLO.ID = opdsID;
+                        tempFLO.action = "updir";
+                        LoadOPDS foneLoadOPDS = new LoadOPDS(tempFLO);
+                        foneLoadOPDS.execute();
+                    }
+                }
+            });
+            ImageButton back_btn = (ImageButton) findViewById(R.id.results_btn);
+
+            // Выход из каталога
+            back_btn.setOnClickListener(new View.OnClickListener() {
+                public void onClick(View v) {
                     names.clear();
                     books.clear();
                     list_book_steps.clear();
                     list_path_steps.clear();
-                    names_tmp.clear();
-                    books_tmp.clear();
-                    count_login = 0;
-                    login_opds = "";
-                    pass_opds = "";
                     finish();
-                    return true;
                 }
             });
-            ImageButton bu = (ImageButton) findViewById(R.id.btn_scrollup);
-            bu.setOnClickListener(new View.OnClickListener() {
+            ImageButton adv = (ImageButton) findViewById(R.id.advanced_btn);
+            adv.setOnClickListener( new View.OnClickListener() {
                 public void onClick(View v) {
-                    if (N2DeviceInfo.EINK_NOOK) {
-                        MotionEvent ev;
-                        ev = MotionEvent.obtain(SystemClock.uptimeMillis(),
-                                SystemClock.uptimeMillis(),
-                                MotionEvent.ACTION_DOWN, 200, 100, 0);
-                        lvMain.dispatchTouchEvent(ev);
-                        ev = MotionEvent.obtain(SystemClock.uptimeMillis(),
-                                SystemClock.uptimeMillis() + 100,
-                                MotionEvent.ACTION_MOVE, 200, 200, 0);
-                        lvMain.dispatchTouchEvent(ev);
-                        SystemClock.sleep(100);
-                        ev = MotionEvent.obtain(SystemClock.uptimeMillis(),
-                                SystemClock.uptimeMillis(),
-                                MotionEvent.ACTION_UP, 200, 200, 0);
-                        lvMain.dispatchTouchEvent(ev);
-                    } else {
-                        int first = lvMain.getFirstVisiblePosition();
-                        int visible = lvMain.getLastVisiblePosition()
-                                - lvMain.getFirstVisiblePosition() + 1;
-                        first -= visible;
-                        if (first < 0)
-                            first = 0;
-                        final int finfirst = first;
-                        lvMain.clearFocus();
-                        lvMain.post(new Runnable() {
-
-                            public void run() {
-                                lvMain.setSelection(finfirst);
-                            }
-                        });
-                    }
+                    Intent i = new Intent(OPDSActivity.this, Advanced.class);
+                    startActivity(i);
                 }
             });
 
-            ImageButton bd = (ImageButton) findViewById(R.id.btn_scrolldown);
-            bd.setOnClickListener(new View.OnClickListener() {
-                public void onClick(View v) {
-                    if (N2DeviceInfo.EINK_NOOK) {
-                        MotionEvent ev;
-                        ev = MotionEvent.obtain(SystemClock.uptimeMillis(),SystemClock.uptimeMillis(),MotionEvent.ACTION_DOWN, 200, 200, 0);
-                        lvMain.dispatchTouchEvent(ev);
-                        ev = MotionEvent.obtain(SystemClock.uptimeMillis(),SystemClock.uptimeMillis() + 100,MotionEvent.ACTION_MOVE, 200, 100, 0);
-                        lvMain.dispatchTouchEvent(ev);
-                        SystemClock.sleep(100);
-                        ev = MotionEvent.obtain(SystemClock.uptimeMillis(), SystemClock.uptimeMillis(),MotionEvent.ACTION_UP, 200, 100, 0);
-                        lvMain.dispatchTouchEvent(ev);
-                    } else {
-                        int total = lvMain.getCount();
-                        int last = lvMain.getLastVisiblePosition();
-                        if (total == last + 1)
-                            return;
-                        int target = last + 1;
-                        if (target > (total - 1))
-                            target = total - 1;
-                        final int ftarget = target;
-                        lvMain.clearFocus();
-                        lvMain.post(new Runnable() {
-                            public void run() {
-                                lvMain.setSelection(ftarget);
-                            }
-                        });
-                    }
-
-                }
-            });
-
-            if(load_opds(URLstr, names_tmp, books_tmp, login_opds, pass_opds)){
-                names.clear();
-                books.clear();
-                list_book_steps.clear();
-                list_path_steps.clear();
-                names_tmp.clear();
-                books_tmp.clear();
-                finish();
-            }else{
-                names.clear();
-                books.clear();
-                names.addAll(names_tmp);
-                books.addAll(books_tmp);
-                names_tmp.clear();
-                books_tmp.clear();
-                adapter.notifyDataSetChanged();
-            }
+            // Загрузка первой страницы с каталога
+            OPDS_URL_CURRENT = URL_START_LINK;
+            For_Load_OPDS tempFLO = new For_Load_OPDS();
+            tempFLO.ID = opdsID;
+            tempFLO.url_next = URL_START_LINK;
+            tempFLO.action = "enter";
+            LoadOPDS foneLoadOPDS = new LoadOPDS(tempFLO);
+            foneLoadOPDS.execute();
         }
     }
-    //===========================================================================================================
-    private boolean load_opds(String URLstr, ArrayList<Item> names_tmp, ArrayList<BookInfo> books_tmp, String login, String pass){
-        InputStream inputStream1;
-        InputStreamReader in;
 
-        try {
-            HttpURLConnection conn;
-            conn = (new HttpBasicAuthentication(URLstr, login, pass)).Connect();
-            if(conn == null){
-                return true;
-            }else {
-                inputStream1 = conn.getInputStream();
-            }
-
-        } catch (MalformedURLException e) {
-            app.showToast(getString(R.string.srt_dbactivity_err_con_dropbox));
-            return true;
-        } catch (IOException e) {
-            app.showToast(getString(R.string.srt_dbactivity_err_con_dropbox));
-            return true;
-        }
-
-        try {
-            XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
-            factory.setNamespaceAware(true);
-            xpp = factory.newPullParser();
-            in = new InputStreamReader(inputStream1);
-            xpp.setInput(in);
-            eventType = xpp.getEventType();
-            String_Link_Tag tmp_link;
-            String link_next = "";
-            String url_pref;
-
-            if(list_book_steps.size() != 0){
-                names_tmp.add(new Item("Назад", "",list_book_steps.get(list_book_steps.size()-1),"up", null));
-                books_tmp.add(new BookInfo(null,null,"","","",null));
-            }
-            while (xpp.getEventType() != XmlPullParser.END_DOCUMENT) {
-                switch (xpp.getEventType()) {
-                    case XmlPullParser.START_TAG:
-                        if(xpp.getName().equalsIgnoreCase("title")){
-                            ((EditText) findViewById(R.id.prefernces_title)).setText(Title_Tag(xpp));
-                        }
-                        if(xpp.getName().equalsIgnoreCase("entry")){
-                            if(Entry_Tag(xpp, names_tmp, books_tmp)){
-                                return true;
-                            }
-                        }
-                        if(xpp.getName().equalsIgnoreCase("link")){
-                            tmp_link = Link_Tag(xpp);
-                            if(tmp_link.rel != null){
-                                if(!(tmp_link.href.contains("http://"))){
-                                    url_pref = URLdomen;
-                                }else{
-                                    url_pref = "";
-                                }
-                                if(tmp_link.rel.equalsIgnoreCase("next")){
-                                    link_next = url_pref + tmp_link.href;
-                                }
-                                if(tmp_link.rel.equals("search") && tmp_link.type.equals("application/atom+xml")){
-                                    search_site =new String_Search_Tag("Search", url_pref + tmp_link.href);
-                                }
-                            }
-                        }
-                    break;
-                }
-                xpp.next();
-            }
-            if(link_next.length() != 0){
-                names_tmp.add(new Item("ДАЛЕЕ", "",link_next,"down", null));
-            }
-        } catch (XmlPullParserException e) {
-            return true;
-        }  catch (IOException e) {
-            return true;
-        }
-        try {
-            in.close();
-        } catch (IOException e) {
-            //
-        }
-        names_tmp.trimToSize();
-        books_tmp.trimToSize();
-        return false;
-    }
     //====================================================================================
-    private void showBookInfo(int count_book) throws MalformedURLException {
+    private void showBookInfo(int count_book){
 
         final int book_numbe = count_book;
 
@@ -504,14 +394,14 @@ public class OPDSActivity extends Activity {
         dialog.getWindow().requestFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.bookinfo);
 
-        ((ImageView) dialog.findViewById(R.id.book_icon)).setImageResource(R.drawable.book);
+        ((ImageView) dialog.findViewById(R.id.book_icon)).setImageResource(R.drawable.icon);
         ImageView img = (ImageView) dialog.findViewById(R.id.cover);
 
         if(books.get(count_book).url_cover != null &&  books.get(count_book).url_cover.length() != 0){
             DownloadImageTask downloadImage = new DownloadImageTask(img, books.get(count_book).url_cover);
             downloadImage.execute();
         }
-        img.setImageResource(R.drawable.book);
+        img.setImageResource(R.drawable.icon_book_list);
         img.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -538,9 +428,11 @@ public class OPDSActivity extends Activity {
             for (int i = 0; i < count_author; i++) {
                 authors[i] = books.get(count_book).book_authors.get(i);
             }
-
-            final ArrayAdapter<String> lvAdapter = new ArrayAdapter<String>(getApplicationContext(), R.layout.simple_list_item_1, authors);
-            lv.setAdapter(lvAdapter);
+            Context context = getApplicationContext();
+            if(context != null) {
+                final ArrayAdapter<String> lvAdapter = new ArrayAdapter<String>(context, R.layout.simple_list_item_1, authors);
+                lv.setAdapter(lvAdapter);
+            }
         }
         ///====================== серия книги ==========================================
         if(books.get(count_book).book_series != null){
@@ -577,7 +469,7 @@ public class OPDSActivity extends Activity {
         }
     }
     //=============================================================================================
-    public Bitmap getImageBitmap(String url, int type_image) {
+    private Bitmap getImageBitmap(String url, int type_image) {
         Bitmap bm = null;
         Bitmap cover = null;
         int COVER_MAX_W = 0;
@@ -598,17 +490,8 @@ public class OPDSActivity extends Activity {
     }
     //=================================================================================================
     private Drawable ImageOperations(String url1) {
-        try {
-            InputStream is = (InputStream) new URL(url1).getContent();
-            //Drawable d = Drawable.createFromStream(is, "src");
+            InputStream is =  (new HttpBasicAuthentication(url1, opdsID, app)).Connect();
             return Drawable.createFromStream(is, "src");
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-            return null;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
     }
     //============================================================================
     private class BookLink {
@@ -647,7 +530,6 @@ public class OPDSActivity extends Activity {
                 }
                 namefile = namefile.replaceAll("\\p{Cntrl}", "");
                 namefile = namefile.replaceAll("[\\\\/:*?\"<>|]","_");
-                //namefile = namefile.replaceAll(":\\/*?","_");
                 namefile = namefile+"."+ bookItem.get(item).url_type;
 
                 DownloadTask downloadFile = new DownloadTask(getBaseContext(),namefile,url);
@@ -679,21 +561,12 @@ public class OPDSActivity extends Activity {
             builder.setItems(list_url, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int i) {
-                    String tmp_url = names.get(numbe_item).list_link.get(i).uri;
-                    if(load_opds(tmp_url, names_tmp, books_tmp, "", "")){
-                        names_tmp.clear();
-                        books_tmp.clear();
-                    }else{
-                        URLtemp = tmp_url;
-                        list_path_steps.add(tmp_url);
-                        names.clear();
-                        books.clear();
-                        names.addAll(names_tmp);
-                        books.addAll(books_tmp);
-                        names_tmp.clear();
-                        books_tmp.clear();
-                        adapter.notifyDataSetChanged();
-                    }
+                    For_Load_OPDS tempFLO = new For_Load_OPDS();
+                    tempFLO.url_next = names.get(numbe_item).list_link.get(i).uri;
+                    tempFLO.ID = opdsID;
+                    tempFLO.action = "enter";
+                    LoadOPDS foneLoadOPDS = new LoadOPDS(tempFLO);
+                    foneLoadOPDS.execute();
                 }
             });
         }else{
@@ -721,39 +594,29 @@ public class OPDSActivity extends Activity {
             this.name_file = namefile;
             this.strUrl = url;
         }
+        protected void onPreExecute() {
+            super.onPreExecute();
+            countDownload++;
+            dowloadTitleCount(String.valueOf(((Button) findViewById(R.id.results_title)).getText()));
+
+        }
 
         @Override
         protected String doInBackground(String... sUrl) {
 
             InputStream input = null;
             OutputStream output = null;
-            HttpURLConnection connection = null;
-            String base64EncodedCredentials;
 
             try {
-                URL url = new URL(strUrl);
 
-                try {
-                    connection = (HttpURLConnection) url.openConnection();
-                } catch (IOException e) {
-                    return "Невозможно установить Интернет-соединение с источником данных";
-                }
-
-                if(login_opds != null && pass_opds != null && !login_opds.equals("") && !pass_opds.equals("")){
-                    base64EncodedCredentials = Base64Coder.encodeString(login_opds + ":" + pass_opds);
-                    connection.setRequestProperty("Authorization", "Basic " + base64EncodedCredentials);
-                }
-
-                connection.connect();
+                input = (new HttpBasicAuthentication(strUrl, opdsID, app)).Connect();
 
                 // expect HTTP 200 OK, so we don't mistakenly save error report
                 // instead of the file
-                if (connection.getResponseCode() != HttpURLConnection.HTTP_OK)
-                    return "Server returned HTTP " + connection.getResponseCode() + " " + connection.getResponseMessage();
-
-                // download the file
-                input = connection.getInputStream();
-
+                if (input == null) {
+                    return "Connection error";
+                }
+                //Log.i("DownloadTask", "---- connect ----- ");
                 output = new FileOutputStream(OPDS_Path_Download +"/" + name_file);
 
                 byte data[] = new byte[4096];
@@ -775,15 +638,14 @@ public class OPDSActivity extends Activity {
                         input.close();
                 }
                 catch (IOException ignored) { }
-
-                if (connection != null)
-                    connection.disconnect();
             }
             return null;
         }
 
         @Override
         protected void onPostExecute(String result) {
+            countDownload--;
+            dowloadTitleCount(String.valueOf(((Button) findViewById(R.id.results_title)).getText()));
             if (result != null)
                 Toast.makeText(context,"Download error: "+result, Toast.LENGTH_LONG).show();
             else{
@@ -1086,17 +948,17 @@ public class OPDSActivity extends Activity {
         ArrayList<BookLink> entry_books_link = new ArrayList<BookLink>();
         ArrayList<String_Search_Tag> tmp_list_link = new ArrayList<String_Search_Tag>();
         String url_pref;
-        flag_book = true;
+        boolean flag_book = true;
         try {
             while (xpp.getEventType() != XmlPullParser.END_DOCUMENT) {
                 switch (xpp.getEventType()) {
                     case XmlPullParser.START_TAG:
                         if(xpp.getName().equalsIgnoreCase("link")){
                             tmp_link = Link_Tag(xpp);
-                            if(!(tmp_link.href.contains("http://"))){
-                                url_pref = URLdomen;
-                            }else{
+                            if (tmp_link.href.startsWith("http")){
                                 url_pref = "";
+                            }else {
+                                url_pref = URL_START_LINK.substring(0,URL_START_LINK.lastIndexOf("/"));
                             }
                             if(tmp_link.type != null){
                                 if(tmp_link.type.contains("image") && tmp_link.rel.contains("image")){
@@ -1121,7 +983,7 @@ public class OPDSActivity extends Activity {
                                 }else if(tmp_link.type.equals("application/epub")){
                                     entry_books_link.add(new BookLink("epub",url_pref + tmp_link.href));
                                 }else if(tmp_link.type.equals("application/epub+zip")){
-                                    if(URLstr.contains("dimonvideo.ru") || URLstr.contains("coollib.net") || URLstr.contains("zone4iphone.ru")){
+                                    if(URL_START_LINK.contains("dimonvideo.ru") || URL_START_LINK.contains("coollib.net") || URL_START_LINK.contains("zone4iphone.ru")){
                                         entry_books_link.add(new BookLink("epub",url_pref + tmp_link.href));
                                     }else
                                         entry_books_link.add(new BookLink("epub.zip",url_pref + tmp_link.href));
@@ -1287,23 +1149,35 @@ public class OPDSActivity extends Activity {
 
         ArrayList<Item> data = new ArrayList<Item>();
         Context context;
+        int size_text;
+        int size_text2;
+        Bitmap bitmapFolder;
+        Bitmap bitmapBook;
+        Bitmap bitmapDown;
+        Bitmap bitmapUP;
 
         public OPDS_adapter(Context context, ArrayList<Item> arr) {
             if (arr != null) {
                 data = arr;
             }
             this.context = context;
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+            int size_icon = Integer.parseInt(prefs.getString("firstLineIconSizePx", "48"));
+            size_text = Integer.parseInt(prefs.getString("firstLineFontSizePx", "20"));
+            size_text2 = Integer.parseInt(prefs.getString("secondLineFontSizePx", "16"));
+            bitmapFolder = scaleDrawableById(R.drawable.folder_books_list, size_icon);
+            bitmapBook = scaleDrawableById(R.drawable.icon_book_list, size_icon);
+            bitmapDown = scaleDrawableById(R.drawable.ci_arrowdown_big, size_icon);
+            bitmapUP = scaleDrawableById(R.drawable.ci_arrowup_big, size_icon);
         }
 
         @Override
         public int getCount() {
-            // TODO Auto-generated method stub
             return data.size();
         }
 
         @Override
         public Object getItem(int num) {
-            // TODO Auto-generated method stub
             return data.get(num);
         }
 
@@ -1318,6 +1192,9 @@ public class OPDSActivity extends Activity {
             if (someView == null) {
                 someView = inflater.inflate(R.layout.button_opds, arg2, false);
             }
+            if (someView == null) {
+                return null;
+            }
             TextView header = (TextView) someView.findViewById(R.id.item_headerText);
             TextView subHeader = (TextView) someView.findViewById(R.id.item_subHeaderText);
             ImageView imgHeader = (ImageView) someView.findViewById((R.id.iV_cover));
@@ -1326,13 +1203,13 @@ public class OPDSActivity extends Activity {
             subHeader.setTextSize(TypedValue.COMPLEX_UNIT_PX, size_text2);
             subHeader.setText(data.get(i).subHeader);
             if(data.get(i).imgHeader.equals("1"))
-                imgHeader.setImageBitmap(scaleDrawableById(R.drawable.folder_books, size_icon));//.setImageResource(R.drawable.folder_books);
+                imgHeader.setImageBitmap(bitmapFolder);
             else if(data.get(i).imgHeader.equals("2"))
-                imgHeader.setImageBitmap(scaleDrawableById(R.drawable.book, size_icon));//.setImageResource(R.drawable.book);
+                imgHeader.setImageBitmap(bitmapBook);
             else if(data.get(i).imgHeader.equals("down"))
-                imgHeader.setImageBitmap(scaleDrawableById(R.drawable.arrow_down, size_icon));//.setImageResource(R.drawable.arrow_down);
+                imgHeader.setImageBitmap(bitmapDown);
             else if(data.get(i).imgHeader.equals("up"))
-                imgHeader.setImageBitmap(scaleDrawableById(R.drawable.arrow_up, size_icon));//.setImageResource(R.drawable.arrow_up);
+                imgHeader.setImageBitmap(bitmapUP);
             return someView;
         }
 
@@ -1372,7 +1249,6 @@ public class OPDSActivity extends Activity {
 
     public class DownloadImageTask extends AsyncTask<Void, Integer, Bitmap>{
 
-        // запускаем ProgressBar в момент запуска потока
         ImageView img;
         String urlImage;
 
@@ -1398,5 +1274,214 @@ public class OPDSActivity extends Activity {
                 img.setImageBitmap(cover);
             }
         }
+    }
+
+    private void dowloadTitleCount(String title){
+        int indexLast = title.lastIndexOf("(");
+        String temp = "";
+        if (countDownload > 0){
+            temp = "(" + String.valueOf(countDownload) + ")";
+        }
+        if (indexLast > 0 ){
+            title = title.substring(0, indexLast) + temp;
+        }else{
+            title += temp;
+        }
+        ((Button) findViewById(R.id.results_title)).setText(title);
+    }
+
+    // загрузка файла для начала обработки книги
+    private class LoadOPDS extends AsyncTask<Void, For_Load_OPDS, Void> {
+        int opdsID;
+        String urlLoad;
+        String action;
+        boolean book = false;
+        boolean start_pos = true;
+        boolean addBookSteps = false;
+        Request_Load_OPDS rez = null;
+        ProgressDialog prog1 = new ProgressDialog(OPDSActivity.this);
+        public LoadOPDS(For_Load_OPDS for_load_opds) {
+            this.opdsID = for_load_opds.ID;
+            this.urlLoad = for_load_opds.url_next;
+            this.action = for_load_opds.action;
+            this.start_pos = for_load_opds.start_pos;
+            this.addBookSteps = for_load_opds.addBookSteps;
+            this.book = for_load_opds.book;
+        }
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+
+            prog1.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            prog1.setMessage(getString(R.string.opds_file_load));
+            prog1.setIndeterminate(true); // выдать значек ожидания
+            prog1.setCancelable(true);
+            prog1.show();
+        }
+        @Override
+        protected Void doInBackground(Void... res) {
+            String flag_lll = "";
+            if ((list_book_steps.size() == 0 && action.equalsIgnoreCase("next"))){
+                flag_lll = "second";
+            }
+            if ((list_book_steps.size() == 1 && action.equalsIgnoreCase("prev"))){
+                flag_lll = "first";
+            }
+            rez = load_opds_catalog(urlLoad, opdsID, flag_lll);
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            prog1.cancel();
+            if (rez != null){
+                if(rez.result){ // при успешной загрузке ссылки
+                    // -- выводим новый заголовок страницы - если есть ----
+                    if (rez.title.length() > 0) {
+                        dowloadTitleCount(rez.title);
+                    }
+                    // -- говорим адаптеру, что данные обновились --
+                    adapter.notifyDataSetChanged();
+                    // начинаем разбор действий
+                    if (action.equalsIgnoreCase("enter")){
+                        if (!URL_START_LINK.equalsIgnoreCase(urlLoad)) { //
+                            list_path_steps.add(OPDS_URL_CURRENT);
+                        }
+                        lvMain.setSelection(0);
+                    }
+                    if (action.equalsIgnoreCase("next")){
+                        list_book_steps.add(OPDS_URL_CURRENT);
+                        lvMain.setSelection(0);
+                    }
+                    if (action.equalsIgnoreCase("prev")){
+                        list_book_steps.remove(list_book_steps.size() - 1);
+                        lvMain.setSelection(names.size() - 1);
+                    }
+                    if (action.equalsIgnoreCase("updir")){
+                        if(list_path_steps.size() > 0) {
+                            list_path_steps.remove(list_path_steps.size() - 1);
+                        }
+                        list_book_steps.clear();
+                        lvMain.setSelection(0);
+                    }
+
+                    OPDS_URL_CURRENT = urlLoad;
+                }else{ // -- ошибка загрузки --
+                    // -- выводим сообщение о ошибке загрузки
+                    app.showToast(getString(R.string.srt_dbactivity_err_con_dropbox));
+
+                    if (URL_START_LINK.equalsIgnoreCase(urlLoad)) {
+                        finish();
+                    }
+                }
+            }else{
+                finish();
+            }
+        }
+    }
+    private class Request_Load_OPDS{
+        boolean result = false;
+        String title = "";
+    }
+    private class For_Load_OPDS{
+        boolean book = false;
+        boolean start_pos = true;
+        boolean addBookSteps = false;
+        int ID;
+        String url_next;
+        String action;
+    }
+    //===========================================================================================================
+    private Request_Load_OPDS load_opds_catalog(String URL_LINK, int opdsID, String flag){
+        InputStream inputStream1;
+        InputStreamReader in = null;
+        Request_Load_OPDS retry = new Request_Load_OPDS();
+
+        inputStream1 = (new HttpBasicAuthentication(URL_LINK, opdsID, app)).Connect();
+        if(inputStream1 == null){
+            return null;
+        }
+        ArrayList<Item> names_tmp = new ArrayList<Item>();
+        ArrayList<BookInfo> books_tmp = new ArrayList<BookInfo>();
+
+        try {
+            XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
+            factory.setNamespaceAware(true);
+            xpp = factory.newPullParser();
+            in = new InputStreamReader(inputStream1);
+            xpp.setInput(in);
+            String_Link_Tag tmp_link;
+            String link_next = "";
+            String url_pref;
+
+            if(list_book_steps.size() > 0 ) {
+                if (!flag.equalsIgnoreCase("first")){
+                    names_tmp.add(new Item("Назад", "", list_book_steps.get(list_book_steps.size() - 1), "up", null));
+                    books_tmp.add(new BookInfo(null, null, "", "", "", null));
+                }
+            }else if (flag.equalsIgnoreCase("second")){
+                names_tmp.add(new Item("Назад", "", OPDS_URL_CURRENT, "up", null));
+                books_tmp.add(new BookInfo(null, null, "", "", "", null));
+            }
+
+            while (xpp.getEventType() != XmlPullParser.END_DOCUMENT) {
+                switch (xpp.getEventType()) {
+                    case XmlPullParser.START_TAG:
+                        if(xpp.getName().equalsIgnoreCase("title")){
+                            retry.title = Title_Tag(xpp);
+                        }
+                        if(xpp.getName().equalsIgnoreCase("entry")){
+                            Entry_Tag(xpp, names_tmp, books_tmp);
+                        }
+                        if(xpp.getName().equalsIgnoreCase("link")){
+                            tmp_link = Link_Tag(xpp);
+                            if(tmp_link != null && tmp_link.rel != null){
+                                if (tmp_link.href.startsWith("http")){
+                                    url_pref = "";
+                                }else {
+                                    url_pref = URL_START_LINK.substring(0,URL_START_LINK.lastIndexOf("/"));
+                                }
+                                if(tmp_link.rel.equalsIgnoreCase("next")){
+                                    link_next = url_pref + tmp_link.href;
+                                }
+                                if(tmp_link.rel.equals("search") && tmp_link.type.equals("application/atom+xml")){
+                                    search_site =new String_Search_Tag("Search", url_pref + tmp_link.href);
+                                }                                
+                            }
+                        }
+                        break;
+                }
+                xpp.next();
+            }
+            if(link_next.length() != 0){
+                names_tmp.add(new Item("ДАЛЕЕ", "", link_next,"down", null));
+            }
+            retry.result = true;
+        } catch (XmlPullParserException e) {
+            retry.result = false;
+        } catch (IOException e) {
+            retry.result = false;
+        }
+
+        try {
+            if (in != null) {
+                in.close();
+            }
+            inputStream1.close();
+            retry.result = true;
+        } catch (IOException e) {
+            retry.result = false;
+        }
+
+        if (retry.result){
+            names_tmp.trimToSize();
+            books_tmp.trimToSize();
+            names.clear();
+            books.clear();
+            names.addAll(names_tmp);
+            books.addAll(books_tmp);
+        }
+
+        return retry;
     }
 }

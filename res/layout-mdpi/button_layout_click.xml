@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="fill_parent"
+              android:layout_height="fill_parent"
+              android:background="@color/normal_bg"
+              android:orientation="vertical"
+              android:paddingTop="4dp"
+              android:paddingBottom="4dp"
+              android:paddingRight="8dp"
+              android:paddingLeft="8dp">
+
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@color/normal_transparent"
+                android:text="@string/jv_button_new_title"
+                android:textAppearance="@android:style/TextAppearance.Large"
+                android:textColor="@color/normal_fg"
+                android:id="@+id/run_button_click_title"
+                android:layout_gravity="top|center_horizontal" android:textStyle="bold"/>
+
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/jv_buttonsetC_title"
+            android:background="@color/normal_transparent"
+            android:textAppearance="@android:style/TextAppearance.Large"
+            android:textColor="@color/normal_fg"
+            android:id="@+id/textView14"
+            android:layout_marginTop="10dp"/>
+
+    <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="56dp"
+            android:orientation="horizontal" android:background="@drawable/main_button">
+        <ImageView
+                android:id="@+id/iV_Click"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@color/normal_transparent"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="@color/normal_fg"
+                android:id="@+id/run_single_click" android:layout_weight="0.5"/>
+
+        <Button
+                android:layout_width="wrap_content"
+                android:layout_height="fill_parent"
+                android:text="@string/jv_button_select_click"
+                android:id="@+id/button_add_click_btn"
+                android:background="@drawable/main_button"
+                android:textSize="24dp"
+                android:singleLine="true"
+                android:textStyle="normal"/>
+    </LinearLayout>
+
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/jv_buttonsetL_title"
+            android:background="@color/normal_transparent"
+            android:textAppearance="@android:style/TextAppearance.Large"
+            android:textColor="@color/normal_fg"
+            android:id="@+id/textView15" android:layout_marginTop="20dp"/>
+    <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="56dp"
+            android:orientation="horizontal" android:background="@drawable/main_button">
+        <ImageView
+                android:id="@+id/iV_DClick"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.5"
+                android:background="@color/normal_transparent"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="@color/normal_fg"
+                android:id="@+id/run_double_click"/>
+
+        <Button
+                android:layout_width="wrap_content"
+                android:layout_height="fill_parent"
+                android:layout_weight="0"
+                android:text="@string/jv_button_select_click"
+                android:id="@+id/button_add_double_click_btn"
+                android:background="@drawable/main_button"
+                android:textSize="24dp"
+                android:singleLine="true"
+                android:textStyle="normal"/>
+    </LinearLayout>
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/jv_buttonsetD_title"
+            android:background="@color/normal_transparent"
+            android:textAppearance="@android:style/TextAppearance.Large"
+            android:textColor="@color/normal_fg"
+            android:id="@+id/textView16" android:layout_marginTop="20dp"/>
+    <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="56dp"
+            android:orientation="horizontal"
+            android:background="@drawable/main_button">
+        <ImageView
+                android:id="@+id/iV_LClick"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.5"
+                android:background="@color/normal_transparent"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="@color/normal_fg"
+                android:id="@+id/run_long_click"/>
+
+        <Button
+                android:layout_width="wrap_content"
+                android:layout_height="fill_parent"
+                android:layout_weight="0"
+                android:text="@string/jv_button_select_click"
+                android:id="@+id/button_add_long_click_btn"
+                android:background="@drawable/main_button"
+                android:textSize="24dp"
+                android:singleLine="true"
+                android:textStyle="normal"/>
+    </LinearLayout>
+    <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="56dp"
+            android:layout_marginTop="30dp" android:gravity="bottom">
+
+        <Button
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                android:text="@string/app_ok"
+                android:id="@+id/button_add_ok_btn"
+                android:background="@drawable/main_button"
+                android:textSize="24dp"
+                android:singleLine="true"
+                android:textStyle="normal"/>
+
+        <Button
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                android:text="@string/app_cancel"
+                android:id="@+id/button_add_cancel_btn"
+                android:background="@drawable/main_button"
+                android:textSize="24dp"
+                android:singleLine="true"
+                android:textStyle="normal"/>
+    </LinearLayout>
+</LinearLayout>

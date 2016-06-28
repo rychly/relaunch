@@ -52,7 +52,7 @@
             android:orientation="vertical" >
 
             <TextView
-                android:id="@+id/textView2"
+                android:id="@+id/textView1"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="right"
@@ -65,7 +65,7 @@
             </TextView>
 
             <TextView
-                android:id="@+id/textView3"
+                android:id="@+id/textView2"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="right"
@@ -78,7 +78,7 @@
             </TextView>
 
             <TextView
-                android:id="@+id/textView6"
+                android:id="@+id/textView3"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="right"
@@ -91,7 +91,7 @@
             </TextView>
 
             <TextView
-                android:id="@+id/textView9"
+                android:id="@+id/textView4"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="right"
@@ -104,7 +104,7 @@
             </TextView>
 
             <TextView
-                android:id="@+id/textView9"
+                android:id="@+id/textView5"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="right"
@@ -117,7 +117,7 @@
             </TextView>
 
             <TextView
-                android:id="@+id/textView9"
+                android:id="@+id/textView6"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="right"
@@ -130,7 +130,7 @@
             </TextView>
 
             <TextView
-                android:id="@+id/textView9"
+                android:id="@+id/textView7"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="right"
@@ -143,7 +143,7 @@
             </TextView>
 
             <TextView
-                android:id="@+id/textView9"
+                android:id="@+id/textView8"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="right"
@@ -171,7 +171,6 @@
                 android:layout_marginBottom="1dp"
                 android:background="#ffffff"
                 android:gravity="center"
-                android:text="TextView"
                 android:textAppearance="?android:attr/textAppearanceLarge"
                 android:textColor="#000000" >
             </TextView>
@@ -184,7 +183,6 @@
                 android:layout_marginBottom="1dp"
                 android:background="#ffffff"
                 android:gravity="center"
-                android:text="TextView"
                 android:textAppearance="?android:attr/textAppearanceLarge"
                 android:textColor="#000000" >
             </TextView>
@@ -197,7 +195,6 @@
                 android:layout_marginBottom="1dp"
                 android:background="#ffffff"
                 android:gravity="center"
-                android:text="TextView"
                 android:textAppearance="?android:attr/textAppearanceLarge"
                 android:textColor="#000000" >
             </TextView>
@@ -210,7 +207,6 @@
                 android:layout_marginBottom="1dp"
                 android:background="#ffffff"
                 android:gravity="center"
-                android:text="TextView"
                 android:textAppearance="?android:attr/textAppearanceLarge"
                 android:textColor="#000000" >
             </TextView>
@@ -223,7 +219,6 @@
                 android:layout_marginBottom="1dp"
                 android:background="#ffffff"
                 android:gravity="center"
-                android:text="TextView"
                 android:textAppearance="?android:attr/textAppearanceLarge"
                 android:textColor="#000000" >
             </TextView>
@@ -236,7 +231,6 @@
                 android:layout_marginBottom="1dp"
                 android:background="#ffffff"
                 android:gravity="center"
-                android:text="TextView"
                 android:textAppearance="?android:attr/textAppearanceLarge"
                 android:textColor="#000000" >
             </TextView>
@@ -249,7 +243,6 @@
                 android:layout_marginBottom="1dp"
                 android:background="#ffffff"
                 android:gravity="center"
-                android:text="TextView"
                 android:textAppearance="?android:attr/textAppearanceLarge"
                 android:textColor="#000000" >
             </TextView>
@@ -262,7 +255,6 @@
                 android:layout_marginBottom="1dp"
                 android:background="#ffffff"
                 android:gravity="center"
-                android:text="TextView"
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:textColor="#000000" >
             </TextView>

@@ -43,7 +43,7 @@
 			android:title="@string/pref_i_sg_screenUpdateMode_title" />
 
 		<EditTextPreference
-			android:defaultValue="20"
+			android:defaultValue="@string/twenty"
 			android:enabled="true"
 			android:key="fileFontSize"
 			android:layout="@layout/pref_child"
@@ -77,7 +77,7 @@
 					android:title="@string/pref_i_showAddStartDir_title" />
 
 				<EditTextPreference
-					android:defaultValue="/sdcard,/media/My Files"
+					android:defaultValue=""
 					android:enabled="true"
 					android:key="startDir"
 					android:layout="@layout/pref_child"
@@ -115,7 +115,22 @@
 					android:key="fileAssociations"
 					android:layout="@layout/pref_child"
 					android:title="@string/pref_i_fileAssociations_title" />
-
+                <CheckBoxPreference
+                        android:defaultValue="false"
+                        android:key="showOnlyKnownExts"
+                        android:layout="@layout/pref_child"
+                        android:persistent="true"
+                        android:summaryOff="@string/pref_i_showOnlyKnownExts_off"
+                        android:summaryOn="@string/pref_i_showOnlyKnownExts_on"
+                        android:title="@string/pref_i_showOnlyKnownExts_title" />
+                <CheckBoxPreference
+                        android:defaultValue="false"
+                        android:key="showButtonParenFolder"
+                        android:layout="@layout/pref_child"
+                        android:persistent="true"
+                        android:summaryOff="@string/pref_i_showButtonParenFolder_off"
+                        android:summaryOn="@string/pref_i_showButtonParenFolder_on"
+                        android:title="@string/pref_i_showButtonParenFolder_title" />
 				<CheckBoxPreference
 					android:defaultValue="false"
 					android:key="askAmbig"
@@ -139,7 +154,21 @@
 					android:layout="@layout/pref_child"
 					android:summary="@string/pref_i_bookTitleFormat_sum"
 					android:title="@string/pref_i_bookTitleFormat_title" />
-
+                <CheckBoxPreference
+                        android:defaultValue="false"
+                        android:key="fileExtendedFormat"
+                        android:layout="@layout/pref_child"
+                        android:persistent="true"
+                        android:summaryOff="@string/pref_i_fileExtendedFormat_off"
+                        android:summaryOn="@string/pref_i_fileExtendedFormat_on"
+                        android:title="@string/pref_i_fileExtendedFormat_title" />
+                <EditTextPreference
+                        android:dependency="fileExtendedFormat"
+                        android:defaultValue="( %Sb bytes, %D %T )"
+                        android:key="fileExtendedDataFormat"
+                        android:layout="@layout/pref_child"
+                        android:summary="@string/pref_i_fileExtendedDataFormat_sum"
+                        android:title="@string/pref_i_fileExtendedDataFormat_title" />
 				<CheckBoxPreference
 					android:defaultValue="true"
 					android:key="openWith"
@@ -164,12 +193,10 @@
 					android:dialogTitle="@string/LangDialogTitle"
 					android:summary="@string/LangSummary"
 					android:title="@string/LangTitle" />
-
-
 			</PreferenceScreen>
 			<PreferenceScreen android:title="@string/pref_s_appearance_title" >
 				<ListPreference
-					android:defaultValue="1"
+					android:defaultValue="@string/one"
 					android:enabled="true"
 					android:entries="@array/einkUpdateMode_names"
 					android:entryValues="@array/einkUpdateMode_values"
@@ -180,7 +207,7 @@
 					android:title="@string/pref_i_einkUpdateMode_title" />
 
 				<EditTextPreference
-					android:defaultValue="10"
+					android:defaultValue="@string/ten"
 					android:enabled="true"
 					android:key="einkUpdateInterval"
 					android:layout="@layout/pref_child"
@@ -199,6 +226,14 @@
 					android:title="@string/pref_i_fullScreen_title" />
 				<CheckBoxPreference
 					android:defaultValue="true"
+					android:key="hideTitle"
+					android:layout="@layout/pref_child"
+					android:persistent="true"
+					android:summaryOff="@string/pref_i_hideTitle_off"
+					android:summaryOn="@string/pref_i_hideTitle_on"
+					android:title="@string/pref_i_hideTitle_title" />
+				<CheckBoxPreference
+					android:defaultValue="true"
 					android:key="showNew"
 					android:layout="@layout/pref_child"
 					android:persistent="true"
@@ -207,7 +242,7 @@
 					android:title="@string/pref_i_showNew_title" />
 
 				<EditTextPreference
-					android:defaultValue="20"
+					android:defaultValue="@string/twenty"
 					android:enabled="true"
 					android:key="firstLineFontSizePx"
 					android:layout="@layout/pref_child"
@@ -217,7 +252,7 @@
 					android:summary="@string/pref_i_firstLineFontSizePx_sum"
 					android:title="@string/pref_i_firstLineFontSizePx_title" />
 				<EditTextPreference
-					android:defaultValue="16"
+					android:defaultValue="@string/sixteen"
 					android:enabled="true"
 					android:key="secondLineFontSizePx"
 					android:layout="@layout/pref_child"
@@ -227,7 +262,7 @@
 					android:summary="@string/pref_i_secondLineFontSizePx_sum"
 					android:title="@string/pref_i_secondLineFontSizePx_title" />
 				<EditTextPreference
-					android:defaultValue="48"
+					android:defaultValue="@string/forty_eight"
 					android:enabled="true"
 					android:key="firstLineIconSizePx"
 					android:layout="@layout/pref_child"
@@ -256,9 +291,18 @@
 					android:summaryOn="@string/pref_i_doNotHyph_on"
 					android:title="@string/pref_i_doNotHyph_title" >
 				</CheckBoxPreference>
+				<CheckBoxPreference
+						android:defaultValue="true"
+						android:key="showFileOperation"
+						android:layout="@layout/pref_child"
+						android:persistent="true"
+						android:summaryOff="@string/pref_i_showFileOperation_off"
+						android:summaryOn="@string/pref_i_showFileOperation_on"
+						android:title="@string/pref_i_showFileOperation_title" >
+				</CheckBoxPreference>
 
 				<ListPreference
-					android:defaultValue="-1"
+					android:defaultValue="@string/minus_one"
 					android:enabled="true"
 					android:entries="@array/output_columns_names"
 					android:entryValues="@array/output_columns_values"
@@ -268,7 +312,8 @@
 					android:selectable="true"
 					android:title="@string/pref_i_columnsDirsFiles_title" />
 				<ListPreference
-					android:defaultValue="-1"
+					android:defaultValue="@string/minus_one"
+                    android:numeric="integer"
 					android:enabled="true"
 					android:entries="@array/output_columns_names"
 					android:entryValues="@array/output_columns_values"
@@ -278,7 +323,7 @@
 					android:selectable="true"
 					android:title="@string/pref_i_columnsHomeList_title" />
 				<ListPreference
-					android:defaultValue="-1"
+					android:defaultValue="@string/minus_one"
 					android:enabled="true"
 					android:entries="@array/output_columns_names"
 					android:entryValues="@array/output_columns_values"
@@ -288,7 +333,7 @@
 					android:selectable="true"
 					android:title="@string/pref_i_columnsLRU_title" />
 				<ListPreference
-					android:defaultValue="-1"
+					android:defaultValue="@string/minus_one"
 					android:enabled="true"
 					android:entries="@array/output_columns_names"
 					android:entryValues="@array/output_columns_values"
@@ -298,7 +343,7 @@
 					android:selectable="true"
 					android:title="@string/pref_i_columnsFAV_title" />
 				<ListPreference
-					android:defaultValue="-1"
+					android:defaultValue="@string/minus_one"
 					android:enabled="true"
 					android:entries="@array/output_columns_names"
 					android:entryValues="@array/output_columns_values"
@@ -308,7 +353,7 @@
 					android:selectable="true"
 					android:title="@string/pref_i_columnsSearch_title" />
 				<ListPreference
-					android:defaultValue="-1"
+					android:defaultValue="@string/minus_one"
 					android:enabled="true"
 					android:entries="@array/output_columns_names"
 					android:entryValues="@array/output_columns_values"
@@ -318,7 +363,7 @@
 					android:selectable="true"
 					android:title="@string/pref_i_columnsAppAll_title" />
 				<ListPreference
-					android:defaultValue="-1"
+					android:defaultValue="@string/minus_one"
 					android:enabled="true"
 					android:entries="@array/output_columns_names"
 					android:entryValues="@array/output_columns_values"
@@ -327,6 +372,26 @@
 					android:persistent="true"
 					android:selectable="true"
 					android:title="@string/pref_i_columnsAppFav_title" />
+                <ListPreference
+                        android:defaultValue="@string/minus_one"
+                        android:enabled="true"
+                        android:entries="@array/output_columns_names"
+                        android:entryValues="@array/output_columns_values"
+                        android:key="columnsOpdsList"
+                        android:layout="@layout/pref_child"
+                        android:persistent="true"
+                        android:selectable="true"
+                        android:title="@string/pref_i_opdsSize_title" />
+                <ListPreference
+                        android:defaultValue="@string/minus_one"
+                        android:enabled="true"
+                        android:entries="@array/output_columns_names"
+                        android:entryValues="@array/output_columns_values"
+                        android:key="columnsFTPList"
+                        android:layout="@layout/pref_child"
+                        android:persistent="true"
+                        android:selectable="true"
+                        android:title="@string/pref_i_ftpSize_title" />
 				<ListPreference
 					android:defaultValue="70 3:5 7:4 15:3 48:2"
 					android:enabled="true"
@@ -343,38 +408,10 @@
 					android:key="rowSeparator"
 					android:layout="@layout/pref_child"
 					android:title="@string/pref_i_rowSeparator_title" />
-                <CheckBoxPreference
-                        android:defaultValue="true"
-                        android:key="showOnePanel"
+                <Preference
+                        android:key="screenManualPanel"
                         android:layout="@layout/pref_child"
-                        android:persistent="true"
-                        android:summaryOff="@string/pref_i_showOnePanel_off"
-                        android:summaryOn="@string/pref_i_showOnePanel_on"
-                        android:title="@string/pref_i_showOnePanel_title" />
-                <CheckBoxPreference
-                        android:defaultValue="true"
-                        android:key="showTwoPanel"
-                        android:layout="@layout/pref_child"
-                        android:persistent="true"
-                        android:summaryOff="@string/pref_i_showOnePanel_off"
-                        android:summaryOn="@string/pref_i_showOnePanel_on"
-                        android:title="@string/pref_i_showTwoPanel_title" />
-                <CheckBoxPreference
-                        android:defaultValue="true"
-                        android:key="showThreePanel"
-                        android:layout="@layout/pref_child"
-                        android:persistent="true"
-                        android:summaryOff="@string/pref_i_showOnePanel_off"
-                        android:summaryOn="@string/pref_i_showOnePanel_on"
-                        android:title="@string/pref_i_showThreePanel_title" />
-                <CheckBoxPreference
-                        android:defaultValue="true"
-                        android:key="showFourPanel"
-                        android:layout="@layout/pref_child"
-                        android:persistent="true"
-                        android:summaryOff="@string/pref_i_showOnePanel_off"
-                        android:summaryOn="@string/pref_i_showOnePanel_on"
-                        android:title="@string/pref_i_showFourPanel_title" />
+                        android:title="@string/pref_s_screenManualPanel_title" />
 			</PreferenceScreen>
 			<PreferenceScreen android:title="@string/pref_s_file_title" >
 				<Preference
@@ -446,6 +483,23 @@
 					android:summaryOff="@string/pref_i_confirmNonEmptyDirDelete_off"
 					android:summaryOn="@string/pref_i_confirmNonEmptyDirDelete_on"
 					android:title="@string/pref_i_confirmNonEmptyDirDelete_title" />
+                <CheckBoxPreference
+                    android:defaultValue="true"
+                    android:key="selectFileTapIcon"
+                    android:layout="@layout/pref_child"
+                    android:persistent="true"
+                    android:summaryOff="@string/pref_i_selectFileTapIcon_off"
+                    android:summaryOn="@string/pref_i_selectFileTapIcon_on"
+                    android:title="@string/pref_i_selectFileTapIcon_title" />
+				<CheckBoxPreference
+					android:defaultValue="false"
+					android:key="selectRootNavigation"
+					android:layout="@layout/pref_child"
+					android:persistent="true"
+					android:summaryOff="@string/pref_i_selectRootNavigation_off"
+					android:summaryOn="@string/pref_i_selectRootNavigation_on"
+					android:title="@string/pref_i_selectRootNavigation_title" />
+
 			</PreferenceScreen>
 			<PreferenceScreen
 				android:key="psButtons"
@@ -830,6 +884,14 @@
 					android:summaryOff="@string/pref_i_dateUS_off"
 					android:summaryOn="@string/pref_i_dateUS_on"
 					android:title="@string/pref_i_dateUS_title" />
+                <CheckBoxPreference
+                        android:defaultValue="true"
+                        android:key="blockExit"
+                        android:layout="@layout/pref_child"
+                        android:persistent="true"
+                        android:summaryOff="@string/pref_i_blockExit_off"
+                        android:summaryOn="@string/pref_i_blockExit_on"
+                        android:title="@string/pref_i_blockExit_title" />
 			</PreferenceScreen>
 			<PreferenceScreen android:title="@string/pref_s_scroll_title" >
 				<CheckBoxPreference
@@ -842,7 +904,7 @@
 					android:title="@string/pref_i_disableScrollJump_title" />
 
 				<EditTextPreference
-					android:defaultValue="10"
+					android:defaultValue="@string/ten"
 					android:enabled="true"
 					android:key="scrollPerc"
 					android:layout="@layout/pref_child"
@@ -862,7 +924,7 @@
 					android:title="@string/pref_i_customScroll_title" />
 
 				<EditTextPreference
-					android:defaultValue="25"
+					android:defaultValue="@string/twenty_five"
 					android:enabled="true"
 					android:key="scrollWidth"
 					android:layout="@layout/pref_child"
@@ -872,7 +934,7 @@
 					android:summary="@string/pref_i_scrollWidth_sum"
 					android:title="@string/pref_i_scrollWidth_title" />
 				<EditTextPreference
-					android:defaultValue="10"
+					android:defaultValue="@string/ten"
 					android:enabled="true"
 					android:key="scrollPad"
 					android:layout="@layout/pref_child"
@@ -892,7 +954,7 @@
 			</PreferenceScreen>
 			<PreferenceScreen android:title="@string/pref_s_search_title" >
 				<EditTextPreference
-					android:defaultValue="5000"
+					android:defaultValue="@string/fifty"
 					android:enabled="true"
 					android:key="searchSize"
 					android:layout="@layout/pref_child"
@@ -902,7 +964,7 @@
 					android:summary="@string/pref_i_searchSize_sum"
 					android:title="@string/pref_i_searchSize_title" />
 				<EditTextPreference
-					android:defaultValue="100"
+					android:defaultValue="@string/one_hundred"
 					android:enabled="true"
 					android:key="searchReport"
 					android:layout="@layout/pref_child"
@@ -912,7 +974,7 @@
 					android:summary="@string/pref_i_searchReport_sum"
 					android:title="@string/pref_i_searchReport_title" />
 				<EditTextPreference
-					android:defaultValue="/sdcard,/media/My Files"
+					android:defaultValue=""
 					android:enabled="true"
 					android:key="searchRoot"
 					android:layout="@layout/pref_child"
@@ -923,7 +985,7 @@
 			</PreferenceScreen>
 			<PreferenceScreen android:title="@string/pref_s_viewer_title" >
 				<EditTextPreference
-					android:defaultValue="1048576"
+					android:defaultValue="@string/ten_many"
 					android:enabled="true"
 					android:key="viewerMaxSize"
 					android:layout="@layout/pref_child"
@@ -933,7 +995,7 @@
 					android:summary="@string/pref_i_viewerMaxSize_sum"
 					android:title="@string/pref_i_viewerMaxSize_title" />
 				<EditTextPreference
-					android:defaultValue="262144"
+					android:defaultValue="@string/twenty_six"
 					android:enabled="true"
 					android:key="editorMaxSize"
 					android:layout="@layout/pref_child"
@@ -945,7 +1007,7 @@
 			</PreferenceScreen>
 			<PreferenceScreen android:title="@string/pref_s_listSize_title" >
 				<EditTextPreference
-					android:defaultValue="30"
+					android:defaultValue="@string/thirty"
 					android:enabled="true"
 					android:key="lruSize"
 					android:layout="@layout/pref_child"
@@ -955,7 +1017,7 @@
 					android:summary="@string/pref_i_lruSize_sum"
 					android:title="@string/pref_i_lruSize_title" />
 				<EditTextPreference
-					android:defaultValue="30"
+					android:defaultValue="@string/thirty"
 					android:enabled="true"
 					android:key="favSize"
 					android:layout="@layout/pref_child"
@@ -965,7 +1027,7 @@
 					android:summary="@string/pref_i_favSize_sum"
 					android:title="@string/pref_i_favSize_title" />
 				<EditTextPreference
-					android:defaultValue="30"
+					android:defaultValue="@string/thirty"
 					android:enabled="true"
 					android:key="appLruSize"
 					android:layout="@layout/pref_child"
@@ -975,7 +1037,7 @@
 					android:summary="@string/pref_i_appLruSize_sum"
 					android:title="@string/pref_i_appLruSize_title" />
 				<EditTextPreference
-					android:defaultValue="30"
+					android:defaultValue="@string/thirty"
 					android:enabled="true"
 					android:key="appFavSize"
 					android:layout="@layout/pref_child"
@@ -985,7 +1047,7 @@
 					android:summary="@string/pref_i_appFavSize_sum"
 					android:title="@string/pref_i_appFavSize_title" />
                 <EditTextPreference
-                        android:defaultValue="30"
+                        android:defaultValue="@string/thirty"
                         android:enabled="true"
                         android:key="opdsSize"
                         android:layout="@layout/pref_child"
@@ -1059,7 +1121,34 @@
                         android:selectable="true"
                         android:title="@string/pref_i_dropboxSetButton_title" />
             </PreferenceScreen>
+            <PreferenceScreen android:title="@string/pref_s_screenFTP_title" >
+                <ListPreference
+                        android:defaultValue="NOTHING"
+                        android:enabled="true"
+                        android:entries="@array/array_buttons_names"
+                        android:entryValues="@array/array_buttons_values"
+                        android:key="ftpSetButton"
+                        android:layout="@layout/pref_child"
+                        android:persistent="true"
+                        android:selectable="true"
+                        android:title="@string/pref_i_dropboxSetButton_title" />
+                <EditTextPreference
+                        android:defaultValue="/sdcard/.FTP_temp"
+                        android:key="ftpTempDir"
+                        android:layout="@layout/pref_child"
+                        android:summary="@string/pref_i_Local_folder_FTP_info"
+                        android:title="@string/pref_i_Local_folder_FTP" />
+            </PreferenceScreen>
 			<PreferenceScreen android:title="@string/pref_s_system_title" >
+				<EditTextPreference
+						android:defaultValue="/sdcard/.relaunch"
+						android:enabled="true"
+						android:key="backupDir"
+						android:layout="@layout/pref_child"
+						android:persistent="true"
+						android:selectable="true"
+						android:summary="@string/pref_i_backupDir_desc"
+						android:title="@string/pref_i_backupDir_title" />
 				<Preference
 					android:key="loadSettings"
 					android:layout="@layout/pref_child"
@@ -1069,9 +1158,25 @@
 					android:layout="@layout/pref_child"
 					android:title="@string/pref_i_saveSettings_title" />
 				<Preference
-					android:key="cleanupDatabase"
+					android:key="cleanupDatabaseBooks"
 					android:layout="@layout/pref_child"
-					android:title="@string/pref_i_cleanupDatabase_title" />
+					android:title="@string/pref_i_cleanupDatabaseBooks_title" />
+                <Preference
+                        android:key="cleanupDatabaseOPDS"
+                        android:layout="@layout/pref_child"
+                        android:title="@string/pref_i_cleanupDatabaseOPDS_title" />
+                <Preference
+                        android:key="cleanupDatabaseFTP"
+                        android:layout="@layout/pref_child"
+                        android:title="@string/pref_i_cleanupDatabaseFTP_title" />
+				<Preference
+						android:key="cleanupDatabasePANELS"
+						android:layout="@layout/pref_child"
+						android:title="@string/pref_i_cleanupDatabasePANELS_title" />
+                <Preference
+                        android:key="deleteDatabaseAll"
+                        android:layout="@layout/pref_child"
+                        android:title="@string/pref_i_deleteDatabaseAll_title" />
 				<Preference
 					android:key="cleanupLRU"
 					android:layout="@layout/pref_child"

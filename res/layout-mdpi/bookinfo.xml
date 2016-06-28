@@ -28,7 +28,6 @@
 			android:gravity="left|center_vertical"
 			android:inputType="textMultiLine"
 			android:paddingLeft="8dp"
-			android:text="TextView"
 			android:textAppearance="?android:attr/textAppearanceMedium"
 			android:textColor="@color/normal_fg"
 			android:textStyle="bold" >
@@ -64,8 +63,7 @@
 			<ImageView
 				android:id="@+id/cover"
 				android:layout_width="wrap_content"
-				android:layout_height="wrap_content"
-				android:src="@drawable/arrow_down" />
+				android:layout_height="wrap_content" />
 
 			<LinearLayout
 				android:id="@+id/linearLayout4"
@@ -84,7 +82,6 @@
 					android:id="@+id/tvTitle"
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
-					android:text=""
 					android:textAppearance="?android:attr/textAppearanceLarge" />
 				<TextView
 					android:id="@+id/TextView01"
@@ -111,7 +108,6 @@
 					android:id="@+id/tvSeries"
 					android:layout_width="wrap_content"
 					android:layout_height="wrap_content"
-					android:text=""
 					android:textAppearance="?android:attr/textAppearanceLarge" />
 			</LinearLayout>
 		</LinearLayout>
@@ -130,7 +126,6 @@
 					android:id="@+id/tvAnnotation"
 					android:layout_width="fill_parent"
 					android:layout_height="wrap_content"
-					android:text="TextView"
 					android:textAppearance="@android:style/TextAppearance.Medium" />
 			</LinearLayout>
 		</ScrollView>

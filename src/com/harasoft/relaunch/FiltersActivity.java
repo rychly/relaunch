@@ -66,24 +66,27 @@ public class FiltersActivity extends Activity {
 		}
 
 		@Override
-		public View getView(final int position, View convertView,
-				ViewGroup parent) {
+		public View getView(final int position, View convertView,ViewGroup parent) {
 			// Do not reuse convertView and create new view each time !!!
 			// I know it is not so efficient, but I don't know how to prevent
 			// spinner's value for different position in list be mixed
 			// otherwise.
 			// Anyway filters list can't be big, so I hope its OK.
-			LayoutInflater vi = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-			View v = vi.inflate(R.layout.filters_item, null);
-
-			Spinner methodSpn = (Spinner) v.findViewById(R.id.filters_method);
-			ImageButton rmBtn = (ImageButton) v.findViewById(R.id.filters_delete);
-			Button valBtn = (Button) v.findViewById(R.id.filters_type);
-			TextView condTxt = (TextView) v.findViewById(R.id.filters_condition);
+			if (convertView == null) {
+				LayoutInflater vi = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+				convertView = vi.inflate(R.layout.filters_item, parent, false);
+			}
+            if (convertView == null){
+                return null;
+            }
+			Spinner methodSpn = (Spinner) convertView.findViewById(R.id.filters_method);
+			ImageButton rmBtn = (ImageButton) convertView.findViewById(R.id.filters_delete);
+			Button valBtn = (Button) convertView.findViewById(R.id.filters_type);
+			TextView condTxt = (TextView) convertView.findViewById(R.id.filters_condition);
 
 			final String[] item = itemsArray.get(position);
 			if (item == null)
-				return v;
+				return convertView;
 
 			// Set spinner
 			Integer spos = 0;
@@ -135,7 +138,7 @@ public class FiltersActivity extends Activity {
 								new DialogInterface.OnClickListener() {
 									public void onClick(DialogInterface dialog,
 											int whichButton) {
-										String value = input.getText().toString();
+										String value = String.valueOf(input.getText());
 										if (value.equals(""))
 											// "Can't be empty!"
 											Toast.makeText(cntx,getResources().getString(R.string.jv_filters_cant_be_empty),Toast.LENGTH_LONG).show();
@@ -164,13 +167,13 @@ public class FiltersActivity extends Activity {
 			else if (app.filters_and)
 				// "AND"
 				condTxt.setText(getResources().getString(
-						R.string.jv_filters_and));
+						R.string.app_and));
 			else
 				// "OR"
 				condTxt.setText(getResources()
 						.getString(R.string.jv_filters_or));
 
-			return v;
+			return convertView;
 		}
 	}
 
@@ -182,7 +185,10 @@ public class FiltersActivity extends Activity {
 
 		// Create global storage with values
 		app = (ReLaunchApp) getApplicationContext();
-		app.setFullScreenIfNecessary(this);
+        if(app == null ) {
+            finish();
+        }
+        app.setFullScreenIfNecessary(this);
 		setContentView(R.layout.filters_view);
 
 		lv = (ListView) findViewById(R.id.filters_lv);
@@ -225,7 +231,7 @@ public class FiltersActivity extends Activity {
 			andorBtn.setText(getResources().getString(R.string.jv_filters_or));
 		else
 			// "AND"
-			andorBtn.setText(getResources().getString(R.string.jv_filters_and));
+			andorBtn.setText(getResources().getString(R.string.app_and));
 		andorBtn.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				app.filters_and = !app.filters_and;
@@ -236,7 +242,7 @@ public class FiltersActivity extends Activity {
 				else
 					// "AND"
 					andorBtn.setText(getResources().getString(
-							R.string.jv_filters_and));
+							R.string.app_and));
 				adapter.notifyDataSetChanged();
 			}
 		});

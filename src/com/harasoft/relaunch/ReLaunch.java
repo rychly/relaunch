@@ -5,6 +5,9 @@ import android.app.ActivityManager.MemoryInfo;
 import android.content.*;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.res.Configuration;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Typeface;
@@ -14,15 +17,11 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.net.wifi.WifiManager;
-import android.os.BatteryManager;
-import android.os.Build;
-import android.os.Bundle;
-import android.os.SystemClock;
+import android.os.*;
 import android.preference.PreferenceManager;
 import android.text.SpannableString;
 import android.text.TextUtils.TruncateAt;
 import android.text.style.StyleSpan;
-
 import android.util.TypedValue;
 import android.view.*;
 import android.view.GestureDetector.SimpleOnGestureListener;
@@ -31,19 +30,17 @@ import android.view.View.OnTouchListener;
 import android.webkit.WebView;
 import android.widget.*;
 import com.dropbox.client2.DropboxAPI;
-import com.dropbox.client2.android.AndroidAuthSession;
-import com.dropbox.client2.android.AuthActivity;
-import com.dropbox.client2.exception.DropboxException;
-import com.dropbox.client2.session.AccessTokenPair;
-import com.dropbox.client2.session.AppKeyPair;
-import com.dropbox.client2.session.Session;
+import com.stericson.RootTools.RootTools;
 import ebook.EBook;
 import ebook.parser.InstantParser;
 import ebook.parser.Parser;
+import it.sauronsoftware.ftp4j.*;
 
 import java.io.*;
+import java.lang.Process;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
-
 
 public class ReLaunch extends Activity {
 
@@ -55,14 +52,15 @@ public class ReLaunch extends Activity {
 	static public final String HIST_FILE = "History.txt";
 	static public final String FILT_FILE = "Filters.txt";
 	static public final String COLS_FILE = "Columns.txt";
-	final String defReaders = ".epub:Intent:application/epub"
+	final String defReaders = ".epub:Intent:application/epub+zip"
             + "|.fb2:Intent:application/fb2"
             + "|.fb2.zip:Intent:application/fb2.zip"
             + "|.jpg,.jpeg:Intent:image/jpeg"
 			+ "|.png:Intent:image/png"
             + "|.pdf:Intent:application/pdf"
             + "|.djvu:Intent:application/djvu"
-            + "|.djv:Intent:application/djvu"
+            + "|.djv:Intent:application/djv"
+			+ "|.djv,.djvu:Intent:image/vnd.djvu"
             + "|.doc:Intent:application/msword"
 			+ "|.chm,.pdb,.prc,.mobi,.azw:org.coolreader%org.coolreader.CoolReader%Cool Reader"
 			+ "|.cbz,.cb7:Intent:application/x-cbz"
@@ -95,13 +93,20 @@ public class ReLaunch extends Activity {
     final static int CNTXT_MENU_COPY_DIR_DROPBOX = 23;
     final static int CNTXT_MENU_SETTINGS = 24;
     final static int CNTXT_MENU_SELECTE = 25;
+    final static int CNTXT_MENU_FILEUNZIP = 26;
+    final static int CNTXT_MENU_PERMISSION = 27;
 
 	final static int SORT_FILES_ASC = 0;
 	final static int SORT_FILES_DESC = 1;
-	final static int SORT_TITLES_ASC = 2;
-	final static int SORT_TITLES_DESC = 3;
-    public static String BACKUP_DIR = "/sdcard/.relaunch";
-	static String currentRoot = "/sdcard";
+    final static int SORT_DATES_ASC = 2;
+    final static int SORT_DATES_DESC = 3;
+    final static int SORT_SIZES_ASC = 4;
+    final static int SORT_SIZES_DESC = 5;
+	final static int SORT_TITLES_ASC = 6;
+	final static int SORT_TITLES_DESC = 7;
+
+
+	static String currentRoot;
 	static int currentPosition = -1;
 	List<HashMap<String, String>> itemsArray;
 	Stack<Integer> positions = new Stack<Integer>();
@@ -109,11 +114,8 @@ public class ReLaunch extends Activity {
 	static SharedPreferences prefs;
     static SharedPreferences.Editor prefsEditor;
 	ReLaunchApp app;
-	static public boolean useHome = false;
-	static boolean useHome1 = false;
 
 	static public boolean filterMyself = true;
-	static public String selfName = "com.harasoft.relaunch.Main";
 	String[] allowedModels;
 	String[] allowedDevices;
 	String[] allowedManufacts;
@@ -122,34 +124,33 @@ public class ReLaunch extends Activity {
     static boolean disableScrollJump;
 
 	// multicolumns per directory configuration
-	//List<String[]> columnsArray = new ArrayList<String[]>();
 	int currentColsNum = -1;
 
 	// Bottom info panel
-	BroadcastReceiver batteryLevelReceiver = null;
-	boolean batteryLevelRegistered = false;
 	boolean mountReceiverRegistered = false;
 	boolean powerReceiverRegistered = false;
 	boolean wifiReceiverRegistered = false;
 	TextView memTitle;
 	TextView memLevel;
-	TextView battTitle;
+	TextView battTitle = null;
 	TextView battLevel;
-	IntentFilter batteryLevelFilter;
+    static ImageButton battLevelSec = null;
+    static ImageButton wifiOp = null;
 
-	String fileOpFile[];
-	String fileOpDir[];
-	int fileOp;
-	final String[] sortType = new String[] {"sname"};
-	final boolean[] sortOrder = new boolean[] {true};
-    ArrayList<imageIcon> arrIcon = new ArrayList<imageIcon>();
+	static String fileOpFile[];
+	static String fileOpDir[];
+    static int ftpID;
+	static int fileOp;
+	static String sortType = "sname";
+	static boolean sortOrder = true;
+    static ArrayList<imageIcon> arrIcon = new ArrayList<imageIcon>();
     ArrayList<Integer> arrSelItem = new ArrayList<Integer>();
 
-    //=================== Show panel ==============
-    boolean showOnePanel = true;
-    boolean showTwoPanel = true;
-    boolean showThreePanel = true;
-    boolean showFourPanel = true;
+    private static Locale locale;
+    static boolean fileExtendedData;
+    static String fileExtendedDataFormat;
+    static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy.MM.dd");
+    static SimpleDateFormat timeFormat = new SimpleDateFormat("HH:mm");
     // ====== FLSimpleAdapter==================================================================
     boolean useFaces;
     int firstLineIconSizePx;
@@ -160,10 +161,10 @@ public class ReLaunch extends Activity {
     boolean showBookTitles;
     boolean rowSeparator;
     static ArrayList<String> exts;
-    String intentStartDir = null;
-    LayoutInflater vi;
+    String currentHomeDir = null;
+	boolean f_onCreate = false;
     //=================================================================================
-    // ====== refreshBottomInfo==================================================================
+    // ====== GetDateAndMewory()==================================================================
     boolean dateUS;
     //=================================================================================
     // ====== getAutoColsNum==================================================================
@@ -181,24 +182,26 @@ public class ReLaunch extends Activity {
     // ====== drawDirectory==================================================================
     boolean showFullDirPath;
     boolean showHidden;
+    boolean showOnlyKnownExts;
+    boolean showButtonParenFolder;
     String bookTitleFormat;
     Button tv_title;
     GridView gvList;
     Button upScroll;
     Button downScroll;
-    String lastdir;
     //=================================================================================
     // for dropbox
-    public static DropboxAPI<AndroidAuthSession> mDBApi;
-    final static private String APP_KEY = "2vfpyoojj4rsi5t";
-    final static private String APP_SECRET = "m6okqlqhi1nugq1";
-    final static private Session.AccessType ACCESS_TYPE = Session.AccessType.DROPBOX;
-
-    final static public String ACCOUNT_PREFS_NAME = "prefs";
-    final static public String ACCESS_KEY_NAME = "ACCESS_KEY";
-    final static public String ACCESS_SECRET_NAME = "ACCESS_SECRET";
-
+    static MyDropboxClient dropboxClient;
     //===================================================
+    // for FTP
+    static FTPConnector connectorFTP;
+    static int ID_FTP;
+    static String FTPTempDir;
+    //===================================================
+    static boolean blockExitLauncher = true;
+	static boolean selectRootNavigation = false;
+    static boolean accessRoot = false;
+	static boolean showFileOperation;
 
 	private void actionSwitchWiFi() {
 		WifiManager wifiManager;
@@ -220,15 +223,18 @@ public class ReLaunch extends Activity {
 					Toast.LENGTH_SHORT).show();
 			wifiManager.setWifiEnabled(true);
 		}
-		refreshBottomInfo();
 	}
 
 	private void actionLock() {
-		PowerFunctions.actionLock(ReLaunch.this);
+		PowerFunctions.actionLock(ReLaunch.this, accessRoot);
 	}
 
 	private void actionPowerOff() {
-		PowerFunctions.actionPowerOff(ReLaunch.this);
+		PowerFunctions.actionPowerOff(ReLaunch.this, accessRoot);
+	}
+
+	private void actionReboot() {
+		PowerFunctions.actionReboot(ReLaunch.this, accessRoot);
 	}
 
 	private void saveLast() {
@@ -239,45 +245,6 @@ public class ReLaunch extends Activity {
             // emply
 		}
 		app.writeFile("app_last", ReLaunch.APP_LRU_FILE, appLruMax, ":");
-	}
-
-	private void actionRun(String appspec) {
-		Intent i = app.getIntentByLabel(appspec);
-		if (i == null)
-			// "Activity \"" + item + "\" not found!"
-			Toast.makeText(
-					ReLaunch.this,
-					getResources().getString(R.string.jv_allapp_activity)
-							+ " \""
-							+ appspec
-							+ "\" "
-							+ getResources().getString(
-									R.string.jv_allapp_not_found),
-					Toast.LENGTH_LONG).show();
-		else {
-			boolean ok = true;
-			try {
-				i.setAction(Intent.ACTION_MAIN);
-				i.addCategory(Intent.CATEGORY_LAUNCHER);
-				startActivity(i);
-			} catch (ActivityNotFoundException e) {
-				// "Activity \"" + item + "\" not found!"
-				Toast.makeText(
-						ReLaunch.this,
-						getResources().getString(R.string.jv_allapp_activity)
-								+ " \""
-								+ appspec
-								+ "\" "
-								+ getResources().getString(
-										R.string.jv_allapp_not_found),
-						Toast.LENGTH_LONG).show();
-				ok = false;
-			}
-			if (ok) {
-				app.addToList("app_last", appspec, "X", false);
-				saveLast();
-			}
-		}
 	}
 
 	private boolean checkField(String[] a, String f) {
@@ -338,23 +305,22 @@ public class ReLaunch extends Activity {
 		ImageView iv;
 		ImageView is;
 		LinearLayout tvHolder;
+        int position;
 	}
 
 	private Bitmap scaleDrawableById(int id, int size) {
-		return Bitmap.createScaledBitmap(
-				BitmapFactory.decodeResource(getResources(), id), size, size,
-				true);
+		return Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getResources(), id), size, size,true);
 	}
 
 	private Bitmap scaleDrawable(Drawable d, int size) {
-		return Bitmap.createScaledBitmap(((BitmapDrawable) d).getBitmap(),
-				size, size, true);
+		return Bitmap.createScaledBitmap(((BitmapDrawable) d).getBitmap(),size, size, true);
 	}
 
 	class FLSimpleAdapter1 extends SimpleAdapter {
-		
+		LayoutInflater vi;
 		FLSimpleAdapter1(Context context, List<HashMap<String, String>> data, int resource, String[] from, int[] to) {
 			super(context, data, resource, from, to);
+			vi = (LayoutInflater) app.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		}
 
 		@Override
@@ -372,8 +338,7 @@ public class ReLaunch extends Activity {
 			View v = convertView; // передаваемый тэг ??????
             HashMap<String, String> item = itemsArray.get(position); // получаем карту для указанной позиции
             if (v == null) {  // если нет объекта то создаем его
-				//LayoutInflater vi = (LayoutInflater) getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-				v = vi.inflate(R.layout.flist_layout, null);
+				v = vi.inflate(R.layout.flist_layout, parent, false);
                 if(v == null){
                     return null;
                 }
@@ -383,6 +348,7 @@ public class ReLaunch extends Activity {
 				holder.iv = (ImageView) v.findViewById(R.id.fl_icon);
 				holder.is = (ImageView) v.findViewById(R.id.fl_separator);
 				holder.tvHolder = (LinearLayout) v.findViewById(R.id.grid_cell);
+                holder.position = position;
                 // проверяем на однострочный режим
                 if (doNotHyph) {
                     holder.tv.setLines(1); // первой - только одна строка
@@ -518,42 +484,41 @@ public class ReLaunch extends Activity {
 					v.setMinimumHeight(recalc_height);
 				}
 			}
+
 			return v;
 		}
+
+
 	}
 
 	private static List<HashMap<String, String>> parseReadersString(String readerList) {
 		List<HashMap<String, String>> rc = new ArrayList<HashMap<String, String>>();
 		String[] rdrs = readerList.split("\\|");
-		for (int i = 0; i < rdrs.length; i++) {
-			String[] re = rdrs[i].split(":");
-			switch (re.length) {
-			case 2:
-				String rName = re[1];
-				String[] exts = re[0].split(",");
-                String ext;
-				for (int j = 0; j < exts.length; j++) {
-					ext = exts[j];
-					HashMap<String, String> r = new HashMap<String, String>();
-					r.put(ext, rName);
-					rc.add(r);
-				}
-				break;
-			case 3:
-				if (re[1].equals("Intent")) {
-					String iType = re[2];
-					String[] exts1 = re[0].split(",");
-                    String ext1;
-					for (int j = 0; j < exts1.length; j++) {
-						ext1 = exts1[j];
-						HashMap<String, String> r = new HashMap<String, String>();
-						r.put(ext1, "Intent:" + iType);
-						rc.add(r);
-					}
-				}
-				break;
-			}
-		}
+        for (String rdr : rdrs) {
+            String[] re = rdr.split(":");
+            switch (re.length) {
+                case 2:
+                    String rName = re[1];
+                    String[] exts = re[0].split(",");
+                    for (String ext : exts) {
+                        HashMap<String, String> r = new HashMap<String, String>();
+                        r.put(ext, rName);
+                        rc.add(r);
+                    }
+                    break;
+                case 3:
+                    if (re[1].equals("Intent")) {
+                        String iType = re[2];
+                        String[] exts1 = re[0].split(",");
+                        for (String ext1 : exts1) {
+                            HashMap<String, String> r = new HashMap<String, String>();
+                            r.put(ext1, "Intent:" + iType);
+                            rc.add(r);
+                        }
+                    }
+                    break;
+            }
+        }
 		return rc;
 	}
 
@@ -576,433 +541,361 @@ public class ReLaunch extends Activity {
 		currentPosition = p1;
 	}
 
-	private void setUpButton(String currDir) {
-
-        String tempDB = currDir;
+	private void setUpButton() {
 		if (upButton != null) {
-			// more versatile check against home, if needed
-			boolean enabled = !upDir.equals("");
-            if(currDir.startsWith("Dropbox| ")){
-                tempDB = currDir.substring("Dropbox| ".length());
-                if("Dropbox| ".length() == upDir.length()){
-                    enabled = false;
-                }
-
-            }
-			if (enabled && !tempDB.equals("/") && notLeaveStartDir) {
-				enabled = false;
-
-                for (String home : startDir) {
-                    if (home.length() < currDir.length() && currDir.startsWith(home)) {
-                        enabled = true;
-                        break;
-                    }
-                }
+			if (CheckUpDir()) {
+				upButton.setEnabled(true);
+				upButton.setCompoundDrawablesWithIntrinsicBounds( R.drawable.ci_levelup, 0, 0, 0);
+			}else{
+				upButton.setEnabled(false);
+				upButton.setCompoundDrawablesWithIntrinsicBounds( R.drawable.ci_levelup_gray, 0, 0, 0);
 			}
-            upButton.setEnabled( enabled);
-		}
-	}
-
-	private void refreshBottomInfo() {
-		// Date
-		String d;
-		Calendar c = Calendar.getInstance();
-		if (dateUS)
-			d = String.format("%02d:%02d%s %02d/%02d/%02d",
-					c.get(Calendar.HOUR), c.get(Calendar.MINUTE),
-					((c.get(Calendar.AM_PM) == 0) ? "AM" : "PM"),
-					c.get(Calendar.MONTH) + 1, c.get(Calendar.DAY_OF_MONTH),
-					(c.get(Calendar.YEAR) - 2000));
-		else
-			d = String.format("%02d:%02d %02d/%02d/%02d",
-					c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE),
-					c.get(Calendar.DAY_OF_MONTH), c.get(Calendar.MONTH) + 1,
-					(c.get(Calendar.YEAR) - 2000));
-		if (memTitle != null  && useHome && showFourPanel)
-			memTitle.setText(d);
-
-		// Memory
-		MemoryInfo mi = new MemoryInfo();
-		ActivityManager activityManager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
-		activityManager.getMemoryInfo(mi);
-		if (memLevel != null && useHome && showFourPanel) {
-			// "M free"
-			memLevel.setText(mi.availMem / 1048576L
-					+ getResources().getString(R.string.jv_relaunch_m_free));
-			memLevel.setCompoundDrawablesWithIntrinsicBounds(null, null,
-					getResources().getDrawable(R.drawable.ram), null);
-		}
-
-		// Wifi status
-		WifiManager wfm = (WifiManager) getSystemService(Context.WIFI_SERVICE);
-		if (battTitle != null && useHome && showFourPanel) {
-			if (wfm.isWifiEnabled()) {
-				String nowConnected = wfm.getConnectionInfo().getSSID();
-				if (nowConnected != null && !nowConnected.equals("")) {
-					battTitle.setText(nowConnected);
-				} else {
-					battTitle.setText(getResources().getString(R.string.jv_relaunch_wifi_is_on));
-				}
-				battTitle.setCompoundDrawablesWithIntrinsicBounds(
-						getResources().getDrawable(R.drawable.wifi_on), null,
-						null, null);
-			} else {
-				// "WiFi is off"
-				battTitle.setText(getResources().getString(R.string.jv_relaunch_wifi_is_off));
-				battTitle.setCompoundDrawablesWithIntrinsicBounds(
-						getResources().getDrawable(R.drawable.wifi_off), null,
-						null, null);
-			}
-		}
-
-		// Battery
-		if (batteryLevelReceiver == null && useHome && showFourPanel) {
-			batteryLevelReceiver = new BroadcastReceiver() {
-				public void onReceive(Context context, Intent intent) {
-					try {
-						context.unregisterReceiver(this);
-						batteryLevelRegistered = false;
-						int rawlevel = intent.getIntExtra(
-								BatteryManager.EXTRA_LEVEL, -1);
-						int scale = intent.getIntExtra(
-								BatteryManager.EXTRA_SCALE, -1);
-						int plugged = intent.getIntExtra(
-								BatteryManager.EXTRA_PLUGGED, -1);
-						int level = -1;
-						if (rawlevel >= 0 && scale > 0) {
-							level = (rawlevel * 100) / scale;
-						}
-						if (battLevel != null) {
-							String add_text = "";
-							if (plugged == BatteryManager.BATTERY_PLUGGED_AC) {
-								add_text = " AC";
-							} else if (plugged == BatteryManager.BATTERY_PLUGGED_USB) {
-								add_text = " USB";
-							}
-							battLevel.setText(level + "%" + add_text);
-
-							if (level < 25)
-								battLevel
-										.setCompoundDrawablesWithIntrinsicBounds(
-												getResources().getDrawable(
-														R.drawable.bat1), null,
-												null, null);
-							else if (level < 50)
-								battLevel
-										.setCompoundDrawablesWithIntrinsicBounds(
-												getResources().getDrawable(
-														R.drawable.bat2), null,
-												null, null);
-							else if (level < 75)
-								battLevel
-										.setCompoundDrawablesWithIntrinsicBounds(
-												getResources().getDrawable(
-														R.drawable.bat3), null,
-												null, null);
-							else
-								battLevel.setCompoundDrawablesWithIntrinsicBounds(
-												getResources().getDrawable(
-														R.drawable.bat4), null,
-												null, null);
-						}
-					} catch (IllegalArgumentException e) {
-						//Log.v("ReLaunch", "Battery intent illegal arguments");
-					}
-
-				}
-			};
-		}
-		if (!batteryLevelRegistered && useHome && showFourPanel) {
-			registerReceiver(batteryLevelReceiver, batteryLevelFilter);
-			batteryLevelRegistered = true;
 		}
 	}
 
     private void drawDirectory(String root, Integer startPosition) {
-    // организуем два массива для хранения имен папок и имен файлов
-        List<String> files = new ArrayList<String>();
-        List<String> dirs = new ArrayList<String>();
-        // вычищаем иконки из массива. оставляем только стандартные
-        for(int i = 4, j = arrIcon.size(); i< j; j--){
-            arrIcon.remove(j-1);
-        }
-        // очищаем массив выделений
-        arrSelItem.clear();
-        // устанавливаем текущую папку корневой
-        currentRoot = root;
-        //сохраняем имя папки
-        lastdir = currentRoot;
+		// организуем проверку на выход из домашней папки
+		if(notLeaveStartDir && !root.startsWith(currentHomeDir) ){
+			root = currentHomeDir;
+		}
+		// организуем два массива для хранения имен папок и имен файлов
+		List<String> files = new ArrayList<String>();
+		List<Long> filesDate = new ArrayList<Long>();
+		List<Long> filesSize = new ArrayList<Long>();
+		List<String> dirs = new ArrayList<String>();
+		// очищаем массив выделений
+		arrSelItem.clear();
+		// текущая позиция неизвестна (-1) или задана при вызове
+		currentPosition = (startPosition == -1) ? 0 : startPosition;
+		// создаем массив элементов списка
+		itemsArray = new ArrayList<HashMap<String, String>>();
+		upDir = "";
+		if (showButtonParenFolder) {
+			itemsArray.add(null); // помещаем элемент в массив
+		}
+		// выясняем что обрабатываем - локальную папку или аккаунт Dropbox
+		if (root.startsWith("FTP| ")) {
+			if (root.equals("FTP| ")) {
+				root = "/";
+			} else {
+				root = root.substring("FTP| ".length());
+			}
 
-        // текущая позиция неизвестна (-1) или задана при вызове
-        currentPosition = (startPosition == -1) ? 0 : startPosition;
-        // создаем массив элементов списка
-        itemsArray = new ArrayList<HashMap<String, String>>();
-        upDir = "";
-        // выясняем что обрабатываем - локальную папку или аккаунт Dropbox
-        if(root.startsWith("Dropbox| ")){
-            root = root.substring("Dropbox| ".length());
-            if(root.equals("/")){
-                currentRoot = "Dropbox| ";
-            }
-            // список файлов и папок
-            DropboxAPI.Entry entries;
-            try {
-                entries = mDBApi.metadata(root, 0, null, true, null);// может быть ошибка при получении коллекции
-                for (DropboxAPI.Entry e : entries.contents) {
-                    if (!e.isDeleted) {
-                        if(e.isDir){
-                            dirs.add(e.fileName());
-                        }else if (!filterResults || app.filterFile(e.path, e.fileName())){
-                            files.add(e.fileName());
-                        }
-                    }
-                }
-
-                // заполняем заголовок
-                if (showTwoPanel){
-                    if (showFullDirPath){ // в зависимости от настроек
-                        // полный путь к текущей папки + ( число элементов в ней)
-                        tv_title.setText("Dropbox| " + entries.fileName() + " ("  + entries.contents.size() + ")");
-                    }else{
-                        // имя папки
-                        tv_title.setText("Dropbox| " + entries.path);
-                    }
-                }
-                if (entries.parentPath() != null){
-                    upDir = "Dropbox| " + entries.parentPath();
-                }
-            } catch (DropboxException e) {
-                drawDirectory(startDir[0], -1);
-                return;
-            }
-        }else{
-            // получаем папку как объект
-            File dir = new File(root);
-            // получаем список подпапок и файлов
-            File[] allEntries = dir.listFiles();
-
-
-            // заполняем заголовок
-            if (showTwoPanel){
-                if (showFullDirPath){ // в зависимости от настроек
-                    // полный путь к текущей папки + ( число элементов в ней)
-                    tv_title.setText(currentRoot + " ("  + ((allEntries == null) ? 0 : allEntries.length) + ")");
-                }else{
-                    // имя папки
-                    tv_title.setText(dir.getName());
-                }
-            }
-            // определяем папку родитель
-
-            if (dir.getParent() != null){
-                upDir = dir.getParent();
-            }
-            // полученный массив элементов разбиваем на папки и файлы
-            if (allEntries != null) {
-                for (File entry : allEntries) {
-                    if (entry.isDirectory()){
-                        dirs.add(entry.getName());
-                    }else if (!filterResults || app.filterFile(dir.getAbsolutePath(), entry.getName())){
-                        files.add(entry.getName());
-                    }
-                }
-            }
-        }
-
-
-        // сортируем папки
-        Collections.sort(dirs);
-
-        // перебираем папки
-        for (String f : dirs) {
-            if ((f.startsWith(".")) && (!showHidden)){ // если скрытая и указано не показывать - пропускаем
-                continue;
-            }
-            HashMap<String, String> item = new HashMap<String, String>(); //создаем карту и начинаем ее заполнять
-            item.put("name", f); // имя папки
-            item.put("sname", f);// имя папки
-            item.put("dname", currentRoot);  // полный путь к папке
-            item.put("fname", currentRoot + File.separator + f); // полный путь папки
-            item.put("type", "dir");  // тип - папка
-            item.put("reader", "Nope"); // программа обработчик не назначена
-            if (firstLineIconSizePx != 0) {
-                item.put("nameIcon", "dir_ok");
-            }
-            itemsArray.add(item); // помещаем элемент в массив
-        }
-        // создаем массив карт для файлов
-        List<HashMap<String, String>> fileItemsArray = new ArrayList<HashMap<String, String>>();
-        // перебираем файлы
-        String sname;
-        for (String f : files) {
-            if ((f.startsWith(".")) && (!showHidden)){ // если скрытый и указано не показывать - пропускаем
-                continue;
-            }
-            HashMap<String, String> item = new HashMap<String, String>();//создаем карту и начинаем ее заполнять
-            sname = f;
-            if (showBookTitles){ // показывать имена книг
-                sname = app.dataBase.getEbookName(currentRoot, f, bookTitleFormat); // bvz bp ,fps
-            }else if(hideKnownExts){  // скрываем расширение
-                for (String ext : exts) { // прогоняем все расширения через имя файла
-                    if (sname.endsWith(ext)) {
-                        sname = sname.substring(0, sname.length() - ext.length());// удаляем если нашли совпадение
-                    }
-                }
-            }
-
-            item.put("sname", sname);// имя файла
-            item.put("name", f); // имя файла
-            item.put("dname", currentRoot); // путь к файлу
-            item.put("fname", currentRoot + File.separator + f); // полное имя файла
-            item.put("type", "file"); // тип - файл
-            item.put("reader", app.readerName(f)); // программа обработчик
-            if (firstLineIconSizePx != 0) {
-                String nameIcon;
-                Drawable d = app.specialIcon(f, false);  // получаем иконку
-                if (d != null){ // если удалось
-                    imageIcon temp_icon = new imageIcon();
-                    temp_icon.nameIcon = f;
-                    temp_icon.icon = scaleDrawable(d, firstLineIconSizePx);
-                    arrIcon.add(temp_icon);
-                    nameIcon = f;
-                }else {  // иначе
-                    String rdrName = app.readerName(f); // в поле реадера читаем обработчик
-
-                    if (rdrName.startsWith("Intent:")){ // если ответ начинается с ...
-                        nameIcon = "icon";
-                    }else if (rdrName.equals("Nope")) { // если не известен
-                        File fil = new File(currentRoot + "/" + f); // получаем файл
-                        if (fil.length() > app.viewerMax*1024){  // больше определенного размера
-                            nameIcon = "file_notok";
-                        }else{  // иначе
-                            nameIcon = "file_ok";
-                        }
-                    } else  { // во всех остальных случаях
-
-                        if (app.getIcons().containsKey(rdrName)){ // у программы есть иконка?
-                            imageIcon temp_icon = new imageIcon();
-                            temp_icon.nameIcon = rdrName;
-                            temp_icon.icon = scaleDrawable(app.getIcons().get(rdrName),firstLineIconSizePx);
-                            arrIcon.add(temp_icon);
-                            nameIcon = rdrName;
-                        }else{
-                            nameIcon = "file_notok";
-                        }
-                    }
-                }
-                item.put("nameIcon", nameIcon); // тип - файл
-            }
-
-            fileItemsArray.add(item);  // добавляем в массив
-        }
-        // производим сортировку файлов
-        fileItemsArray = sortFiles(fileItemsArray, sortType[0], sortOrder[0]);
-        // добавляем в массив карт предназначенный для отображения
-        itemsArray.addAll(fileItemsArray);
-        // скрываем или показываем кнопку переход в родительскую папку
-        setUpButton(currentRoot);
-        // определяем число колонок для отображения
-        Integer colsNum = getDirectoryColumns(currentRoot);
-        if (colsNum == 0) {  // проверяем не назначено ли пользователем отображение определенного числа колонок для этой папки
-            colsNum = Integer.parseInt(prefs.getString("columnsDirsFiles", "-1"));
-        }
-        // override auto (not working fine in adnroid) судя по всему работает дерьмого автоколлумнилование
-        if (colsNum == -1) {
-            colsNum = app.getAutoColsNum(itemsArray, "sname", columnsAlgIntensity);
-        }
-        // устанавливаем число колонок для отображения
-        currentColsNum = 1;//colsNum;
-        // устанавливаем число колонок у View
-        gvList.setNumColumns(colsNum);
-
-        // устанавливаем стартовый элемент
-        if (startPosition != -1){
-            gvList.setSelection(startPosition);
-        }
-        reDraw();
-    }
-
-	private HashMap<String, Drawable> createIconsList(PackageManager pm) {
-		Drawable d = null;
-		HashMap<String, Drawable> rc = new HashMap<String, Drawable>();
-		Intent componentSearchIntent = new Intent();
-		componentSearchIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-		componentSearchIntent.setAction(Intent.ACTION_MAIN);
-		List<ResolveInfo> ril = pm.queryIntentActivities(componentSearchIntent, 0);
-		String pname;
-		String aname;
-		String hname = "";
-		for (ResolveInfo ri : ril) {
-			if (ri.activityInfo != null) {
-				pname = ri.activityInfo.packageName;
-				aname = ri.activityInfo.name;
-				try {
-					if (ri.activityInfo.labelRes != 0) {
-						hname = (String) ri.activityInfo.loadLabel(pm);
-					} else {
-						hname = (String) ri.loadLabel(pm);
-					}
-					if (ri.activityInfo.icon != 0) {
-						d = ri.activityInfo.loadIcon(pm);
-					} else {
-						d = ri.loadIcon(pm);
-					}
-				} catch (Exception e) {
-                    // emply
+			if (root.equals("/")) {
+				currentRoot = "FTP| ";
+			}
+			//connectorFTP.changeDirectory(root);
+			FTPFile[] FTPlist = connectorFTP.ftpFilesList(root);
+			if (FTPlist == null) {
+				return;
+			}
+			// заполняем заголовок
+			if (tv_title != null) {
+				if (showFullDirPath) { // в зависимости от настроек
+					// полный путь к текущей папки + ( число элементов в ней)
+					tv_title.setText("FTP| " + root + " (" + FTPlist.length + ")");
+				} else {
+					// имя папки
+					tv_title.setText("FTP| " + root.substring(root.lastIndexOf("/")));
 				}
-				if (d != null) {
-					rc.put(pname + "%" + aname + "%" + hname, d);
+			}
+			if (!(root.lastIndexOf("/") > 0)) {
+				upDir = "FTP| /";
+			} else {
+				upDir = "FTP| " + root.substring(0, root.lastIndexOf("/"));
+			}
+			Date d;
+			long milliseconds;
+			for (FTPFile aFTPlist : FTPlist) {
+				if (aFTPlist.getType() == FTPFile.TYPE_DIRECTORY) {
+					dirs.add(aFTPlist.getName());
+				} else if (!filterResults || app.filterFile(root, aFTPlist.getName())) {
+					d = aFTPlist.getModifiedDate();
+					milliseconds = d.getTime();
+					filesDate.add(milliseconds);
+					filesSize.add(aFTPlist.getSize());
+					files.add(aFTPlist.getName());
+				}
+			}
+		} else if (root.startsWith("Dropbox| ")) {
+			root = root.substring("Dropbox| ".length());
+			if (root.equals("/")) {
+				currentRoot = "Dropbox| ";
+			}
+			// список файлов и папок
+			DropboxAPI.Entry entries;
+			entries = dropboxClient.metadata(root);// может быть ошибка при получении коллекции
+			if (entries != null) {
+				SimpleDateFormat f = new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss Z", Locale.US);
+				Date d;
+				long milliseconds;
+				long sysMillisec = System.currentTimeMillis();
+				for (DropboxAPI.Entry e : entries.contents) {
+					if (!e.isDeleted) {
+						if (e.isDir) {
+							dirs.add(e.fileName());
+						} else if (!filterResults || app.filterFile(e.path, e.fileName())) {
+							try {
+								d = f.parse(e.modified);
+								milliseconds = d.getTime();
+							} catch (ParseException e1) {
+								milliseconds = sysMillisec;
+							}
+							filesDate.add(milliseconds);
+							filesSize.add(e.bytes);
+							files.add(e.fileName());
+						}
+					}
+				}
+				// заполняем заголовок
+				if (tv_title != null) {
+					if (showFullDirPath) { // в зависимости от настроек
+						// полный путь к текущей папки + ( число элементов в ней)
+						tv_title.setText("Dropbox| " + entries.fileName() + " (" + entries.contents.size() + ")");
+					} else {
+						// имя папки
+						tv_title.setText("Dropbox| " + entries.path);
+					}
+				}
+				if (entries.parentPath() != null) {
+					upDir = "Dropbox| " + entries.parentPath();
+				}
+			} else {
+				drawDirectory(startDir[0], -1);
+				return;
+			}
+		} else {
+			if (root.equals("")) {
+				root = "/";
+				upDir = "";
+			} else {
+				upDir = root.substring(0, root.lastIndexOf("/"));
+				if (upDir.equals("") && !root.equals("/")) {
+					upDir = "/";
+				}
+			}
+			// устанавливаем текущую папку корневой
+
+			currentRoot = root;
+			// получаем папку как объект
+			File dir = new File(root);
+			// получаем список подпапок и файлов
+			File[] allEntries = dir.listFiles();
+			// заполняем заголовок
+			if (tv_title != null) {
+				if (showFullDirPath) { // в зависимости от настроек
+					// полный путь к текущей папки + ( число элементов в ней)
+					tv_title.setText(currentRoot + " (" + ((allEntries == null) ? 0 : allEntries.length) + ")");
+				} else {
+					// имя папки
+					tv_title.setText(dir.getName());
+				}
+			}
+			// полученный массив элементов разбиваем на папки и файлы
+			if (allEntries != null) {
+				for (File allEntry : allEntries) {
+					if (allEntry.isDirectory()) {
+						dirs.add(allEntry.getName());
+					} else if (!filterResults || app.filterFile(dir.getAbsolutePath(), allEntry.getName())) {
+						filesDate.add(allEntry.lastModified());
+						filesSize.add(allEntry.length());
+						files.add(allEntry.getName());
+					}
+				}
+			} else if (selectRootNavigation) {
+				ArrayList<String[]> dirContent = RootCommands.listFiles(root, true);
+				if (dirContent != null) {
+					for (String[] element : dirContent) {
+						if (element != null && element.length > 0) {
+							if (element[0].startsWith("d")) {
+								dirs.add(element[5]);
+							} else {
+								filesDate.add((long) 0);
+								filesSize.add(Long.valueOf(element[3]));
+								files.add(element[6]);
+							}
+						}
+					}
 				}
 			}
 		}
-		return rc;
-	}
-
-	private static class AppComparator implements Comparator<String> {
-		public int compare(String a, String b) {
-			if (a == null && b == null) {
-				return 0;
-			}
-			if (a == null && b != null) {
-				return 1;
-			}
-			if (a != null && b == null) {
-				return -1;
-			}
-			String[] ap = a.split("\\%");
-			String[] bp = b.split("\\%");
-			return ap[2].compareToIgnoreCase(bp[2]);
-		}
-	}
-
-	static public List<String> createAppList(PackageManager pm) {
-		List<String> rc = new ArrayList<String>();
-		Intent componentSearchIntent = new Intent();
-		componentSearchIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-		componentSearchIntent.setAction(Intent.ACTION_MAIN);
-		List<ResolveInfo> ril = pm.queryIntentActivities(componentSearchIntent, 0);
-		String pname;
-		String aname ;
-		String hname = "";
-		for (ResolveInfo ri : ril) {
-			if (ri.activityInfo != null) {
-				pname = ri.activityInfo.packageName;
-				aname = ri.activityInfo.name;
-				try {
-					if (ri.activityInfo.labelRes != 0) {
-						hname = (String) ri.activityInfo.loadLabel(pm);
-					} else {
-						hname = (String) ri.loadLabel(pm);
-					}
-				} catch (Exception e) {
-                    // emply
+		if (showButtonParenFolder) {
+			HashMap<String, String> item = new HashMap<String, String>(); //создаем карту и начинаем ее заполнять
+			item.put("name", ".."); // имя папки
+			item.put("sname", "..");// имя папки
+			item.put("dname", currentRoot);  // полный путь к папке
+			item.put("fname", "..");
+			item.put("type", "dir");  // тип - папка
+			item.put("reader", "Nope"); // программа обработчик не назначена
+			if (firstLineIconSizePx != 0) {
+				if (CheckUpDir()) {
+					item.put("nameIcon", "parent_ok");
+				} else {
+					item.put("nameIcon", "parent_off");
 				}
-				if (!filterMyself || (aname != null && !aname.equals(selfName)))
-					rc.add(pname + "%" + aname + "%" + hname);
+			}
+			itemsArray.set(0, item); // помещаем элемент в массив
+		}
+		//сохраняем имя папки
+		// lastdir = currentRoot;
+		// сортируем папки
+		Collections.sort(dirs);
+		// перебираем папки
+		for (String f : dirs) {
+			if ((f.startsWith(".")) && (!showHidden)) { // если скрытая и указано не показывать - пропускаем
+				continue;
+			}
+			HashMap<String, String> item = new HashMap<String, String>(); //создаем карту и начинаем ее заполнять
+			item.put("name", f); // имя папки
+			item.put("sname", f);// имя папки
+			item.put("dname", currentRoot);  // полный путь к папке
+			if (currentRoot.equals("/")) {// полный путь папки
+				item.put("fname", currentRoot + f);
+			} else {
+				item.put("fname", currentRoot + File.separator + f);
+			}
+			item.put("type", "dir");  // тип - папка
+			item.put("reader", "Nope"); // программа обработчик не назначена
+			if (firstLineIconSizePx != 0) {
+				item.put("nameIcon", "dir_ok");
+			}
+			itemsArray.add(item); // помещаем элемент в массив
+		}
+		// создаем массив карт для файлов
+		List<HashMap<String, String>> fileItemsArray = new ArrayList<HashMap<String, String>>();
+		// перебираем файлы
+		String sname;
+		String f;
+		long date;
+		long size;
+
+		String tt;
+		for (int i = 0, j = files.size(); i < j; i++) {
+			f = files.get(i);
+			if ((f.startsWith(".")) && (!showHidden)) { // если скрытый и указано не показывать - пропускаем
+				continue;
+			}
+			if (showOnlyKnownExts) {  // пропускаем если расширение не зарегистрировано
+				boolean hide = true;
+				for (String ext : exts) { // прогоняем все расширения через имя файла
+					if (f.endsWith(ext)) {
+						hide = false; // зарегистрировано
+					}
+				}
+				if (hide) {// ели не зарегистрировано, то пропускаем
+					continue;
+				}
+			}
+			HashMap<String, String> item = new HashMap<String, String>();//создаем карту и начинаем ее заполнять
+			sname = f;
+			if (showBookTitles) { // показывать имена книг
+				sname = app.dataBase.getEbookName(currentRoot, f, bookTitleFormat); // bvz bp ,fps
+			} else if (hideKnownExts) {  // скрываем расширение
+				for (String ext : exts) { // прогоняем все расширения через имя файла
+					if (sname.endsWith(ext)) {
+						sname = sname.substring(0, sname.length() - ext.length());// удаляем если нашли совпадение
+					}
+				}
+			}
+			if (fileExtendedData) {
+				date = filesDate.get(i);
+				size = filesSize.get(i);
+				tt = fileExtendedDataFormat;
+				tt = tt.toLowerCase();
+				String temp;
+				if (tt.contains("%d")) {
+					tt = tt.replace("%d", String.valueOf(dateFormat.format(date)));
+				}
+				if (tt.contains("%t")) {
+					tt = tt.replace("%t", String.valueOf(timeFormat.format(date)));
+				}
+				if (tt.contains("%sb")) {
+					tt = tt.replace("%sb", String.valueOf(size));
+				}
+				if (tt.contains("%skb")) {
+					temp = String.valueOf((int) (size / 102.4));
+					if (temp.length() > 1) {
+						temp = temp.substring(0, temp.length() - 1) + "," + temp.substring(temp.length() - 1);
+					} else if (temp.length() == 1) {
+						temp = "0," + temp;
+					}
+					tt = tt.replace("%skb", temp);
+				}
+				if (tt.contains("%smb")) {
+					temp = String.valueOf((int) (size / 104857.6));
+					if (temp.length() > 1) {
+						temp = temp.substring(0, temp.length() - 1) + "," + temp.substring(temp.length() - 1);
+					} else if (temp.length() == 1) {
+						temp = "0," + temp;
+					}
+					tt = tt.replace("%smb", temp);
+				}
+				sname += tt;
+			}
+			item.put("sname", sname);// имя файла
+			item.put("name", f); // имя файла
+			item.put("dname", currentRoot); // путь к файлу
+			if (currentRoot.equals("/")) {// полный путь папки
+				item.put("fname", currentRoot + f);
+			} else {
+				item.put("fname", currentRoot + File.separator + f);
+			}
+			item.put("type", "file"); // тип - файл
+			item.put("size", String.valueOf(filesSize.get(i) + 1000000000000000L));
+			item.put("date", String.valueOf(filesDate.get(i)));
+			item.put("reader", app.readerName(f)); // программа обработчик
+			if (firstLineIconSizePx != 0) {
+				String nameIcon;
+
+				if (f.endsWith(".apk")) { // если удалось
+					nameIcon = "install";
+				} else {  // иначе
+					String rdrName = app.readerName(f); // в поле реадера читаем обработчик
+
+					if (rdrName.startsWith("Intent:")) { // если ответ начинается с ...
+						nameIcon = "icon";
+					} else if (rdrName.equals("Nope")) { // если не известен
+						File fil = new File(currentRoot + "/" + f); // получаем файл
+						if (fil.length() > app.viewerMax * 1024) {  // больше определенного размера
+							nameIcon = "file_notok";
+						} else {  // иначе
+							nameIcon = "file_ok";
+						}
+					} else {
+						nameIcon = rdrName;
+					}
+				}
+				item.put("nameIcon", nameIcon); // тип - файл
+			}
+			fileItemsArray.add(item);  // добавляем в массив
+		}
+		fileItemsArray = sortFiles(fileItemsArray, sortType, sortOrder);
+		// добавляем в массив карт предназначенный для отображения
+		itemsArray.addAll(fileItemsArray);
+		// скрываем или показываем кнопку переход в родительскую папку
+		setUpButton();
+		// определяем число колонок для отображения
+		Integer colsNum = getDirectoryColumns(currentRoot);
+		if (colsNum == 0) {  // проверяем не назначено ли пользователем отображение определенного числа колонок для этой папки
+			colsNum = Integer.parseInt(prefs.getString("columnsDirsFiles", "-1"));
+		}
+		// override auto (not working fine in adnroid) судя по всему работает дерьмого автоколлумнилование
+		if (colsNum == -1) {
+			colsNum = app.getAutoColsNum(itemsArray, "sname", columnsAlgIntensity);
+		}
+		// устанавливаем число колонок для отображения
+		currentColsNum = colsNum;
+		// устанавливаем число колонок у View
+		gvList.setNumColumns(colsNum);
+		// устанавливаем стартовый элемент
+		if (startPosition != -1) {
+			gvList.setSelection(currentPosition);
+			if(N2DeviceInfo.EINK_ONYX || N2DeviceInfo.EINK_GMINI || N2DeviceInfo.EINK_BOEYE){
+				DownScroll( currentPosition);
 			}
 		}
-		Collections.sort(rc, new AppComparator());
-		return rc;
+
+		reDraw();
 	}
 
 	private void start(Intent i) {
@@ -1020,8 +913,6 @@ public class ReLaunch extends Activity {
 		public void onReceive(Context context, Intent intent) {
 			// Code to react to SD mounted goes here
 			Intent i = new Intent(context, ReLaunch.class);
-			i.putExtra("home", useHome);
-			i.putExtra("home1", useHome1);
 			startActivity(i);
 		}
 	};
@@ -1029,85 +920,152 @@ public class ReLaunch extends Activity {
 	private BroadcastReceiver PowerChangeReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			refreshBottomInfo();
+			// Battery
+			try {
+				int batDraw;
+				int rawlevel = intent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+				int scale = intent.getIntExtra( BatteryManager.EXTRA_SCALE, -1);
+				int plugged = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
+				int level = -1;
+				if (rawlevel >= 0 && scale > 0) {
+					level = (rawlevel * 100) / scale;
+				}
+				if (battLevel != null) {
+					String add_text = "";
+					if (plugged == BatteryManager.BATTERY_PLUGGED_AC) {
+						add_text = " AC";
+					} else if (plugged == BatteryManager.BATTERY_PLUGGED_USB) {
+						add_text = " USB";
+					}
+					battLevel.setText(level + "%" + add_text);
+					if(level < 25){
+						if (plugged == BatteryManager.BATTERY_PLUGGED_AC){
+							batDraw = R.drawable.bat1_outlet;
+						}else if (plugged == BatteryManager.BATTERY_PLUGGED_USB){
+							batDraw = R.drawable.bat1_usb;
+						}else{
+							batDraw = R.drawable.bat1;
+						}
+					}else if (level < 50){
+						if (plugged == BatteryManager.BATTERY_PLUGGED_AC){
+							batDraw = R.drawable.bat2_outlet;
+						}else if (plugged == BatteryManager.BATTERY_PLUGGED_USB){
+							batDraw = R.drawable.bat2_usb;
+						}else{
+							batDraw = R.drawable.bat2;
+						}
+					}else if (level < 75){
+						if (plugged == BatteryManager.BATTERY_PLUGGED_AC){
+							batDraw = R.drawable.bat3_outlet;
+						}else if (plugged == BatteryManager.BATTERY_PLUGGED_USB){
+							batDraw = R.drawable.bat3_usb;
+						}else{
+							batDraw = R.drawable.bat3;
+						}
+					}else{
+						if (plugged == BatteryManager.BATTERY_PLUGGED_AC){
+							batDraw = R.drawable.bat4_outlet;
+						}else if (plugged == BatteryManager.BATTERY_PLUGGED_USB){
+							batDraw = R.drawable.bat4_usb;
+						}else{
+							batDraw = R.drawable.bat4;
+						}
+					}
+					battLevel
+							.setCompoundDrawablesWithIntrinsicBounds(
+									getResources().getDrawable(batDraw), null, null, null);
+				}
+				if (battLevelSec != null) {
+					if(level < 25){
+						if (plugged == BatteryManager.BATTERY_PLUGGED_AC){
+							batDraw = R.drawable.bat1_big_outlet;
+						}else if (plugged == BatteryManager.BATTERY_PLUGGED_USB){
+							batDraw = R.drawable.bat1_big_usb;
+						}else{
+							batDraw = R.drawable.bat1_big;
+						}
+					}else if (level < 50){
+						if (plugged == BatteryManager.BATTERY_PLUGGED_AC){
+							batDraw = R.drawable.bat2_big_outlet;
+						}else if (plugged == BatteryManager.BATTERY_PLUGGED_USB){
+							batDraw = R.drawable.bat2_big_usb;
+						}else{
+							batDraw = R.drawable.bat2_big;
+						}
+					}else if (level < 75){
+						if (plugged == BatteryManager.BATTERY_PLUGGED_AC){
+							batDraw = R.drawable.bat3_big_outlet;
+						}else if (plugged == BatteryManager.BATTERY_PLUGGED_USB){
+							batDraw = R.drawable.bat3_big_usb;
+						}else{
+							batDraw = R.drawable.bat3_big;
+						}
+					}else{
+						if (plugged == BatteryManager.BATTERY_PLUGGED_AC){
+							batDraw = R.drawable.bat4_big_outlet;
+						}else if (plugged == BatteryManager.BATTERY_PLUGGED_USB){
+							batDraw = R.drawable.bat4_big_usb;
+						}else{
+							batDraw = R.drawable.bat4_big;
+						}
+					}
+					battLevelSec.setImageBitmap(BitmapFactory.decodeResource(getResources(), batDraw));
+				}
+			} catch (IllegalArgumentException e) {
+				//Log.v("ReLaunch", "Battery intent illegal arguments");
+			}
+			GetDateAndMewory();
 		}
 	};
 
 	private BroadcastReceiver WiFiChangeReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
-			refreshBottomInfo();
+			// Wifi status
+            WiFiReceiver();
 		}
 	};
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-        if(N2DeviceInfo.EINK_ONYX){
-            currentRoot = "/mnt/storage";
-            BACKUP_DIR = "/mnt/storage/.relaunch";
-        }
-
         // ------ загружаем глобальные массивы и переменные ---------------------
         initGlobalVariable();
         // ------ загружаем настройки программы в переменные -----------------------
         initPrefsVariable();
         // ------ загружаем стандартные иконки для отображения в менеджере ----------
-        loadStandartIcons();
+        if (firstLineIconSizePx != 0) {
+            loadStandartIcons();
+        }
 
         // If we called from Home launcher?
         final Intent data = getIntent();
-        if (data.getExtras() == null) {
-            useHome = false;
-            useHome1 = false;
-        } else {
-            useHome = data.getBooleanExtra("home", false);
-            useHome1 = data.getBooleanExtra("home1", false);
-            intentStartDir = data.getStringExtra("start_dir");
-        }
+		if(data != null && data.getExtras() != null){
+			if (data.getExtras().getString("ftplist") != null) {
+				ID_FTP = data.getExtras().getInt("id");
+				currentHomeDir = data.getExtras().getString("path");
+			}else{
+				currentHomeDir = data.getStringExtra("start_dir");
+			}
+			// полученный путь сохраняем
+			prefsEditor.putString("intentStartDir", currentHomeDir);
+			prefsEditor.commit();
+			currentRoot = currentHomeDir;
+			f_onCreate = true;
+		}
         filterMyself = prefs.getBoolean("filterSelf", true);
-        if (useHome1 && prefs.getBoolean("homeMode", true))
-            useHome = true;
-        if (prefs.getString("startMode", "UNKNOWN").equalsIgnoreCase("LAUNCHER"))
-            useHome = true;
 
-
-        if(prefs.getBoolean("showDropbox", false)){
-            boolean f_show = false;
-            for (String aStartDir : startDir) {
-                if (aStartDir.equals("Dropbox| ")) {
-                    f_show = true;
-                }
-            }
-            if(!f_show){
-                String temp = prefs.getString("startDir", "/sdcard,/media/My Files");
-                temp += ",Dropbox| ";
-                startDir = temp.split("\\,");
-            }
-        }else{
-            boolean f_show = false;
-            for (String aStartDir : startDir) {
-                if (aStartDir.equals("Dropbox| ")) {
-                    f_show = true;
-                }
-            }
-            if(f_show){
-                String temp = prefs.getString("startDir", "/sdcard,/media/My Files");
-                String temp2 = temp.substring(0, temp.indexOf(",Dropbox| ")) + temp.substring(temp.indexOf(",Dropbox| ") + ",Dropbox| ".length());
-                startDir = temp2.split("\\,");
-            }
-        }
         //=================================================================================
 		app.fullScreen = prefs.getBoolean("fullScreen", true);
+		app.hideTitle = prefs.getBoolean("hideTitle", true);
 		app.setFullScreenIfNecessary(this);
 
-		if (app.dataBase == null)
-			app.dataBase = new BooksBase(this);
+
 		// Create application icons map
-		app.setIcons(createIconsList(getPackageManager()));
+		app.setAppInfoArrayList(app.createAppList(getPackageManager()));
 
 		// Create applications label list
-		app.setApps(createAppList(getPackageManager()));
+		//app.setApps(createAppList(getPackageManager()));
 
 		// Miscellaneous lists list
 		app.readFile("filters", FILT_FILE, ":");
@@ -1130,1060 +1088,45 @@ public class ReLaunch extends Activity {
 
         // Main layout
         setContentView(R.layout.main);
-        vi = (LayoutInflater) getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-        if (useHome && showFourPanel) {
-            app.readFile("app_last", APP_LRU_FILE, ":");
-            app.readFile("app_favorites", APP_FAV_FILE, ":");
-            // last applications button
-            final ImageButton lrua_button = ((ImageButton) findViewById(R.id.app_last));
-            class LruaSimpleOnGestureListener extends
-                    SimpleOnGestureListener {
-                @Override
-                public boolean onSingleTapConfirmed(MotionEvent e) {
-                    tapButton("appLastButtonST");
-                    return true;
-                }
-
-                @Override
-                public boolean onDoubleTap(MotionEvent e) {
-                    tapButton("appLastButtonDT");
-                    return true;
-                }
-
-                @Override
-                public void onLongPress(MotionEvent e) {
-                    if (ReLaunch.this.hasWindowFocus())
-                        tapButton("appLastButtonLT");
-                }
-            }
-
-            LruaSimpleOnGestureListener lrua_gl = new LruaSimpleOnGestureListener();
-            final GestureDetector lrua_gd = new GestureDetector(lrua_gl);
-            lrua_button.setOnTouchListener(new OnTouchListener() {
-                public boolean onTouch(View v, MotionEvent event) {
-                    lrua_gd.onTouchEvent(event);
-                    return false;
-                }
-            });
-            // all applications button
-            final ImageButton alla_button = ((ImageButton) findViewById(R.id.all_applications_btn));
-            class AllaSimpleOnGestureListener extends
-                    SimpleOnGestureListener {
-                @Override
-                public boolean onSingleTapConfirmed(MotionEvent e) {
-                    tapButton("appAllButtonST");
-                    return true;
-                }
-
-                @Override
-                public boolean onDoubleTap(MotionEvent e) {
-                    tapButton("appAllButtonDT");
-                    return true;
-                }
-
-                @Override
-                public void onLongPress(MotionEvent e) {
-                    if (ReLaunch.this.hasWindowFocus())
-                        tapButton("appAllButtonLT");
-                }
-
-            }
-
-            AllaSimpleOnGestureListener alla_gl = new AllaSimpleOnGestureListener();
-            final GestureDetector alla_gd = new GestureDetector(alla_gl);
-            alla_button.setOnTouchListener(new OnTouchListener() {
-                public boolean onTouch(View v, MotionEvent event) {
-                    alla_gd.onTouchEvent(event);
-                    return false;
-                }
-            });
-            // applications favorites button
-            final ImageButton fava_button = ((ImageButton) findViewById(R.id.app_favorites));
-            class FavaSimpleOnGestureListener extends
-                    SimpleOnGestureListener {
-
-                @Override
-                public boolean onSingleTapConfirmed(MotionEvent e) {
-                    tapButton("appFavButtonST");
-                    return true;
-                }
-
-                @Override
-                public boolean onDoubleTap(MotionEvent e) {
-                    tapButton("appFavButtonDT");
-                    return true;
-                }
-
-                @Override
-                public void onLongPress(MotionEvent e) {
-                    if (ReLaunch.this.hasWindowFocus())
-                        tapButton("appFavButtonLT");
-                }
-            }
-            FavaSimpleOnGestureListener fava_gl = new FavaSimpleOnGestureListener();
-            final GestureDetector fava_gd = new GestureDetector(this, fava_gl);
-            fava_button.setOnTouchListener(new OnTouchListener() {
-                public boolean onTouch(View v, MotionEvent event) {
-                    fava_gd.onTouchEvent(event);
-                    return false;
-                }
-            });
-            // Memory buttons (task manager activity)
-            final LinearLayout mem_l = (LinearLayout) findViewById(R.id.mem_layout);
-            if (mem_l != null) {
-                class MemlSimpleOnGestureListener extends
-                        SimpleOnGestureListener {
-                    @Override
-                    public boolean onSingleTapConfirmed(MotionEvent e) {
-                        tapButton("memButtonST");
-                        return true;
-                    }
-
-                    @Override
-                    public boolean onDoubleTap(MotionEvent e) {
-                        tapButton("memButtonDT");
-                        return true;
-                    }
-
-                    @Override
-                    public void onLongPress(MotionEvent e) {
-                        if (mem_l.hasWindowFocus()) {
-                            tapButton("memButtonLT");
-                        }
-                    }
-                }
-
-                MemlSimpleOnGestureListener meml_gl = new MemlSimpleOnGestureListener();
-                final GestureDetector meml_gd = new GestureDetector(meml_gl);
-                mem_l.setOnTouchListener(new OnTouchListener() {
-                    public boolean onTouch(View v, MotionEvent event) {
-                        meml_gd.onTouchEvent(event);
-                        return false;
-                    }
-                });
-            }
-            memLevel = (TextView) findViewById(R.id.mem_level);
-            memTitle = (TextView) findViewById(R.id.mem_title);
-
-            // Battery Layout
-            final LinearLayout bat_l = (LinearLayout) findViewById(R.id.bat_layout);
-            if (bat_l != null) {
-                class BatlSimpleOnGestureListener extends
-                        SimpleOnGestureListener {
-                    @Override
-                    public boolean onSingleTapConfirmed(MotionEvent e) {
-                        tapButton("batButtonST");
-                        return true;
-                    }
-
-                    @Override
-                    public boolean onDoubleTap(MotionEvent e) {
-                        tapButton("batButtonDT");
-                        return true;
-                    }
-
-                    @Override
-                    public void onLongPress(MotionEvent e) {
-                        if (mem_l.hasWindowFocus()) {
-                            tapButton("batButtonLT");
-                        }
-                    }
-                }
-
-                BatlSimpleOnGestureListener batl_gl = new BatlSimpleOnGestureListener();
-                final GestureDetector batl_gd = new GestureDetector(batl_gl);
-                bat_l.setOnTouchListener(new OnTouchListener() {
-                    public boolean onTouch(View v, MotionEvent event) {
-                        batl_gd.onTouchEvent(event);
-                        return false;
-                    }
-                });
-            }
-            // Battery buttons
-            battLevel = (TextView) findViewById(R.id.bat_level);
-            battTitle = (TextView) findViewById(R.id.bat_title);
-            batteryLevelFilter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
-        } else {
-            hideLayout(R.id.linearLayoutBottom);
-        }
-
-        if (showOnePanel) {
-            app.readFile("lastOpened", LRU_FILE, "/");
-            app.readFile("favorites", FAV_FILE, "/");
-            // Home button
-            final ImageButton home_button = (ImageButton) findViewById(R.id.home_btn);
-            class HomeSimpleOnGestureListener extends
-                    SimpleOnGestureListener {
-                @Override
-                public boolean onSingleTapConfirmed(MotionEvent e) {
-                    tapButton("homeButtonST");
-                    return true;
-                }
-
-                @Override
-                public boolean onDoubleTap(MotionEvent e) {
-                    tapButton("homeButtonDT");
-                    return true;
-                }
-
-                @Override
-                public void onLongPress(MotionEvent e) {
-                    if (home_button.hasWindowFocus()) {
-                        tapButton("homeButtonLT");
-                    }
-                }
-            }
-
-            HomeSimpleOnGestureListener home_gl = new HomeSimpleOnGestureListener();
-            final GestureDetector home_gd = new GestureDetector(home_gl);
-            home_button.setOnTouchListener(new OnTouchListener() {
-                public boolean onTouch(View v, MotionEvent event) {
-                    home_gd.onTouchEvent(event);
-                    return false;
-                }
-            });
-            //  Settings button
-            final ImageButton settings_button = (ImageButton) findViewById(R.id.settings_btn);
-            class SettingsSimpleOnGestureListener extends
-                    SimpleOnGestureListener {
-                @Override
-                public boolean onSingleTapConfirmed(MotionEvent e) {
-                    tapButton("settingsButtonST");
-                    return true;
-                }
-
-                @Override
-                public boolean onDoubleTap(MotionEvent e) {
-                    tapButton("settingsButtonDT");
-                    return true;
-                }
-
-                @Override
-                public void onLongPress(MotionEvent e) {
-                    if (settings_button.hasWindowFocus()) {
-                        tapButton("settingsButtonLT");
-                    }
-                }
-            }
-
-            SettingsSimpleOnGestureListener settings_gl = new SettingsSimpleOnGestureListener();
-            final GestureDetector settings_gd = new GestureDetector(
-                    settings_gl);
-            settings_button.setOnTouchListener(new OnTouchListener() {
-                public boolean onTouch(View v, MotionEvent event) {
-                    settings_gd.onTouchEvent(event);
-                    return false;
-                }
-            });
-            // Search button
-            final ImageButton search_button = (ImageButton) findViewById(R.id.search_btn);
-            class SearchSimpleOnGestureListener extends
-                    SimpleOnGestureListener {
-                @Override
-                public boolean onSingleTapConfirmed(MotionEvent e) {
-                    tapButton("searchButtonST");
-                    return true;
-                }
-
-                @Override
-                public boolean onDoubleTap(MotionEvent e) {
-                    tapButton("searchButtonDT");
-                    return true;
-                }
-
-                @Override
-                public void onLongPress(MotionEvent e) {
-                    if (settings_button.hasWindowFocus()) {
-                        tapButton("searchButtonLT");
-                    }
-                }
-            }
-
-            SearchSimpleOnGestureListener search_gl = new SearchSimpleOnGestureListener();
-            final GestureDetector search_gd = new GestureDetector(search_gl);
-            search_button.setOnTouchListener(new OnTouchListener() {
-                public boolean onTouch(View v, MotionEvent event) {
-                    search_gd.onTouchEvent(event);
-                    return false;
-                }
-            });
-            // Last open book
-            final ImageButton lru_button = (ImageButton) findViewById(R.id.lru_btn);
-            class LruSimpleOnGestureListener extends
-                    SimpleOnGestureListener {
-                @Override
-                public boolean onSingleTapConfirmed(MotionEvent e) {
-                    tapButton("lruButtonST");
-                    return true;
-                }
-
-                @Override
-                public boolean onDoubleTap(MotionEvent e) {
-                    tapButton("lruButtonDT");
-                    return true;
-                }
-
-                @Override
-                public void onLongPress(MotionEvent e) {
-                    if (lru_button.hasWindowFocus()) {
-                        tapButton("lruButtonLT");
-                    }
-                }
-            }
-
-            LruSimpleOnGestureListener lru_gl = new LruSimpleOnGestureListener();
-            final GestureDetector lru_gd = new GestureDetector(lru_gl);
-            lru_button.setOnTouchListener(new OnTouchListener() {
-                public boolean onTouch(View v, MotionEvent event) {
-                    lru_gd.onTouchEvent(event);
-                    return false;
-                }
-            });
-            // Favorites book
-            final ImageButton fav_button = (ImageButton) findViewById(R.id.favor_btn);
-            class FavSimpleOnGestureListener extends
-                    SimpleOnGestureListener {
-                @Override
-                public boolean onSingleTapConfirmed(MotionEvent e) {
-                    tapButton("favButtonST");
-                    return true;
-                }
-
-                @Override
-                public boolean onDoubleTap(MotionEvent e) {
-                    tapButton("favButtonDT");
-                    return true;
-                }
-
-                @Override
-                public void onLongPress(MotionEvent e) {
-                    if (fav_button.hasWindowFocus()) {
-                        tapButton("favButtonLT");
-                    }
-                }
-            }
-
-            FavSimpleOnGestureListener fav_gl = new FavSimpleOnGestureListener();
-            final GestureDetector fav_gd = new GestureDetector(fav_gl);
-            fav_button.setOnTouchListener(new OnTouchListener() {
-                public boolean onTouch(View v, MotionEvent event) {
-                    fav_gd.onTouchEvent(event);
-                    return false;
-                }
-            });
-        } else {
-            hideLayout(R.id.linearLayoutTop);
-        }
-
-        if (showTwoPanel) {
-            // кнопка заголовка на которой отображается текущая папка
-            tv_title = (Button) findViewById(R.id.title_txt);
-            class TvSimpleOnGestureListener extends SimpleOnGestureListener {
-                @Override
-                public boolean onSingleTapConfirmed(MotionEvent e) {
-                    final String[] columns = getResources().getStringArray(
-                            R.array.output_columns_names);
-                    final CharSequence[] columnsmode = new CharSequence[columns.length + 1];
-                    columnsmode[0] = getResources().getString(
-                            R.string.jv_relaunch_default);
-                    System.arraycopy(columns, 0, columnsmode, 1, columns.length);
-                    Integer checked;
-                    if (app.columns.containsKey(currentRoot)) {
-                        if (app.columns.get(currentRoot) == -1) {
-                            checked = 1;
-                        } else {
-                            checked = app.columns.get(currentRoot) + 1;
-                        }
-                    } else {
-                        checked = 0;
-                    }
-                    // get checked
-                    AlertDialog.Builder builder = new AlertDialog.Builder( ReLaunch.this);
-                    // "Select application"
-                    builder.setTitle(getResources().getString(R.string.jv_relaunch_select_columns));
-                    builder.setSingleChoiceItems(columnsmode, checked,
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int i) {
-                                    if (i == 0) {
-                                        app.columns.remove(currentRoot);
-                                    } else {
-                                        if (i == 1) {
-                                            app.columns.put(currentRoot, -1);
-                                        } else {
-                                            app.columns.put(currentRoot, i - 1);
-                                        }
-                                    }
-                                    app.saveList("columns");
-                                    drawDirectory(currentRoot, currentPosition);
-                                    dialog.dismiss();
-                                }
-                            });
-                    AlertDialog alert = builder.create();
-                    alert.show();
-                    return true;
-                }
-
-                @Override
-                public boolean onDoubleTap(MotionEvent e) {
-                    return true;
-                }
-
-                @Override
-                public void onLongPress(MotionEvent e) {
-                    menuSort();
-                }
-            }
-
-            TvSimpleOnGestureListener tv_gl = new TvSimpleOnGestureListener();
-            final GestureDetector tv_gd = new GestureDetector(tv_gl);
-            tv_title.setOnTouchListener(new OnTouchListener() {
-                public boolean onTouch(View v, MotionEvent event) {
-                    tv_gd.onTouchEvent(event);
-                    return false;
-                }
-            });
-        } else {
-            hideLayout(R.id.title_txt);
-        }
-        if (showThreePanel) {
-            // Advanced button
-            final ImageButton adv = (ImageButton) findViewById(R.id.advanced_btn);
-            if (adv != null) {
-                class advSimpleOnGestureListener extends SimpleOnGestureListener {
-                    @Override
-                    public boolean onSingleTapConfirmed(MotionEvent e) {
-                        tapButton("advancedButtonST");
-                        return true;
-                    }
-
-                    @Override
-                    public boolean onDoubleTap(MotionEvent e) {
-                        tapButton("advancedButtonDT");
-                        return true;
-                    }
-
-                    @Override
-                    public void onLongPress(MotionEvent e) {
-                        if (adv.hasWindowFocus()) {
-                            tapButton("advancedButtonLT");
-                        }
-                    }
-                }
-
-                advSimpleOnGestureListener adv_gl = new advSimpleOnGestureListener();
-                final GestureDetector adv_gd = new GestureDetector(adv_gl);
-                adv.setOnTouchListener(new OnTouchListener() {
-                    public boolean onTouch(View v, MotionEvent event) {
-                        adv_gd.onTouchEvent(event);
-                        return false;
-                    }
-                });
-            }
-
-            // кнопка перехода в родительскую папку
-            upButton = (Button) findViewById(R.id.goup_btn);
-            // gesture listener
-            class UpSimpleOnGestureListener extends SimpleOnGestureListener {
-                @Override
-                public boolean onSingleTapConfirmed(MotionEvent e) {
-                    if (!upDir.equals("")) {
-                        Integer p = -1;
-                        if (!positions.empty()){
-                            p = positions.pop();
-                        }
-                        drawDirectory(upDir, p);
-                    }
-                    return true;
-                }
-            }
-
-            UpSimpleOnGestureListener up_gl = new UpSimpleOnGestureListener();
-            final GestureDetector up_gd = new GestureDetector(up_gl);
-            upButton.setOnTouchListener(new OnTouchListener() {
-                public boolean onTouch(View v, MotionEvent event) {
-                    up_gd.onTouchEvent(event);
-                    return false;
-                }
-            });
-
-            // up scroll button
-            upScroll = (Button) findViewById(R.id.upscroll_btn);
-            if (!disableScrollJump) {
-                upScroll.setText(app.scrollStep + "%");
-            } else {
-                upScroll.setText(getResources().getString(R.string.jv_relaunch_prev));
-            }
-            class upScrlSimpleOnGestureListener extends SimpleOnGestureListener {
-                @Override
-                public boolean onSingleTapConfirmed(MotionEvent e) {
-                    if (N2DeviceInfo.EINK_NOOK) { // nook
-                        MotionEvent ev;
-                        ev = MotionEvent.obtain(SystemClock.uptimeMillis(),
-                                SystemClock.uptimeMillis(),
-                                MotionEvent.ACTION_DOWN, 200, 100, 0);
-                        if (ev != null) {
-                            gvList.dispatchTouchEvent(ev);
-                        }
-
-                        ev = MotionEvent.obtain(SystemClock.uptimeMillis(),
-                                SystemClock.uptimeMillis() + 100,
-                                MotionEvent.ACTION_MOVE, 200, 200, 0);
-                        if (ev != null) {
-                            gvList.dispatchTouchEvent(ev);
-                        }
-                        SystemClock.sleep(100);
-                        ev = MotionEvent.obtain(SystemClock.uptimeMillis(),
-                                SystemClock.uptimeMillis(), MotionEvent.ACTION_UP,
-                                200, 200, 0);
-                        if (ev != null) {
-                            gvList.dispatchTouchEvent(ev);
-                        }
-                    } else { // other devices
-                        int first = gvList.getFirstVisiblePosition();
-                        int visible = gvList.getLastVisiblePosition() - gvList.getFirstVisiblePosition() + 1;
-                        int total = itemsArray.size();
-                        first -= visible;
-                        if (first < 0)
-                            first = 0;
-                        gvList.setSelection(first);
-                        // some hack workaround against not scrolling in some cases
-                        if (total > 0) {
-                            gvList.requestFocusFromTouch();
-                            gvList.setSelection(first);
-                        }
-                    }
-                    return true;
-                }
-
-                @Override
-                public boolean onDoubleTap(MotionEvent e) {
-                    if (!disableScrollJump) {
-                        int first = gvList.getFirstVisiblePosition();
-                        int total = itemsArray.size();
-                        first -= (total * app.scrollStep) / 100;
-                        if (first < 0)
-                            first = 0;
-                        gvList.setSelection(first);
-                        // some hack workaround against not scrolling in some cases
-                        if (total > 0) {
-                            gvList.requestFocusFromTouch();
-                            gvList.setSelection(first);
-                        }
-                    }
-                    return true;
-                }
-
-                @Override
-                public void onLongPress(MotionEvent e) {
-                    if (upScroll.hasWindowFocus()) {
-                        if (!disableScrollJump) {
-                            int total = itemsArray.size();
-                            gvList.setSelection(0);
-                            // some hack workaround against not scrolling in some
-                            // cases
-                            if (total > 0) {
-                                gvList.requestFocusFromTouch();
-                                gvList.setSelection(0);
-                            }
-                        }
-                    }
-                }
-            }
-
-            upScrlSimpleOnGestureListener upscrl_gl = new upScrlSimpleOnGestureListener();
-            final GestureDetector upscrl_gd = new GestureDetector(upscrl_gl);
-            upScroll.setOnTouchListener(new OnTouchListener() {
-                public boolean onTouch(View v, MotionEvent event) {
-                    upscrl_gd.onTouchEvent(event);
-                    return false;
-                }
-            });
-
-            // down scroll button
-            downScroll = (Button) findViewById(R.id.downscroll_btn);
-            if (!disableScrollJump) {
-                downScroll.setText(app.scrollStep + "%");
-            } else {
-                downScroll.setText(getResources().getString(R.string.jv_relaunch_next));
-            }
-            class dnScrlSimpleOnGestureListener extends SimpleOnGestureListener {
-                @Override
-                public boolean onSingleTapConfirmed(MotionEvent e) {
-                    if (N2DeviceInfo.EINK_NOOK) { // nook special
-                        MotionEvent ev;
-                        ev = MotionEvent.obtain(SystemClock.uptimeMillis(),
-                                SystemClock.uptimeMillis(),
-                                MotionEvent.ACTION_DOWN, 200, 200, 0);
-                        if (ev != null) {
-                            gvList.dispatchTouchEvent(ev);
-                        }
-                        ev = MotionEvent.obtain(SystemClock.uptimeMillis(),
-                                SystemClock.uptimeMillis() + 100,
-                                MotionEvent.ACTION_MOVE, 200, 100, 0);
-                        if (ev != null) {
-                            gvList.dispatchTouchEvent(ev);
-                        }
-                        SystemClock.sleep(100);
-                        ev = MotionEvent.obtain(SystemClock.uptimeMillis(),
-                                SystemClock.uptimeMillis(), MotionEvent.ACTION_UP,
-                                200, 100, 0);
-                        if (ev != null) {
-                            gvList.dispatchTouchEvent(ev);
-                        }
-                    } else { // other devices
-                        int first = gvList.getFirstVisiblePosition();
-                        int total = itemsArray.size();
-                        int last = gvList.getLastVisiblePosition();
-                        if (total == last + 1)
-                            return true;
-                        int target = last + 1;
-                        if (target > (total - 1))
-                            target = total - 1;
-                        RepeatedDownScroll ds = new RepeatedDownScroll();
-                        ds.doIt(first, target, 0);
-                    }
-                    return true;
-                }
-
-                @Override
-                public boolean onDoubleTap(MotionEvent e) {
-                    if (!disableScrollJump) {
-                        int first = gvList.getFirstVisiblePosition();
-                        int total = itemsArray.size();
-                        int last = gvList.getLastVisiblePosition();
-                        if (total == last + 1)
-                            return true;
-                        int target = first + (total * app.scrollStep) / 100;
-                        if (target <= last)
-                            target = last + 1; // Special for NOOK, otherwise it
-                        // won't redraw the listview
-                        if (target > (total - 1))
-                            target = total - 1;
-                        RepeatedDownScroll ds = new RepeatedDownScroll();
-                        ds.doIt(first, target, 0);
-                    }
-                    return true;
-                }
-
-                @Override
-                public void onLongPress(MotionEvent e) {
-                    if (downScroll.hasWindowFocus()) {
-                        if (!disableScrollJump) {
-                            int first = gvList.getFirstVisiblePosition();
-                            int total = itemsArray.size();
-                            int last = gvList.getLastVisiblePosition();
-                            if (total == last + 1)
-                                return;
-                            int target = total - 1;
-                            RepeatedDownScroll ds = new RepeatedDownScroll();
-                            ds.doIt(first, target, 0);
-                        }
-                    }
-                }
-            }
-
-            dnScrlSimpleOnGestureListener dnscrl_gl = new dnScrlSimpleOnGestureListener();
-            final GestureDetector dnscrl_gd = new GestureDetector(dnscrl_gl);
-            downScroll.setOnTouchListener(new OnTouchListener() {
-                public boolean onTouch(View v, MotionEvent event) {
-                    dnscrl_gd.onTouchEvent(event);
-                    return false;
-                }
-            });
-        } else {
-            hideLayout(R.id.linearLayoutNavigate);
-        }
-
-
-
-        // список файлов и папок
-        String[] from = new String[] { "name" };
-        int[] to = new int[] { R.id.fl_text };
-        gvList = (GridView) findViewById(R.id.gl_list);
-        adapter = new FLSimpleAdapter1(this, itemsArray, R.layout.flist_layout, from, to);
-        gvList.setAdapter(adapter);
-        gvList.setHorizontalSpacing(0);
-        if (prefs.getBoolean("customScroll", app.customScrollDef)) {
-             if (addSView) {
-                int scrollW;
-                try {
-                    scrollW = Integer.parseInt(prefs.getString("scrollWidth", "25"));
-                } catch (NumberFormatException e) {
-                    scrollW = 25;
-                }
-                LinearLayout ll = (LinearLayout) findViewById(R.id.gl_layout);
-                final SView sv = new SView(getBaseContext());
-                LinearLayout.LayoutParams pars = new LinearLayout.LayoutParams(scrollW, ViewGroup.LayoutParams.FILL_PARENT, 1f);
-                sv.setLayoutParams(pars);
-                ll.addView(sv);
-                gvList.setOnScrollListener(new AbsListView.OnScrollListener() {
-                    public void onScroll(AbsListView view,
-                                         int firstVisibleItem, int visibleItemCount,
-                                         int totalItemCount) {
-                        sv.total = totalItemCount;
-                        sv.count = visibleItemCount;
-                        sv.first = firstVisibleItem;
-                        EinkScreen.PrepareController(null, false);
-                        sv.invalidate();
-                    }
-
-                    public void onScrollStateChanged(AbsListView view,
-                                                     int scrollState) {
-                    }
-                });
-                addSView = false;
-            }
-        } else {
-            gvList.setOnScrollListener(new AbsListView.OnScrollListener() {
-                public void onScroll(AbsListView view, int firstVisibleItem,
-                                     int visibleItemCount, int totalItemCount) {
-                    EinkScreen.PrepareController(null, false);
-                }
-
-                public void onScrollStateChanged(AbsListView view, int scrollState) {
-                }
-            });
-        }
-        class GlSimpleOnGestureListener extends SimpleOnGestureListener {
-            Context context;
-
-            public GlSimpleOnGestureListener(Context context) {
-                super();
-                this.context = context;
-            }
-            public int findViewByXY(MotionEvent e) {
-                int location[] = new int[2];
-                float x = e.getRawX();
-                float y = e.getRawY();
-                int first = gvList.getFirstVisiblePosition();
-                int last = gvList.getLastVisiblePosition();
-                int count = last -first + 1;
-                for (int i = 0; i<count; i++) {
-                    View v = gvList.getChildAt(i);
-                    if(v == null){
-                        return -1;
-                    }
-                    v.getLocationOnScreen(location);
-                    int viewX = location[0];
-                    int viewY = location[1];
-                    if(( x > viewX && x < (viewX + v.getWidth())) &&
-                            ( y > viewY && y < (viewY + v.getHeight()))){
-                        return first + i;
-                    }
-                }
-                return -1;
-            }
-
-            @Override
-            public boolean onSingleTapConfirmed(MotionEvent e) {
-                int position = findViewByXY(e);
-                if (position == -1){
-                    return true;
-                }
-                HashMap<String, String> item = itemsArray.get(position);
-                if (item.get("type").equals("dir")) {
-                    // Goto directory
-                    pushCurrentPos(gvList, true);
-                    drawDirectory(item.get("fname"), -1);
-                }else{
-                    String tempName = item.get("fname");
-                    String fname;
-                    if(tempName.startsWith("Dropbox| ")){
-                        fname = loadFileDB(tempName, item.get("name"));
-                    }else{
-                        fname = tempName;
-                    }
-                    if (app.specialAction(ReLaunch.this, fname)){
-                        pushCurrentPos(gvList, false);
-                    }else {
-                        prefsEditor.putInt("posInFolder", gvList.getFirstVisiblePosition());
-                        prefsEditor.commit();
-                        pushCurrentPos(gvList, false);
-                        if (item.get("reader").equals("Nope")){
-                            app.defaultAction(ReLaunch.this, fname);
-                        }else {
-                            // Launch reader
-                            if (app.askIfAmbiguous) {
-                                List<String> rdrs = app.readerNames(fname);
-                                if (rdrs.size() < 1)
-                                    return true;
-                                else if (rdrs.size() == 1)
-                                    start(app.launchReader(rdrs.get(0), fname));
-                                else {
-                                    final CharSequence[] applications = rdrs.toArray(new CharSequence[rdrs.size()]);
-                                    final String rdr1 = fname;
-                                    AlertDialog.Builder builder = new AlertDialog.Builder(ReLaunch.this);
-                                    // "Select application"
-                                    builder.setTitle(getResources().getString( R.string.jv_relaunch_select_application));
-                                    builder.setSingleChoiceItems(applications, -1,
-                                            new DialogInterface.OnClickListener() {
-                                                public void onClick(
-                                                        DialogInterface dialog,
-                                                        int i) {
-                                                    start(app.launchReader((String) applications[i],rdr1));
-                                                    dialog.dismiss();
-                                                }
-                                            });
-                                    AlertDialog alert = builder.create();
-                                    alert.show();
-                                }
-                            } else{
-                                start(app.launchReader(item.get("reader"),fname));
-                            }
-                        }
-                    }
-                }
-                return true;
-            }
-
-            @Override
-            public boolean onDoubleTap(MotionEvent e) {
-                int position = findViewByXY(e);
-                if (position != -1) {
-                    HashMap<String, String> item = itemsArray.get(position);
-                    String file = item.get("dname") + "/" + item.get("name");
-                    if (file.endsWith("fb2") || file.endsWith("fb2.zip") || file.endsWith("epub")) {
-                        prefsEditor.putInt("posInFolder", gvList.getFirstVisiblePosition());
-                        prefsEditor.commit();
-                        pushCurrentPos(gvList, false);
-                        String temp = file;
-                        if(temp.startsWith("Dropbox| ")) {
-                            temp = loadFileDB(temp, item.get("name"));
-                        }
-                        showBookInfo(temp);
-                    }
-                }
-                return true;
-            }
-
-
-            @Override
-            public void onLongPress(MotionEvent e) {
-                if (!ReLaunch.this.hasWindowFocus())
-                    return;
-                int menuType;
-                int position = findViewByXY(e);
-                HashMap<String, String> item;
-                String fn = null;
-                String dr = null;
-                String tp;
-                String fullName = null;
-                ArrayList<String> aList = new ArrayList<String>(10);
-                if (position == -1)
-                    menuType = 0;
-                else {
-                    item = itemsArray.get(position);
-                    fn = item.get("name");
-                    dr = item.get("dname");
-                    tp = item.get("type");
-                    fullName = dr + "/" + fn;
-                    if (tp.equals("dir"))
-                        menuType = 1;
-                    else if (fn.endsWith("fb2") || fn.endsWith("fb2.zip") || fn.endsWith("epub"))
-                        menuType = 2;
-                    else
-                        menuType = 3;
-                }
-                if (menuType == 0) {
-                    if (prefs.getBoolean("useFileManagerFunctions", true)) {
-                        aList.add(getString(R.string.jv_relaunch_create_folder));
-                        if (fileOp != 0) {
-                            aList.add(getString(R.string.jv_relaunch_paste));
-                        }
-                    }
-                } else if (menuType == 1) {
-                    if ((!app.isStartDir(fullName)) && (prefs.getBoolean("showAddStartDir", false))) {
-                        aList.add(getString(R.string.jv_relaunch_set_startdir));
-                        aList.add(getString(R.string.jv_relaunch_add_startdir));
-                    }
-                    if (!app.contains("favorites", fullName, app.DIR_TAG))
-                        aList.add(getString(R.string.jv_relaunch_add));
-                    if (prefs.getBoolean("useFileManagerFunctions", true)) {
-                        File d = new File(fullName);
-                        String[] allEntries = d.list();
-                        aList.add(getString(R.string.jv_relaunch_create_folder));
-                        aList.add(getString(R.string.jv_relaunch_rename));
-                        aList.add(getString(R.string.jv_relaunch_move));
-                        aList.add(getString(R.string.jv_relaunch_copy));
-                        if (fileOp != 0) {
-                            aList.add(getString(R.string.jv_relaunch_paste));
-                        }
-                        if (allEntries != null && allEntries.length > 0) {
-                            aList.add(getString(R.string.jv_relaunch_delete_non_emp_dir));
-                        } else {
-                            aList.add(getString(R.string.jv_relaunch_delete_emp_dir));
-                        }
-                        if(arrSelItem.contains(position)){
-                            aList.add(getString(R.string.jv_relaunch_unselecte));
-                        }else {
-                            aList.add(getString(R.string.jv_relaunch_selecte));
-                        }
-                    }
-                    aList.add(getString(R.string.jv_relaunch_fileinfo));
-                } else if (menuType == 2) {
-                    aList.add(getString(R.string.jv_relaunch_bookinfo));
-                    if (!app.contains("favorites", dr, fn)) {
-                        aList.add(getString(R.string.jv_relaunch_add));
-                    }
-                    if (app.history.containsKey(fullName)) {
-                        if (app.history.get(fullName) == app.READING) {
-                            aList.add(getString(R.string.jv_relaunch_mark));
-                        } else if (app.history.get(fullName) == app.FINISHED) {
-                            aList.add(getString(R.string.jv_relaunch_unmark));
-                        }
-                        aList.add(getString(R.string.jv_relaunch_unmarkall));
-                    } else {
-                        aList.add(getString(R.string.jv_relaunch_mark));
-                    }
-                    if (prefs.getBoolean("openWith", true))
-                        aList.add(getString(R.string.jv_relaunch_openwith));
-                    if (prefs.getBoolean("createIntent", false))
-                        aList.add(getString(R.string.jv_relaunch_createintent));
-                    if (prefs.getBoolean("useFileManagerFunctions", true)) {
-                        if (!showBookTitles)
-                            aList.add(getString(R.string.jv_relaunch_tags_rename));
-                        aList.add(getString(R.string.jv_relaunch_create_folder));
-                        if (!showBookTitles)
-                            aList.add(getString(R.string.jv_relaunch_rename));
-                        aList.add(getString(R.string.jv_relaunch_copy));
-                        aList.add(getString(R.string.jv_relaunch_move));
-                        if (fileOp != 0)
-                            aList.add(getString(R.string.jv_relaunch_paste));
-                        aList.add(getString(R.string.jv_relaunch_delete));
-                    }
-                    aList.add(getString(R.string.jv_relaunch_fileinfo));
-                    if(arrSelItem.contains(position)){
-                        aList.add(getString(R.string.jv_relaunch_unselecte));
-                    }else {
-                        aList.add(getString(R.string.jv_relaunch_selecte));
-                    }
-
-                } else if (menuType == 3) {
-                    if (!app.contains("favorites", dr, fn)) {
-                        aList.add(getString(R.string.jv_relaunch_add));
-                    }
-                    if (app.history.containsKey(fullName)) {
-                        if (app.history.get(fullName) == app.READING) {
-                            aList.add(getString(R.string.jv_relaunch_mark));
-                        } else if (app.history.get(fullName) == app.FINISHED) {
-                            aList.add(getString(R.string.jv_relaunch_unmark));
-                        }
-                        aList.add(getString(R.string.jv_relaunch_unmarkall));
-                    } else {
-                        aList.add(getString(R.string.jv_relaunch_mark));
-                    }
-                    if (prefs.getBoolean("openWith", true))
-                        aList.add(getString(R.string.jv_relaunch_openwith));
-                    if (prefs.getBoolean("createIntent", false))
-                        aList.add(getString(R.string.jv_relaunch_createintent));
-                    if (prefs.getBoolean("useFileManagerFunctions", true)) {
-                        aList.add(getString(R.string.jv_relaunch_create_folder));
-                        if (!showBookTitles)
-                            aList.add(getString(R.string.jv_relaunch_rename));
-                        aList.add(getString(R.string.jv_relaunch_copy));
-                        aList.add(getString(R.string.jv_relaunch_move));
-                        if (fileOp != 0)
-                            aList.add(getString(R.string.jv_relaunch_paste));
-                        aList.add(getString(R.string.jv_relaunch_delete));
-                    }
-                    aList.add(getString(R.string.jv_relaunch_fileinfo));
-                    if(arrSelItem.contains(position)){
-                        aList.add(getString(R.string.jv_relaunch_unselecte));
-                    }else {
-                        aList.add(getString(R.string.jv_relaunch_selecte));
-                    }
-                }
-                if(menuType > 0 && !fullName.startsWith("Dropbox| ")){
-                    aList.add(getString(R.string.jv_relaunch_add_Dropbox));
-                    aList.add(getString(R.string.jv_relaunch_add_dir_Dropbox));
-                }
-                if(!showOnePanel && !showTwoPanel && !showThreePanel && !showFourPanel){
-                    aList.add(getString(R.string.app_settings_settings));
-                }
-                aList.add(getString(R.string.app_cancel));
-                final int pos = position;
-                final String[] list = aList.toArray(new String[aList.size()]);
-
-                ListAdapter cmAdapter = new ArrayAdapter<String>(
-                        getApplicationContext(), R.layout.cmenu_list_item, list);
-
-                AlertDialog.Builder builder = new AlertDialog.Builder(context);
-                builder.setAdapter(cmAdapter, new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int item) {
-                        String s = list[item];
-                        if (s.equalsIgnoreCase(getString(R.string.app_cancel)))
-                            onContextMenuSelected(CNTXT_MENU_CANCEL, pos);
-                        else if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_delete)))
-                            onContextMenuSelected(CNTXT_MENU_DELETE_F, pos);
-                        else if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_delete_emp_dir)))
-                            onContextMenuSelected(CNTXT_MENU_DELETE_D_EMPTY, pos);
-                        else if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_delete_non_emp_dir)))
-                            onContextMenuSelected(CNTXT_MENU_DELETE_D_NON_EMPTY, pos);
-                        else if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_add)))
-                            onContextMenuSelected(CNTXT_MENU_ADD, pos);
-                        else if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_mark)))
-                            onContextMenuSelected(CNTXT_MENU_MARK_FINISHED, pos);
-                        else if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_unmark)))
-                            onContextMenuSelected(CNTXT_MENU_MARK_READING, pos);
-                        else if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_unmarkall)))
-                            onContextMenuSelected(CNTXT_MENU_MARK_FORGET, pos);
-                        else if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_createintent)))
-                            onContextMenuSelected(CNTXT_MENU_INTENT, pos);
-                        else if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_openwith)))
-                            onContextMenuSelected(CNTXT_MENU_OPENWITH, pos);
-                        else if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_copy)))
-                            onContextMenuSelected(CNTXT_MENU_COPY_FILE, pos);
-                        else if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_move)))
-                            onContextMenuSelected(CNTXT_MENU_MOVE_FILE, pos);
-                        else if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_paste)))
-                            onContextMenuSelected(CNTXT_MENU_PASTE, pos);
-                        else if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_rename)))
-                            onContextMenuSelected(CNTXT_MENU_RENAME, pos);
-                        else if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_create_folder)))
-                            onContextMenuSelected(CNTXT_MENU_CREATE_DIR, pos);
-                        else if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_tags_rename)))
-                            onContextMenuSelected(CNTXT_MENU_TAGS_RENAME, pos);
-                        else if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_set_startdir)))
-                            onContextMenuSelected(CNTXT_MENU_SET_STARTDIR, pos);
-                        else if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_add_startdir)))
-                            onContextMenuSelected(CNTXT_MENU_ADD_STARTDIR, pos);
-                        else if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_bookinfo)))
-                            onContextMenuSelected(CNTXT_MENU_SHOW_BOOKINFO, pos);
-                        else if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_fileinfo)))
-                            onContextMenuSelected(CNTXT_MENU_FILE_INFO, pos);
-                        else if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_add_Dropbox)))
-                            onContextMenuSelected(CNTXT_MENU_COPY_DROPBOX, pos);
-                        else if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_add_dir_Dropbox)))
-                            onContextMenuSelected(CNTXT_MENU_COPY_DIR_DROPBOX, pos);
-                        else if (s.equalsIgnoreCase(getString(R.string.app_settings_settings)))
-                            onContextMenuSelected(CNTXT_MENU_SETTINGS, pos);
-                        else if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_selecte)) || s.equalsIgnoreCase(getString(R.string.jv_relaunch_unselecte)))
-                            onContextMenuSelected(CNTXT_MENU_SELECTE, pos);
-                    }
-                });
-                AlertDialog alert = builder.create();
-                alert.requestWindowFeature(Window.FEATURE_NO_TITLE);
-                alert.show();
-            }
-        }
-
-        GlSimpleOnGestureListener gv_gl = new GlSimpleOnGestureListener(this);
-        final GestureDetector gv_gd = new GestureDetector(gv_gl);
-        gvList.setOnTouchListener(new OnTouchListener() {
-            public boolean onTouch(View v, MotionEvent event) {
-                gv_gd.onTouchEvent(event);
-                return false;
-            }
-        });
-
+		ArrayList<String> listPanels = dbSCREEN();
+		LayoutInflater ltInflater = getLayoutInflater();
+		LinearLayout ll_container = (LinearLayout) findViewById(R.id.conteiner);
+		if (listPanels != null && listPanels.size() > 0){
+			for (String listPanel : listPanels) {
+				if (listPanel.equals("1")) {
+					drawingFirstPanel(ltInflater, ll_container);
+				} else if (listPanel.equals("2")) {
+					drawingSecondPanel(ltInflater, ll_container);
+				} else if (listPanel.equals("3")) {
+					drawingThirdPanel(ltInflater, ll_container);
+				} else if (listPanel.equals("4")) {
+					drawingFourthPanel(ltInflater, ll_container);
+				} else if (listPanel.equals("5")) {
+					drawingFifthPanel(ltInflater, ll_container);
+				} else {
+					drawingSixPanel(ltInflater, ll_container, listPanel);
+				}
+			}
+		}else{
+			drawingFirstPanel(ltInflater, ll_container);
+			drawingSecondPanel(ltInflater, ll_container);
+			drawingThirdPanel(ltInflater, ll_container);
+			drawingFourthPanel(ltInflater, ll_container);
+			drawingFifthPanel(ltInflater, ll_container);
+		}
+
+        //=================================================================
         // What's new processing
         int latestVersion = prefs.getInt("latestVersion", 0);
         int tCurrentVersion = 0;
-        try {
-            tCurrentVersion = getPackageManager().getPackageInfo(getPackageName(), 0).versionCode;
-        } catch (Exception e) {
-            //emply
+        PackageManager ttt = getPackageManager();
+        if (ttt != null) {
+            try {
+                tCurrentVersion = ttt.getPackageInfo(getPackageName(), 0).versionCode;
+            } catch (PackageManager.NameNotFoundException e) {
+                tCurrentVersion = 0;
+            }
         }
         if (tCurrentVersion > latestVersion) {
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -2218,42 +1161,39 @@ public class ReLaunch extends Activity {
         // incorrect device warning
         checkDevice(Build.DEVICE, Build.MANUFACTURER, Build.MODEL, Build.PRODUCT);
 
-        EinkScreen.setEinkController(prefs);
-
-		app.booted = true;
-
 		ScreenOrientation.set(this, prefs);
 	}
-
 	@Override
 	protected void onStart() {
 		super.onStart();
-        // register Receiver
-        if (!mountReceiverRegistered) {
-            IntentFilter filter = new IntentFilter(Intent.ACTION_MEDIA_MOUNTED);
-            filter.addDataScheme("file");
-            registerReceiver(this.SDCardChangeReceiver,
-                    new IntentFilter(filter));
-            mountReceiverRegistered = true;
-        }
 
-        if (!powerReceiverRegistered) {
-            IntentFilter filter = new IntentFilter();
-            filter.addAction(Intent.ACTION_POWER_CONNECTED);
-            filter.addAction(Intent.ACTION_POWER_DISCONNECTED);
-            registerReceiver(this.PowerChangeReceiver, new IntentFilter(filter));
-            powerReceiverRegistered = true;
+        N2EpdController.n2MainActivity = this;
+        // установка начальной папки
+        // загрузка сохранённой папки если сохранение последней разрешено
+        if (!f_onCreate && prefs.getBoolean("saveDir", true)){
+            if(N2DeviceInfo.EINK_ONYX){
+				currentRoot = prefs.getString("lastdir", "/mnt/storage");
+            }else{
+				currentRoot = prefs.getString("lastdir", "/sdcard");
+            }
+			f_onCreate = false;
         }
-
-        if (!wifiReceiverRegistered) {
-            IntentFilter filter = new IntentFilter();
-            filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
-            registerReceiver(this.WiFiChangeReceiver, new IntentFilter(filter));
-            wifiReceiverRegistered = true;
+        // если текущая пустая то грузим в неё домашнюю
+        if((currentRoot == null || currentRoot.equals("")) && currentHomeDir != null && currentHomeDir.length() > 0){
+			currentRoot = currentHomeDir;
         }
-        //=====================================================================
-		if (app.dataBase == null)
-			app.dataBase = new BooksBase(this);
+        // при запуске учитывать работу с дропбоксом
+        if(currentRoot.startsWith("Dropbox| ")){
+            if(dropboxClient == null) {
+                dropboxClient = new MyDropboxClient(prefs, ReLaunch.this);
+            }
+            if (!dropboxClient.getSession()) {
+                dropboxClient.logIn();
+            }
+        }
+        if (currentRoot.startsWith("FTP| ")){
+            connectorFTP = new FTPConnector(ID_FTP, this);
+        }
 
 		// Reread preferences
 		String typesString = prefs.getString("types", defReaders);
@@ -2277,35 +1217,15 @@ public class ReLaunch extends Activity {
             // сортируем массив расширений
             Collections.sort(exts, new ExtsComparator());
         }
-		app.askIfAmbiguous = prefs.getBoolean("askAmbig", false);
-        if (prefs.getBoolean("saveDir", true))
-            if(N2DeviceInfo.EINK_ONYX){
-                lastdir = prefs.getString("lastdir", "/mnt/storage");
-            }else{
-                lastdir = prefs.getString("lastdir", "/sdcard");
-            }
-        else {
-            lastdir = startDir[0];
-        }
-        if(intentStartDir != null && intentStartDir.length() > 0){
-            lastdir = intentStartDir;
-            intentStartDir = null;
-        }
-        currentRoot = lastdir;
-        // при запуске учитывать работу с дропбоксом
-        if(currentRoot.startsWith("Dropbox| ")){
-            connectDropbox();
-        }
-		drawDirectory(currentRoot, currentPosition);
-	}
 
+        drawDirectory(currentRoot, currentPosition);
+	}
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.mainmenu, menu);
 		return true;
 	}
-
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
@@ -2331,7 +1251,6 @@ public class ReLaunch extends Activity {
 			return true;
 		}
 	}
-
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		if (resultCode != Activity.RESULT_OK)
@@ -2347,6 +1266,176 @@ public class ReLaunch extends Activity {
 			//return;
 		}
 	}
+    @Override
+    protected void onResume() {
+        // register Receiver
+		IntentFilter filter;
+        if (!mountReceiverRegistered) {
+            filter = new IntentFilter();
+			filter.addAction(Intent.ACTION_MEDIA_MOUNTED);
+			filter.addAction(Intent.ACTION_MEDIA_SHARED);
+			filter.addAction(Intent.ACTION_MEDIA_UNMOUNTED);
+			filter.addAction(Intent.ACTION_MEDIA_REMOVED);
+			filter.addAction(Intent.ACTION_MEDIA_BAD_REMOVAL);
+			filter.addAction(Intent.ACTION_MEDIA_EJECT);
+            filter.addDataScheme("file");
+            registerReceiver(this.SDCardChangeReceiver, new IntentFilter(filter));
+            mountReceiverRegistered = true;
+        }
+
+        if (!powerReceiverRegistered) {
+            filter = new IntentFilter(Intent.ACTION_BATTERY_CHANGED);
+            filter.addAction(Intent.ACTION_POWER_CONNECTED);
+            filter.addAction(Intent.ACTION_POWER_DISCONNECTED);
+			registerReceiver(this.PowerChangeReceiver, filter);
+            powerReceiverRegistered = true;
+        }
+
+        if (!wifiReceiverRegistered) {
+            filter = new IntentFilter();
+            filter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
+			filter.addAction(ConnectivityManager.CONNECTIVITY_ACTION);
+            registerReceiver(this.WiFiChangeReceiver, new IntentFilter(filter));
+            wifiReceiverRegistered = true;
+        }
+        WiFiReceiver();
+        //=====================================================================
+        if(currentRoot.startsWith("Dropbox| ")){
+            dropboxClient.logFinish();
+        }
+        EinkScreen.setEinkController(prefs);
+        super.onResume();
+        app.generalOnResume(TAG);
+    }
+    @Override
+    protected void onPause() {
+        // unregister Receiver
+        unregisterReceiver(this.SDCardChangeReceiver);
+        unregisterReceiver(this.PowerChangeReceiver);
+        unregisterReceiver(this.WiFiChangeReceiver);
+        wifiReceiverRegistered = false;
+        powerReceiverRegistered = false;
+        mountReceiverRegistered = false;
+
+		int lruMax = 30;
+		int favMax = 30;
+		int appLruMax = 30;
+		int appFavMax = 30;
+		try {
+			lruMax = Integer.parseInt(prefs.getString("lruSize", "30"));
+			favMax = Integer.parseInt(prefs.getString("favSize", "30"));
+			appLruMax = Integer.parseInt(prefs.getString("appLruSize", "30"));
+			appFavMax = Integer.parseInt(prefs.getString("appFavSize", "30"));
+		} catch (NumberFormatException e) {
+			//emply
+		}
+		app.writeFile("lastOpened", LRU_FILE, lruMax, "/");
+		app.writeFile("favorites", FAV_FILE, favMax, "/");
+		app.writeFile("app_last", APP_LRU_FILE, appLruMax, ":");
+		app.writeFile("app_favorites", APP_FAV_FILE, appFavMax, ":");
+		List<String[]> h = new ArrayList<String[]>();
+		for (String k : app.history.keySet()) {
+			if (app.history.get(k) == app.READING)
+				h.add(new String[] { k, "READING" });
+			else if (app.history.get(k) == app.FINISHED)
+				h.add(new String[] { k, "FINISHED" });
+		}
+		app.setList("history", h);
+		app.writeFile("history", HIST_FILE, 0, ":");
+		List<String[]> c = new ArrayList<String[]>();
+		for (String k : app.columns.keySet()) {
+			c.add(new String[] { k, Integer.toString(app.columns.get(k)) });
+		}
+		app.setList("columns", c);
+		app.writeFile("columns", ReLaunch.COLS_FILE, 0, ":");
+
+		prefsEditor.putString("intentStartDir", currentHomeDir);
+		if (prefs.getBoolean("saveDir", true)) {
+			prefsEditor.putString("lastdir", currentRoot);
+		}
+		prefsEditor.commit();
+
+        super.onPause();
+    }
+    @Override
+    public void onConfigurationChanged(Configuration newConfig){
+        super.onConfigurationChanged(newConfig);
+		String lang;
+		lang = prefs.getString("lang", "default");
+		if (!lang.equals("default")) {
+			locale = new Locale(lang);
+			Locale.setDefault(locale);
+			Configuration config = new Configuration();
+			config.locale = locale;
+			getBaseContext().getResources().updateConfiguration(config, null);
+		}
+    }
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_HOME)
+            return true;
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+			boolean isRoot = !CheckUpDir();
+			if (prefs.getBoolean("useBackButton", true)) {
+                if (!isRoot) {
+					TapUpDir();
+                }
+            }
+            if (((isRoot) || (!prefs.getBoolean("useBackButton", true))) && blockExitLauncher) {// выход из программы
+                // Ask the user if they want to quit
+                new AlertDialog.Builder(this).setIcon(android.R.drawable.ic_dialog_alert)
+                        // "This is a launcher!"
+                        .setTitle(getResources().getString(R.string.jv_relaunch_launcher))
+                                // "Are you sure you want to quit ?"
+                        .setMessage(getResources().getString(R.string.jv_relaunch_launcher_text))
+                                // "YES"
+                        .setPositiveButton(getResources().getString(R.string.app_yes),
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog,int which) {
+                                        finish();
+                                    }
+                                })
+                                // "NO"
+                        .setNegativeButton(getResources().getString(R.string.app_no),null).show();
+            }
+            return true;
+        } else {
+            return super.onKeyDown(keyCode, event);
+        }
+    }
+    @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        if (N2DeviceInfo.EINK_SONY) {
+            int prevCode = 0x0069;
+            int nextCode = 0x006a;
+            if ((event.getScanCode() == prevCode) && (event.getAction() == KeyEvent.ACTION_DOWN)) {
+                int first = gvList.getFirstVisiblePosition();
+                int visible = gvList.getLastVisiblePosition() - first + 1;
+                int total = itemsArray.size();
+                first -= visible;
+                if (first < 0)
+                    first = 0;
+                gvList.setSelection(first);
+                // some hack workaround against not scrolling in some cases
+                if (total > 0) {
+                    //gvList.requestFocusFromTouch();
+                    gvList.setSelection(first);
+                }
+            }
+            if ((event.getScanCode() == nextCode) && (event.getAction() == KeyEvent.ACTION_DOWN)) {
+                int first = gvList.getFirstVisiblePosition();
+                int total = itemsArray.size();
+                int last = gvList.getLastVisiblePosition();
+                if (total == last + 1)
+                    return true;
+                int target = last + 1;
+                if (target > (total - 1))
+                    target = total - 1;
+				app.RepeatedDownScroll(gvList, first, target, 0);
+            }
+        }
+        return super.dispatchKeyEvent(event);
+    }
 
 	public boolean onContextMenuSelected(int itemId, int mPos) {
 		if (itemId == CNTXT_MENU_CANCEL){
@@ -2357,7 +1446,7 @@ public class ReLaunch extends Activity {
 
 		if (mPos == -1) {
 			i = new HashMap<String, String>();
-			i.put("dname", lastdir);
+			i.put("dname", currentRoot);
 			i.put("name", "");
 		} else {
 			tpos = mPos;
@@ -2370,14 +1459,24 @@ public class ReLaunch extends Activity {
 		final String type = i.get("type");
 
 		switch (itemId) {
-		case CNTXT_MENU_SET_STARTDIR:
+		case CNTXT_MENU_SET_STARTDIR:// FTP не работает
+            if(dname.startsWith("FTP| ")) {
+                return true;
+            }
 			app.setStartDir(fullName);
 			drawDirectory(fullName, -1);
 			break;
-		case CNTXT_MENU_ADD_STARTDIR:
+		case CNTXT_MENU_ADD_STARTDIR:// FTP не работает
+            if(dname.startsWith("FTP| ")) {
+                return true;
+            }
 			app.addStartDir(fullName);
+			startDir = app.loadStartDirs();
 			break;
-		case CNTXT_MENU_ADD:
+		case CNTXT_MENU_ADD:// FTP не работает
+            if(dname.startsWith("FTP| ")) {
+                return true;
+            }
 			if (type.equals("file"))
 				app.addToList("favorites", dname, fname, false);
 			else
@@ -2399,15 +1498,8 @@ public class ReLaunch extends Activity {
             reDraw();
 			break;
 		case CNTXT_MENU_OPENWITH: {
-			final CharSequence[] applications = app.getApps().toArray(
-					new CharSequence[app.getApps().size()]);
-			CharSequence[] happlications = app.getApps().toArray(
-					new CharSequence[app.getApps().size()]);
-			for (int j = 0; j < happlications.length; j++) {
-				String happ = (String) happlications[j];
-				String[] happp = happ.split("\\%");
-				happlications[j] = happp[2];
-			}
+			final ArrayList<String> listApp2 = app.getAppList();
+			CharSequence[] happlications = app.getAppList().toArray(new CharSequence[app.getAppList().size()]);
 			AlertDialog.Builder builder = new AlertDialog.Builder(ReLaunch.this);
 			// "Select application"
 			builder.setTitle(getResources().getString(R.string.jv_relaunch_select_application));
@@ -2415,10 +1507,14 @@ public class ReLaunch extends Activity {
 					new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int i) {
                             String temp = fullName;
+                            if(temp.startsWith("FTP| ")) {
+                                downloadFTP(connectorFTP, dname, fname, "");
+                                temp = FTPTempDir + File.separator + temp.substring(temp.lastIndexOf("/")+1);
+                            }
                             if(temp.startsWith("Dropbox| ")) {
                                 temp = loadFileDB(temp, fname);
                             }
-							start(app.launchReader((String) applications[i], temp));
+							start(app.launchReader(listApp2.get(i), temp));
 							dialog.dismiss();
 						}
 					});
@@ -2460,6 +1556,10 @@ public class ReLaunch extends Activity {
 					new DialogInterface.OnClickListener() {
 						public void onClick(DialogInterface dialog, int i) {
                             String temp = fullName;
+                            if(temp.startsWith("FTP| ")) {
+                                downloadFTP(connectorFTP, dname, fname, "");
+                                temp = FTPTempDir + File.separator + temp.substring(temp.lastIndexOf("/")+1);
+                            }
                             if(temp.startsWith("Dropbox| ")) {
                                 temp = loadFileDB(temp, fname);
                             }
@@ -2525,6 +1625,10 @@ public class ReLaunch extends Activity {
 												DialogInterface dialog,
 												int whichButton) {
                                             String temp = fullName;
+                                            if(temp.startsWith("FTP| ")) {
+                                                downloadFTP(connectorFTP, dname, fname, "");
+                                                temp = FTPTempDir + File.separator + temp.substring(temp.lastIndexOf("/")+1);
+                                            }
                                             if(temp.startsWith("Dropbox| ")) {
                                                 temp = loadFileDB(temp, fname);
                                             }
@@ -2615,7 +1719,7 @@ public class ReLaunch extends Activity {
                                 public void onClick(DialogInterface dialog,
                                                     int whichButton) {
                                     dialog.dismiss();
-                                    delAll(fullName, dname, fname);
+                                    delAll(fullName, dname, fname, pos);
                                 }
                             }
                     );
@@ -2630,7 +1734,7 @@ public class ReLaunch extends Activity {
                     );
                     builder.show();
                 } else {
-                    delAll(fullName, dname, fname);
+                    delAll(fullName, dname, fname, pos);
                 }
             }else{
                 delSelect();
@@ -2655,7 +1759,7 @@ public class ReLaunch extends Activity {
                                 public void onClick(DialogInterface dialog,
                                         int whichButton) {
                                     dialog.dismiss();
-                                    delAll(fullName, dname, fname);
+                                    delAll(fullName, dname, fname, pos);
                                 }
                             });
                     // "No"
@@ -2668,7 +1772,7 @@ public class ReLaunch extends Activity {
                             });
                     builder.show();
                 } else {
-                    delAll(fullName, dname, fname);
+                    delAll(fullName, dname, fname, pos);
                 }
             }else{
                 delSelect();
@@ -2695,7 +1799,7 @@ public class ReLaunch extends Activity {
                                 public void onClick(DialogInterface dialog,
                                         int whichButton) {
                                     dialog.dismiss();
-                                    delAll(fullName, dname, fname);
+                                    delAll(fullName, dname, fname, pos);
                                 }
                             });
                     // "No"
@@ -2709,24 +1813,29 @@ public class ReLaunch extends Activity {
                             });
                     builder.show();
                 } else{
-                    delAll(fullName, dname, fname);
+                    delAll(fullName, dname, fname, pos);
                 }
             }else{
                 delSelect();
             }
 			break;
 		case CNTXT_MENU_COPY_FILE:
+            if (dname.startsWith("FTP| ")){
+                ftpID = ID_FTP;
+            }else{
+                ftpID = -1;
+            }
             if(arrSelItem.size() < 1) {
                 fileOpFile = new String[1];
                 fileOpDir = new String[1];
                 fileOpFile[0] = fname;
                 fileOpDir[0] = dname;
+
             }else{
                 HashMap<String, String> i2;
                 int k = arrSelItem.size();
                 fileOpFile = new String[k];
                 fileOpDir = new String[k];
-
                 for(int i1=0; i1 < k; i1++){
                     i2 = itemsArray.get(arrSelItem.get(i1));
                     fileOpDir[i1] = i2.get("dname");
@@ -2737,6 +1846,11 @@ public class ReLaunch extends Activity {
 			break;
 
 		case CNTXT_MENU_MOVE_FILE:
+            if (dname.startsWith("FTP| ")){
+                ftpID = ID_FTP;
+            }else{
+                ftpID = -1;
+            }
             if(arrSelItem.size() < 1) {
                 fileOpFile = new String[1];
                 fileOpDir = new String[1];
@@ -2759,6 +1873,10 @@ public class ReLaunch extends Activity {
 		case CNTXT_MENU_PASTE:
             String src;
             String dst;
+            FTPConnector connectorFTPdown = null;
+            if (fileOpDir[0].startsWith("FTP| ")){
+                connectorFTPdown = new FTPConnector(ftpID, this);
+            }
 
             for(int l=0; l < fileOpDir.length; l++) {
                 if (fileOpDir[l].equalsIgnoreCase("/"))
@@ -2769,37 +1887,87 @@ public class ReLaunch extends Activity {
 
                 boolean dropSrc = src.startsWith("Dropbox| ");// источник в дропе?
                 boolean dropDst = dst.startsWith("Dropbox| ");// приемник в дропе?
+                boolean ftpSrc = src.startsWith("FTP| ");// источник в FTP?
+                boolean ftpDst = dst.startsWith("FTP| ");// приемник в FTP?
 
                 boolean retCode = false;
                 // если источник и приемник в дропе.
-                if (dropSrc && dropDst) {
+                if (dropSrc && dropDst && !ftpSrc && !ftpDst) {
                     if (fileOp == CNTXT_MENU_COPY_FILE) {
                         retCode = DBmoveORcopy(src, dst, true);
                     } else if (fileOp == CNTXT_MENU_MOVE_FILE) {
                         retCode = DBmoveORcopy(src, dst, false);
                     }
                 }
-                // если источник лосально, а приемник в дропе.
-                if (!dropSrc && dropDst) {
+                // если источник локально, а приемник в дропе.
+                if (!dropSrc && dropDst && !ftpSrc && !ftpDst) {
                     retCode = DBupload(src, dname);
                     if (fileOp == CNTXT_MENU_MOVE_FILE) {
-                        app.removeFile(fileOpDir[l], fileOpFile[l]);
+                        //app.removeFile(fileOpDir[l], fileOpFile[l]);
+                        if(app.fileRemove(new File(fileOpDir[l] + "/" + fileOpFile[l]))) {
+                            app.fileRemoveAllList(fileOpDir[l], fileOpFile[l]);
+                        }
                     }
                 }
                 // если источник в дропе, а приемник локально.
-                if (dropSrc && !dropDst) {
+                if (dropSrc && !dropDst && !ftpSrc && !ftpDst) {
                     retCode = DBdownload(src, dname);
                     if (fileOp == CNTXT_MENU_MOVE_FILE) {
                         DBdelete(src);
                     }
                 }
                 // если файлы находяться локально
-                if (!dropDst && !dropSrc) {
+                if (!dropDst && !dropSrc && !ftpSrc && !ftpDst) {
                     if (fileOp == CNTXT_MENU_COPY_FILE) {
-                        retCode = app.copyDirOrFile(src, dst, false);
+                        retCode = app.copyAll(src, dst, false);
                     } else if (fileOp == CNTXT_MENU_MOVE_FILE) {
                         retCode = app.moveFile(src, dst);
                     }
+                }
+                // если источник в дропе, а приемник FTP.
+                if (dropSrc && !dropDst && !ftpSrc && ftpDst) {
+                    DBdownload(src, FTPTempDir);
+                    retCode = uploadFTP(connectorFTP, fileOpDir[l], fileOpFile[l], dname);
+                    if (fileOp == CNTXT_MENU_MOVE_FILE) {
+                        DBdelete(src);
+                    }
+                }
+                // если источник локально, а приемник FTP.
+                if (!dropSrc && !dropDst && !ftpSrc && ftpDst) {
+                    retCode = uploadFTP(connectorFTP, fileOpDir[l], fileOpFile[l], dname);
+                    if (fileOp == CNTXT_MENU_MOVE_FILE) {
+                        //app.removeFile(fileOpDir[l], fileOpFile[l]);
+                        if(app.fileRemove(new File(fileOpDir[l] + "/" + fileOpFile[l]))) {
+                            app.fileRemoveAllList(fileOpDir[l], fileOpFile[l]);
+                        }
+                    }
+                }
+                // если источник FTP, а приемник локально.
+                if (!dropSrc && !dropDst && ftpSrc && !ftpDst) {
+                    retCode = downloadFTP(connectorFTPdown, fileOpDir[l], fileOpFile[l], dname);
+                    if (fileOp == CNTXT_MENU_MOVE_FILE) {
+                        delAll(src, fileOpDir[l], fileOpFile[l], -1);
+                    }
+                }
+                // если источник FTP, а приемник в дропе.
+                if (!dropSrc && dropDst && ftpSrc && !ftpDst) {
+                    downloadFTP(connectorFTPdown, fileOpDir[l], fileOpFile[l], FTPTempDir);
+                    String temp_dname = FTPTempDir + File.separator + fileOpFile[l];
+                    retCode = DBupload(temp_dname, dname);
+                    if (fileOp == CNTXT_MENU_MOVE_FILE) {
+                        delAll(src, fileOpDir[l], fileOpFile[l], -1);
+                    }
+                    delAll(temp_dname, FTPTempDir, fileOpFile[l], -1);
+                }
+                // если источник FTP, а приемник в FTP.
+                if (!dropSrc && !dropDst && ftpSrc && ftpDst) {
+                    downloadFTP(connectorFTPdown, fileOpDir[l], fileOpFile[l], FTPTempDir);
+                    String temp_dname = FTPTempDir + File.separator + fileOpFile[l];
+                    retCode = uploadFTP(connectorFTP, FTPTempDir, fileOpFile[l], dname);
+                    if (fileOp == CNTXT_MENU_MOVE_FILE) {
+                        delAll(src, fileOpDir[l], fileOpFile[l], -1);
+                    }
+                    delAll(temp_dname, FTPTempDir, fileOpFile[l], -1);
                 }
                 if (!retCode) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -2815,8 +1983,12 @@ public class ReLaunch extends Activity {
                     );
                     builder.show();
                 }
+
             }
             fileOp = 0;
+            if (fileOpDir[0].startsWith("FTP| ")){
+                ftpID = -1;
+            }
             drawDirectory(dname, currentPosition);
 			break;
 
@@ -2824,6 +1996,10 @@ public class ReLaunch extends Activity {
 			final Context mThis = this;
 			String oldFullName = dname + "/" + fname;
             String temp_dname = dname;
+            if(oldFullName.startsWith("FTP| ")) {
+                downloadFTP(connectorFTP, dname, fname, "");
+                temp_dname = FTPTempDir;
+            }
             if(oldFullName.startsWith("Dropbox| ")) {
                 oldFullName = loadFileDB(fullName, fname);
                 temp_dname = oldFullName.substring(0, oldFullName.length() - (fname.length()+1));
@@ -2853,6 +2029,9 @@ public class ReLaunch extends Activity {
 							dialog.dismiss();
 							String newName = String.valueOf(input.getText()).trim();
 							String newFullName = finalTemp_dname + "/" + newName;
+                            if(dname.startsWith("FTP| ")) {
+                                connectorFTP.rename(dname + "/" + fname, dname + "/" + newName);
+                            }
                             if(dname.startsWith("Dropbox| ")) {
                                 DBmoveORcopy(dname + "/" + fname, dname + "/" + newName, false);
                             }
@@ -2907,7 +2086,10 @@ public class ReLaunch extends Activity {
 							dialog.dismiss();
 							String newName = String.valueOf(input.getText()).trim();
 							String newFullName = dname + "/" + newName;
-                            if(dname.startsWith("Dropbox| ")) {
+                            if(dname.startsWith("FTP| ")) {
+                                connectorFTP.rename(oldFullName, newFullName);
+                                drawDirectory(dname, currentPosition);
+                            }else if(dname.startsWith("Dropbox| ")) {
                                 DBmoveORcopy(oldFullName, newFullName, false);
                                 drawDirectory(dname, currentPosition);
                             }else if (app.moveFile(oldFullName, newFullName)) {
@@ -2956,36 +2138,40 @@ public class ReLaunch extends Activity {
 						public void onClick(DialogInterface dialog,
 								int whichButton) {
 							dialog.dismiss();
-							String dname = lastdir;
+							String dname = currentRoot;
 							String newName = String.valueOf(input.getText()).trim();
 							if (newName.equalsIgnoreCase("")) {
 								return;
 							}
 							String newFullName = dname + "/" + newName;
-                            if(dname.startsWith("Dropbox| ")) {
+                            boolean f;
+                            if(dname.startsWith("FTP| ")) {
+                                dname = dname.substring("FTP| ".length());
+                                f = connectorFTP.createDir(dname + "/" + newName);
+                            }else if(dname.startsWith("Dropbox| ")) {
                                 dname = dname.substring("Dropbox| ".length());
-                                try {
-                                    mDBApi.createFolder(dname + "/" + newName);
-                                } catch (DropboxException e) {
-                                    e.printStackTrace();
-                                }
-                            }else if (app.createDir(newFullName)) {
-								drawDirectory(dname, currentPosition);
-							} else {
-								AlertDialog.Builder builder = new AlertDialog.Builder(mThis);
-								builder.setTitle(getResources().getString(R.string.jv_relaunch_error_title));
-								builder.setMessage(getResources().getString(
-										R.string.jv_relaunch_create_folder_fail_text)+ " " + newFullName);
-								builder.setNeutralButton(
-										getResources().getString(R.string.app_ok),
-										new DialogInterface.OnClickListener() {
-											public void onClick(DialogInterface dialog,
-													int whichButton) {
-												dialog.dismiss();
-											}
-										});
-								builder.show();
-							}
+                                f = dropboxClient.createFolder(dname + "/" + newName);
+                            }else {
+                                f = app.createDir(newFullName);
+                            }
+                            if (f) {
+                                drawDirectory(currentRoot, currentPosition);
+                            }else {
+                                AlertDialog.Builder builder = new AlertDialog.Builder(mThis);
+                                builder.setTitle(getResources().getString(R.string.jv_relaunch_error_title));
+                                builder.setMessage(getResources().getString(
+                                        R.string.jv_relaunch_create_folder_fail_text)+ " " + newFullName);
+                                builder.setNeutralButton(
+                                        getResources().getString(R.string.app_ok),
+                                        new DialogInterface.OnClickListener() {
+                                            public void onClick(DialogInterface dialog,
+                                                                int whichButton) {
+                                                dialog.dismiss();
+                                            }
+                                        });
+                                builder.show();
+                            }
+
 						}
 					});
 			// "Cancel"
@@ -3011,6 +2197,10 @@ public class ReLaunch extends Activity {
 
 		case CNTXT_MENU_SHOW_BOOKINFO:
             String temp = fullName;
+            if(fullName.startsWith("FTP| ")) {
+                downloadFTP(connectorFTP, dname, fname, "");
+                temp = FTPTempDir + File.separator + temp.substring(temp.lastIndexOf("/")+1);
+            }
             if(temp.startsWith("Dropbox| ")) {
                 temp = loadFileDB(fullName, fname);
             }
@@ -3041,115 +2231,19 @@ public class ReLaunch extends Activity {
             }
             reDraw();
             break;
+        case CNTXT_MENU_FILEUNZIP:
+            ZipUtil zipUtil = new ZipUtil();
+            if (!zipUtil.unzip(fullName)){
+                app.showToast(getResources().getString(R.string.jv_relaunch_fileunzip_error));
+            }
+            drawDirectory(dname, currentPosition);
+            break;
+        case CNTXT_MENU_PERMISSION:
+            SetPermission(fullName);
+            break;
 		}
 
 		return true;
-	}
-
-    @Override
-	protected void onResume() {
-        prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-        prefsEditor = prefs.edit();
-        if(currentRoot.startsWith("Dropbox| ")){
-            endconnectDropbox();
-        }
-        EinkScreen.setEinkController(prefs);
-		super.onResume();
-		if (app.dataBase == null)
-			app.dataBase = new BooksBase(this);
-		app.generalOnResume(TAG);
-		refreshBottomInfo();
-	}
-
-	@Override
-	protected void onStop() {
-
-		int lruMax = 30;
-		int favMax = 30;
-		int appLruMax = 30;
-		int appFavMax = 30;
-        int opdsMax = 30;
-		try {
-			lruMax = Integer.parseInt(prefs.getString("lruSize", "30"));
-			favMax = Integer.parseInt(prefs.getString("favSize", "30"));
-			appLruMax = Integer.parseInt(prefs.getString("appLruSize", "30"));
-			appFavMax = Integer.parseInt(prefs.getString("appFavSize", "30"));
-            opdsMax = Integer.parseInt(prefs.getString("opdsSize", "30"));
-		} catch (NumberFormatException e) {
-            //emply
-		}
-		app.writeFile("lastOpened", LRU_FILE, lruMax, "/");
-		app.writeFile("favorites", FAV_FILE, favMax, "/");
-		app.writeFile("app_last", APP_LRU_FILE, appLruMax, ":");
-		app.writeFile("app_favorites", APP_FAV_FILE, appFavMax, ":");
-		List<String[]> h = new ArrayList<String[]>();
-		for (String k : app.history.keySet()) {
-			if (app.history.get(k) == app.READING)
-				h.add(new String[] { k, "READING" });
-			else if (app.history.get(k) == app.FINISHED)
-				h.add(new String[] { k, "FINISHED" });
-		}
-		app.setList("history", h);
-		app.writeFile("history", HIST_FILE, 0, ":");
-		List<String[]> c = new ArrayList<String[]>();
-		for (String k : app.columns.keySet()) {
-			c.add(new String[] { k, Integer.toString(app.columns.get(k)) });
-		}
-		app.setList("columns", c);
-		app.writeFile("columns", ReLaunch.COLS_FILE, 0, ":");
-		// unregister Receiver
-        unregisterReceiver(this.SDCardChangeReceiver);
-        unregisterReceiver(this.PowerChangeReceiver);
-        unregisterReceiver(this.WiFiChangeReceiver);
-        wifiReceiverRegistered = false;
-        powerReceiverRegistered = false;
-        mountReceiverRegistered = false;
-        prefsEditor.putString("lastdir", currentRoot);
-        prefsEditor.commit();
-		super.onStop();
-	}
-
-	@Override
-	public boolean onKeyDown(int keyCode, KeyEvent event) {
-        boolean isRoot = false;
-		if (!useHome)
-			return super.onKeyDown(keyCode, event);
-		if (keyCode == KeyEvent.KEYCODE_HOME)
-			return true;
-		if (keyCode == KeyEvent.KEYCODE_BACK) {
-			if (prefs.getBoolean("useBackButton", true)) {
-                for (String aStartDir : startDir) {
-                    if (aStartDir.equalsIgnoreCase(currentRoot))
-                        isRoot = true;
-                }
-				if (currentRoot.equalsIgnoreCase("/"))
-					isRoot = true;
-				if (!isRoot) {
-					String newRoot = currentRoot.substring(0, currentRoot.lastIndexOf("/"));
-					drawDirectory(newRoot, -1);
-				}
-			}
-			if ((isRoot) || (!prefs.getBoolean("useBackButton", true))) {
-			// Ask the user if they want to quit
-				new AlertDialog.Builder(this).setIcon(android.R.drawable.ic_dialog_alert)
-					// "This is a launcher!"
-					.setTitle(getResources().getString(R.string.jv_relaunch_launcher))
-					// "Are you sure you want to quit ?"
-					.setMessage(getResources().getString(R.string.jv_relaunch_launcher_text))
-					// "YES"
-					.setPositiveButton(getResources().getString(R.string.app_yes),
-							new DialogInterface.OnClickListener() {
-								public void onClick(DialogInterface dialog,int which) {
-									finish();
-								}
-							})
-					// "NO"
-					.setNegativeButton(getResources().getString(R.string.app_no),null).show();
-			}
-			return true;
-		} else {
-			return super.onKeyDown(keyCode, event);
-		}
 	}
 
 	private void menuSearch() {
@@ -3185,10 +2279,8 @@ public class ReLaunch extends Activity {
 		startActivity(intent);
 	}
 
-	private void openHome(Integer order_num) {
-		if (order_num > 0 && order_num <= startDir.length) {
-			drawDirectory(startDir[order_num - 1], -1);
-		}
+	private void openHome() {
+		drawDirectory(currentHomeDir, 0);
 	}
 
 	private void menuHome() {
@@ -3197,27 +2289,31 @@ public class ReLaunch extends Activity {
 			int ind = startDir[j].lastIndexOf('/');
 			if (ind == -1 && !startDir[j].equals("Dropbox| ")) {
 				hhomes[j] = "";
+			} else if (startDir[j].length() == 1){
+					hhomes[j] = "/";
 			} else {
-				hhomes[j] = startDir[j].substring(ind + 1);
-				if (hhomes[j].equals("")) {
+				hhomes[j] = startDir[j].substring(ind + 1).trim();
+				if (hhomes[j].length() == 0) {
 					hhomes[j] = "/";
 				}
 			}
 		}
+
 		AlertDialog.Builder builder = new AlertDialog.Builder(ReLaunch.this);
 		// "Select home directory"
 		builder.setTitle(R.string.jv_relaunch_home);
 		builder.setSingleChoiceItems(hhomes, -1,
 				new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int i) {
+                        String curDirTemp;
                         if(startDir[i].equals("Dropbox| ")){
-                            if(connectDropbox()){
-                                drawDirectory("Dropbox| /", -1);
-                            }
+                            curDirTemp = "Dropbox| /";
                         }else{
-                            drawDirectory(startDir[i], -1);
+                            curDirTemp = startDir[i];
                         }
-						dialog.dismiss();
+                        currentHomeDir = curDirTemp;
+                        drawDirectory(curDirTemp, -1);
+                        dialog.dismiss();
 					}
 				});
 		builder.setNegativeButton(
@@ -3261,6 +2357,17 @@ public class ReLaunch extends Activity {
         startActivity(intent);
 
     }
+
+    private void screenFTP() {
+        //
+        Intent intent = new Intent(ReLaunch.this, ResultsActivity.class);
+        intent.putExtra("list", "ftplist");
+        intent.putExtra("title", getResources().getString(R.string.jv_relaunch_FTP_catalogs));
+        intent.putExtra("rereadOnStart", true);
+        startActivity(intent);
+
+    }
+
 	private void menuAbout() {
 		app.About(this);
 	}
@@ -3271,11 +2378,6 @@ public class ReLaunch extends Activity {
 			columns = app.columns.get(dir);
 		}
 		return columns;
-	}
-
-	private void hideLayout(int id) {
-		View v = findViewById(id);
-        v.setVisibility(View.GONE);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -3311,15 +2413,23 @@ public class ReLaunch extends Activity {
 	private void menuSort() {
 		final String[] orderList;
 		if (showBookTitles) {
-			orderList = new String[4];
+			orderList = new String[8];
 			orderList[0] = getString(R.string.jv_relaunch_sort_file_dir);
 			orderList[1] = getString(R.string.jv_relaunch_sort_file_rev);
-			orderList[2] = getString(R.string.jv_relaunch_sort_title_dir);
-			orderList[3] = getString(R.string.jv_relaunch_sort_title_rev);
+            orderList[2] = getString(R.string.jv_relaunch_sort_date_dir);
+            orderList[3] = getString(R.string.jv_relaunch_sort_date_rev);
+            orderList[4] = getString(R.string.jv_relaunch_sort_size_dir);
+            orderList[5] = getString(R.string.jv_relaunch_sort_size_rev);
+            orderList[6] = getString(R.string.jv_relaunch_sort_title_dir);
+            orderList[7] = getString(R.string.jv_relaunch_sort_title_rev);
 		} else {
-			orderList = new String[2];
+			orderList = new String[6];
 			orderList[0] = getString(R.string.jv_relaunch_sort_file_dir);
 			orderList[1] = getString(R.string.jv_relaunch_sort_file_rev);
+            orderList[2] = getString(R.string.jv_relaunch_sort_date_dir);
+            orderList[3] = getString(R.string.jv_relaunch_sort_date_rev);
+            orderList[4] = getString(R.string.jv_relaunch_sort_size_dir);
+            orderList[5] = getString(R.string.jv_relaunch_sort_size_rev);
 		}
 		int sortMode = prefs.getInt("sortMode", 0);
 		if (sortMode > orderList.length - 1)
@@ -3347,56 +2457,33 @@ public class ReLaunch extends Activity {
 	}
 
 	private void setSortMode(int i) {
-		if ((!showBookTitles) && (i > 1))
+		if ((!showBookTitles) && (i > 5))
 			i = 0;
 		if (i == SORT_FILES_ASC) {
-			sortType[0] = "name";
-			sortOrder[0] = true;
+			sortType = "name";
+			sortOrder = true;
 		} else if (i == SORT_FILES_DESC) {
-			sortType[0] = "name";
-			sortOrder[0] = false;
-		} else if (i == SORT_TITLES_ASC) {
-			sortType[0] = "sname";
-			sortOrder[0] = true;
+			sortType = "name";
+			sortOrder = false;
+		} else if (i == SORT_DATES_ASC) {
+            sortType = "date";
+            sortOrder = true;
+        } else if (i == SORT_DATES_DESC) {
+            sortType = "date";
+            sortOrder = false;
+        } else if (i == SORT_SIZES_ASC) {
+            sortType = "size";
+            sortOrder = false;
+        } else if (i == SORT_SIZES_DESC) {
+            sortType = "size";
+            sortOrder = true;
+        }else if (i == SORT_TITLES_ASC) {
+			sortType = "sname";
+			sortOrder = true;
 		} else if (i == SORT_TITLES_DESC) {
-			sortType[0] = "sname";
-			sortOrder[0] = false;
+			sortType = "sname";
+			sortOrder = false;
 		}
-	}
-
-	@Override
-	public boolean dispatchKeyEvent(KeyEvent event) {
-		if (N2DeviceInfo.EINK_SONY) {
-			int prevCode = 0x0069;
-			int nextCode = 0x006a;
-			if ((event.getScanCode() == prevCode) && (event.getAction() == KeyEvent.ACTION_DOWN)) {
-				int first = gvList.getFirstVisiblePosition();
-				int visible = gvList.getLastVisiblePosition() - first + 1;
-				int total = itemsArray.size();
-				first -= visible;
-				if (first < 0)
-					first = 0;
-				gvList.setSelection(first);
-				// some hack workaround against not scrolling in some cases
-				if (total > 0) {
-					//gvList.requestFocusFromTouch();
-					gvList.setSelection(first);
-				}
-			}
-			if ((event.getScanCode() == nextCode) && (event.getAction() == KeyEvent.ACTION_DOWN)) {
-				int first = gvList.getFirstVisiblePosition();
-				int total = itemsArray.size();
-				int last = gvList.getLastVisiblePosition();
-				if (total == last + 1)
-					return true;
-				int target = last + 1;
-				if (target > (total - 1))
-					target = total - 1;
-				RepeatedDownScroll ds = new RepeatedDownScroll();
-				ds.doIt(first, target, 0);
-			}
-		}
-		return super.dispatchKeyEvent(event);
 	}
 
 	private void showBookInfo(final String file) {
@@ -3441,10 +2528,11 @@ public class ReLaunch extends Activity {
 
 		if (eBook.isOk) {
 			ImageView img = (ImageView) dialog.findViewById(R.id.cover);
-			if (cover != null)
-				img.setImageBitmap(cover);
-			else
-				img.setVisibility(View.GONE);
+			if (cover != null) {
+                img.setImageBitmap(cover);
+            }else {
+                img.setImageResource(R.drawable.icon_book_list);
+            }
 			TextView tv = (TextView) dialog.findViewById(R.id.tvTitle);
 			tv.setText(eBook.title);
 			tv = (TextView) dialog.findViewById(R.id.tvAnnotation);
@@ -3478,7 +2566,7 @@ public class ReLaunch extends Activity {
 			if (eBook.sequenceName != null) {
 				tv.setText(eBook.sequenceName);
 			}
-			
+
 			((TextView) dialog.findViewById(R.id.book_title)).setText(file.substring(file.lastIndexOf("/") + 1));
 		}
 
@@ -3505,18 +2593,21 @@ public class ReLaunch extends Activity {
 
         LinearLayout llSize = (LinearLayout) dialog.findViewById(R.id.llSize);
 
-        if(filename.startsWith("Dropbox| ")) {
+        if(filename.startsWith("FTP| ")) {
+            Date d = connectorFTP.getModifiedDate(filename);
+            fileTime = d.toLocaleString();
+            fileSize = String.valueOf(connectorFTP.getFileSize(filename));
+            fileOwn = connectorFTP.addressServer;
+        }else if(filename.startsWith("Dropbox| ")) {
             String temp;
             DropboxAPI.Entry entries;
             temp = filename.substring("Dropbox| ".length());
-            try {
-                entries = mDBApi.metadata(temp, 0, null, true, null);
+            entries = dropboxClient.metadata(temp);
+            if (entries != null) {
                 fileName = entries.fileName();
                 fileSize = entries.size;
                 fileTime = entries.modified;
                 fileOwn = "Dropbox.com";
-            } catch (DropboxException e) {
-               //emply
             }
         }else{
             file = new File(filename);
@@ -3530,7 +2621,12 @@ public class ReLaunch extends Activity {
             String fileAttr = null;
             try {
                 Runtime rt = Runtime.getRuntime();
-                String[] args = {"ls", "-l", filename};
+                String[] args;
+                if (file.isDirectory()){
+                    args = new String[]{"ls", "-l", file.getParent(), "|grep", filename};
+                }else {
+                    args = new String[]{"ls", "-l", filename};
+                }
                 Process proc = rt.exec(args);
                 //String str = filename.replace(" ", "\\ ");
                 BufferedReader br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
@@ -3546,12 +2642,14 @@ public class ReLaunch extends Activity {
             } catch (Throwable t) {
                 //emply
             }
-            fileAttr = fileAttr.replaceAll(" +", " ");
-            int iPerm = fileAttr.indexOf(" ");
-            int iOwner = fileAttr.indexOf(" ", iPerm+1);
-            int iGroup = fileAttr.indexOf(" ", iOwner+1);
-            filePerm = fileAttr.substring(1, iPerm);
-            fileOwn = fileAttr.substring(iPerm + 1, iOwner)+ "/" + fileAttr.substring(iOwner + 1, iGroup);
+            if(fileAttr != null && fileAttr.length()>0) {
+                fileAttr = fileAttr.replaceAll(" +", " ");
+                int iPerm = fileAttr.indexOf(" ");
+                int iOwner = fileAttr.indexOf(" ", iPerm + 1);
+                int iGroup = fileAttr.indexOf(" ", iOwner + 1);
+                filePerm = fileAttr.substring(1, iPerm);
+                fileOwn = fileAttr.substring(iPerm + 1, iOwner) + "/" + fileAttr.substring(iOwner + 1, iGroup);
+            }
         }
 
 
@@ -3563,13 +2661,11 @@ public class ReLaunch extends Activity {
 		tv = (TextView) dialog.findViewById(R.id.tvTime);
 		tv.setText(fileTime);
 
-
-
 		tv = (TextView) dialog.findViewById(R.id.tvPerm);
 		tv.setText(filePerm);
 		tv = (TextView) dialog.findViewById(R.id.tvOwner);
 		tv.setText(fileOwn);
-		
+
 		Button btn = (Button) dialog.findViewById(R.id.btnOk);
 		btn.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
@@ -3580,200 +2676,9 @@ public class ReLaunch extends Activity {
 		dialog.show();
 	}
 
-    private void copyFileToLocalDirDropbox(String dirname, String filename) {
-        String src, str_f, locDirDrop;
-
-        locDirDrop = prefs.getString("LocalfolderDropbox", "none");
-        if(!"none".equals(locDirDrop)){
-            str_f = locDirDrop.trim();
-            if(str_f.lastIndexOf("/") == str_f.length()-1) {
-                locDirDrop = str_f.substring(0, str_f.length()-1);
-            }else{
-                locDirDrop = str_f;
-            }
-            String dst = locDirDrop + "/" + filename;
-            src = dirname + "/" + filename;
-            File toDir = new File(src);
-            if(toDir.isDirectory()){
-                app.copyDirOrFile(src, dst, false);
-            }else{
-                app.copyDirOrFile(src, dst, false);
-            }
-        }
-    }
-
-
-    private void copyFileToDropbox(final String dirname, String filename) {
-        // получаем имя папки Dropbox, куда будем закидывать выделенное
-        String str_f;
-        String DBPath;
-        final Activity activity = this;
-        DBPath = prefs.getString("DropBoxfolder", "none");
-        str_f = DBPath.trim();
-        if(str_f.lastIndexOf("/") == str_f.length()-1){
-            DBPath = str_f.substring(0, str_f.length()-1);
-        }else{
-            DBPath = str_f;
-        }
-        //---------------------------------------------------------------------
-        // проверяем наличие подключения к сервису Dropbox
-        if(mDBApi == null){
-            if(!connectDropbox()){
-                app.showToast(getString(R.string.srt_dbactivity_err_con_dropbox));//" Нет подключения к серверу");
-                return;   // нет подключения к сервису
-            }
-        }
-        //------------------------------------------------------------------------
-        // проверяем наличие на сервере и если такое уже есть - выдаем диалог с вариантами
-        int checkRez = checkFileDB(DBPath, filename, mDBApi);
-        if(checkRez == 1){
-
-            // выбор действия
-            String[] list_url = new String[2];
-            final String[] tempNameFile = {filename};
-            final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
-            builder.setTitle(getString(R.string.jv_relaunch_activity_not_found_text1));//"На сервере уже есть такой файл.");//"Скачать файлы");
-            list_url[0] = getString(R.string.jv_relaunch_rename);//"Переименовать";
-            list_url[1] = getString(R.string.jv_relaunch_rewrite);//"Заменить";
-            final String finalDBPath = DBPath;
-            builder.setItems(list_url, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int item) {
-
-                    if(item == 0){
-                        final AlertDialog.Builder builder2 = new AlertDialog.Builder(activity);
-                        builder2.setTitle(getString(R.string.jv_relaunch_rename_title));//"Введите новое имя");
-                        final EditText input = new EditText(activity);
-                        builder2.setView(input);
-                        builder2.setCancelable(true);
-                        builder2.setNegativeButton(getResources().getString(R.string.app_cancel), new DialogInterface.OnClickListener() { // Кнопка Отмена
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.dismiss(); // Отпускает диалоговое окно
-                            }
-                        });
-                        builder2.setPositiveButton(getResources().getString(R.string.app_ok), new DialogInterface.OnClickListener() { // Кнопка Отмена
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                String newName = String.valueOf(input.getText()).trim();
-
-                                if (newName.length() > 0) {
-                                    uploadFilesOrDir(dirname, tempNameFile[0], finalDBPath, mDBApi, newName);
-                                }else{
-                                    uploadFilesOrDir(dirname, tempNameFile[0], finalDBPath, mDBApi, "");
-                                }
-                                dialog.dismiss(); // Отпускает диалоговое окно
-                            }
-                        });
-                        builder2.show();
-                    }
-                    if(item == 1){
-                        try {
-                            mDBApi.delete(finalDBPath + "/" +tempNameFile[0]);
-                        } catch (DropboxException e) {
-                            app.showToast(getString(R.string.srt_dbactivity_err_upl_dropbox));//"Ошибка при перезаписи.");
-                        }
-
-                        uploadFilesOrDir(dirname, tempNameFile[0], finalDBPath, mDBApi, "");
-                    }
-                    dialog.dismiss(); // Отпускает диалоговое окно
-                }
-            });
-            builder.setCancelable(true);
-            builder.setNegativeButton(getResources().getString(R.string.app_cancel), new DialogInterface.OnClickListener() { // Кнопка Отмена
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.dismiss(); // Отпускает диалоговое окно
-                }
-            });
-            builder.show();
-
-        }else if(checkRez == 0){
-            uploadFilesOrDir(dirname, filename, DBPath, mDBApi, "");
-        }
-
-    }
-    private boolean uploadFilesOrDir(String dirname, String filename, String DBPath, DropboxAPI<AndroidAuthSession> mDBApi, String newfilename) {
-        //------------------------------------------------------------------------
-        // выясняем чего копируем - папку или файл
-        FileInputStream mFos;
-        if(newfilename.equals("")){
-            newfilename = filename;
-        }
-        String src = dirname + "/" + filename;
-        File toDir = new File(src);
-        if(toDir.isDirectory()){
-            if (!uploadFiles(dirname + "/" + filename, (dirname + "/" ).length(), DBPath, mDBApi)) {
-                return false;
-            }
-        }else{ // копирование одиночного файла
-            File f1 = new File(src);
-            try {
-                mFos = new FileInputStream(src);
-            } catch (FileNotFoundException e) {
-                return false;
-            }
-            try {
-                mDBApi.putFile(DBPath + "/" + newfilename, mFos, f1.length(), null, null);
-            } catch (DropboxException e) {
-                app.showToast(getString(R.string.srt_dbactivity_err_upl_dropbox));//" Ошибка при записи файла на сервер");
-                return false;
-            }
-        }
-        //-----------------------------------------------------------------------
-        app.showToast(getString(R.string.jv_prefs_rsr_ok_text));//" Успешно выполнено");
-        return true;
-    }
-    private boolean uploadFiles(String Path, int start_pos_path, String DBPath, DropboxAPI<AndroidAuthSession> mDBApi) {
-        String[] strDirList = (new File(Path)).list();
-        String strPath = Path.substring(start_pos_path);
-        FileInputStream mFos;
-
-        for (String aStrDirList : strDirList) {
-
-            File f1 = new File(Path+ File.separator + aStrDirList);
-            if (f1.isFile()) {
-                    try {
-                        mFos = new FileInputStream(f1);
-                    } catch (FileNotFoundException e) {
-                        app.showToast(getString(R.string.jv_editor_openerr_text1));//" Ошибка при открытии файла");
-                        return false;
-                    }
-                    try {
-                        mDBApi.putFile(DBPath + "/" + strPath + File.separator + f1.getName(), mFos, f1.length(), null, null);
-                    } catch (DropboxException e) {
-                        app.showToast(getString(R.string.srt_dbactivity_err_upl_dropbox));//" Ошибка при записи на сервер");
-                        return false;
-                    }
-            } else {
-                if (!uploadFiles(Path + File.separator + aStrDirList , start_pos_path, DBPath, mDBApi)) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
-    private int checkFileDB(String PathDB, String filenameOrDirname, DropboxAPI<AndroidAuthSession> mDBApi){
-        DropboxAPI.Entry entries;
-        try {
-            entries = mDBApi.metadata(PathDB, 0, null, true, null);
-        } catch (DropboxException e) {
-            return -1;
-        }
-        for (DropboxAPI.Entry e : entries.contents) {
-            if (!e.isDeleted) {
-                if(e.fileName().equals(filenameOrDirname)){
-                    return 1;
-                }
-            }
-        }
-        return 0;
-    }
-
     private void tapButton(String buttonName) {
         // battery button
-        prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        //prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         String putSettingButton = prefs.getString(buttonName, "NOTHING");
         // если действие не назначено
         // проверяеим стандартные кнопки
@@ -3813,16 +2718,20 @@ public class ReLaunch extends Activity {
             actionLock();
         } else if (putSettingButton.equals("POWEROFF")) {
             actionPowerOff();
+		} else if (putSettingButton.equals("REBOOT")) {
+			actionReboot();
         } else if (putSettingButton.equals("SWITCHWIFI")) {
             actionSwitchWiFi();
         } else if (putSettingButton.equals("RUN")) {
-            if(prefs.getString(buttonName + "app", "%%") != null && prefs.getString(buttonName + "app", "%%").length() > 0) {
-                actionRun(prefs.getString(buttonName + "app", "%%"));
+            if(prefs.getString(buttonName + "app", "%%").length() > 0) {
+				RunApp(prefs.getString(buttonName + "app", "%%"));
             }
         } else if (putSettingButton.equals("DROPBOX")) {
             screenDropbox();
         } else if (putSettingButton.equals("OPDS")) {
             screenOPDS();
+        } else if (putSettingButton.equals("FTP")) {
+            screenFTP();
         } else if (putSettingButton.equals("BATTERY")) {
             Intent intent = new Intent(Intent.ACTION_POWER_USAGE_SUMMARY);
             startActivity(intent);
@@ -3839,14 +2748,14 @@ public class ReLaunch extends Activity {
             menuFavorites();
         } else if (putSettingButton.equals("LRUN")) {
             ListActions la = new ListActions(app,ReLaunch.this);
-            la.runItem("lastOpened",Integer.parseInt(prefs.getString(buttonName + "lru", "1")) - 1);
+            la.runItem("lastOpened", Integer.parseInt(prefs.getString(buttonName + "lru", "1")) - 1);
         } else if (putSettingButton.equals("LRUMENU")) {
             ListActions la = new ListActions(app,ReLaunch.this);
             la.showMenu("lastOpened");
         } else if (putSettingButton.equals("LRUSCREEN")) {
             menuLastopened();
         } else if (putSettingButton.equals("HOMEN")) {
-            openHome(Integer.parseInt(prefs.getString(buttonName + "home", "1")));
+            openHome();
         } else if (putSettingButton.equals("HOMEMENU")) {
             menuHome();
         } else if (putSettingButton.equals("HOMESCREEN")) {
@@ -3859,35 +2768,40 @@ public class ReLaunch extends Activity {
         } else if (putSettingButton.equals("FAVAPP")) {
             Intent intent = new Intent(ReLaunch.this, AllApplications.class);
             intent.putExtra("list", "app_favorites");
-            intent.putExtra("title", getResources().getString(R.string.jv_relaunch_fav_a));
             startActivity(intent);
         } else if (putSettingButton.equals("ALLAPP")) {
             Intent intent = new Intent(ReLaunch.this,AllApplications.class);
             intent.putExtra("list", "app_all");
-            // "All applications"
-            intent.putExtra("title",getResources().getString(R.string.jv_relaunch_all_a));
             startActivity(intent);
         } else if (putSettingButton.equals("LASTAPP")) {
             Intent intent = new Intent(ReLaunch.this,AllApplications.class);
             intent.putExtra("list", "app_last");
-            // "Last recently used applications"
-            intent.putExtra("title",getResources().getString(R.string.jv_relaunch_lru_a));
             startActivity(intent);
         } else if (putSettingButton.equals("SEARCH")) {
             menuSearch();
         } else if (putSettingButton.equals("SYSSETTINGS")) {
             startActivity(new Intent(android.provider.Settings.ACTION_SETTINGS));
+        } else if (putSettingButton.equals("UPDIR")) {
+            TapUpDir();
+        } else if (putSettingButton.equals("UPSCROOL")) {
+			app.TapUpScrool(gvList, itemsArray.size());
+        } else if (putSettingButton.equals("DOWNSCROOL")) {
+			app.TapDownScrool(gvList, itemsArray.size());
         }
 
     }
-    class ExtsComparator implements Comparator<String> {
+
+    class ExtsComparator implements java.util.Comparator<String> {
         public int compare(String a, String b) {
-            if (a == null && b == null)
-                return 0;
-            if (a == null && b != null)
-                return 1;
-            if (a != null && b == null)
+            if (a == null) {
+                if (b == null) {
+                    return 0;
+                }else {
+                    return 1;
+                }
+            }else if (b == null) {
                 return -1;
+            }
             if (a.length() < b.length())
                 return 1;
             if (a.length() > b.length())
@@ -3895,35 +2809,8 @@ public class ReLaunch extends Activity {
             return a.compareTo(b);
         }
     }
-    // down scroll button
-    private class RepeatedDownScroll {
-        public void doIt(int first, int target, int shift) {
-            int total = gvList.getCount();
-            int last = gvList.getLastVisiblePosition();
-            if (total == last + 1)
-                return;
-            final int ftarget = target + shift;
-            gvList.clearFocus();
-            gvList.post(new Runnable() {
-                public void run() {
-                    gvList.setSelection(ftarget);
-                }
-            });
-            final int ffirst = first;
-            final int fshift = shift;
-            gvList.postDelayed(new Runnable() {
-                public void run() {
-                    int nfirst = gvList.getFirstVisiblePosition();
-                    if (nfirst == ffirst) {
-                        RepeatedDownScroll ds = new RepeatedDownScroll();
-                        ds.doIt(ffirst, ftarget, fshift + 1);
-                    }
-                }
-            }, 150);
-        }
-    }
 
-    private class imageIcon {
+    public class imageIcon {
         String nameIcon;
         Bitmap icon;
     }
@@ -3934,74 +2821,193 @@ public class ReLaunch extends Activity {
         // говорим что данные изменились и нужно перерисовать данные
         adapter.notifyDataSetChanged();
     }
-
     //============= dropbox ==========================
-    public void checkAppKeySetup() {
-        // Check to make sure that we have a valid app key
-        if (APP_KEY.startsWith("CHANGE") ||
-                APP_SECRET.startsWith("CHANGE")) {
-            app.showToast("You must apply for an app key and secret from developers.dropbox.com, and add them to the DBRoulette ap before trying it.");
-            finish();
-            return;
-        }
+    private void copyFileToLocalDirDropbox(String dirname, String filename) {
+        String src, str_f, locDirDrop;
 
-        // Check if the app has set up its manifest properly.
-        Intent testIntent = new Intent(Intent.ACTION_VIEW);
-        String scheme = "db-" + APP_KEY;
-        String uri = scheme + "://" + AuthActivity.AUTH_VERSION + "/test";
-        testIntent.setData(Uri.parse(uri));
-        PackageManager pm = getPackageManager();
-        if (0 == pm.queryIntentActivities(testIntent, 0).size()) {
-            app.showToast("URL scheme in your app's " +
-                    "manifest is not set up correctly. You should have a " +
-                    "com.dropbox.client2.android.AuthActivity with the " +
-                    "scheme: " + scheme);
-            finish();
+        locDirDrop = prefs.getString("LocalfolderDropbox", "none");
+        if(!"none".equals(locDirDrop)){
+            str_f = locDirDrop.trim();
+            if(str_f.lastIndexOf("/") == str_f.length()-1) {
+                locDirDrop = str_f.substring(0, str_f.length()-1);
+            }else{
+                locDirDrop = str_f;
+            }
+            String dst = locDirDrop + "/" + filename;
+            src = dirname + "/" + filename;
+            if(src.startsWith("FTP| ")) {
+                downloadFTP(connectorFTP, dirname, filename, locDirDrop);
+            }else {
+                app.copyAll(src, dst, false);
+            }
         }
     }
-    public boolean connectDropbox() {
-        if(haveNetworkConnection(getApplicationContext())){
-            checkAppKeySetup();
-            AppKeyPair appKeyPair = new AppKeyPair(APP_KEY, APP_SECRET);
-            AndroidAuthSession session;
-
-            String[] stored = getKeys();
-            if (stored != null) {
-                AccessTokenPair accessToken = new AccessTokenPair(stored[0], stored[1]);
-                session = new AndroidAuthSession(appKeyPair, ACCESS_TYPE, accessToken);
-
-            } else {
-                session = new AndroidAuthSession(appKeyPair, ACCESS_TYPE);
-            }
-            mDBApi = new DropboxAPI<AndroidAuthSession>(session);
-            if(stored == null){
-                mDBApi.getSession().startAuthentication(this);
-            }
-            return true;
+    private void copyFileToDropbox(final String dirname, String filename) {
+        String tempDirName = dirname;
+        if(dirname.startsWith("FTP| ")) {
+            downloadFTP(connectorFTP, dirname, filename, "");
+            tempDirName = FTPTempDir;
+        }
+        // получаем имя папки Dropbox, куда будем закидывать выделенное
+        String str_f;
+        String DBPath;
+        final Activity activity = this;
+        DBPath = prefs.getString("DropBoxfolder", "none");
+        str_f = DBPath.trim();
+        if(str_f.lastIndexOf("/") == str_f.length()-1){
+            DBPath = str_f.substring(0, str_f.length()-1);
         }else{
-            return false;
+            DBPath = str_f;
+        }
+        //---------------------------------------------------------------------
+        // проверяем наличие подключения к сервису Dropbox
+        if(dropboxClient == null){
+            if(haveNetworkConnection(app)) {
+                dropboxClient = new MyDropboxClient(prefs, ReLaunch.this);
+                dropboxClient.logIn();
+            }else{
+                return;
+            }
+        }
+        //------------------------------------------------------------------------
+        // проверяем наличие на сервере и если такое уже есть - выдаем диалог с вариантами
+        int checkRez = checkFileDB(DBPath, filename);
+        if(checkRez == 1){
+
+            // выбор действия
+            String[] list_url = new String[2];
+            final String[] tempNameFile = {filename};
+            final AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+            builder.setTitle(getString(R.string.jv_relaunch_activity_not_found_text1));//"На сервере уже есть такой файл.");//"Скачать файлы");
+            list_url[0] = getString(R.string.jv_relaunch_rename);//"Переименовать";
+            list_url[1] = getString(R.string.jv_relaunch_rewrite);//"Заменить";
+            final String finalDBPath = DBPath;
+            final String finalTempDirName = tempDirName;
+            builder.setItems(list_url, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int item) {
+
+                    if(item == 0){
+                        final AlertDialog.Builder builder2 = new AlertDialog.Builder(activity);
+                        builder2.setTitle(getString(R.string.jv_relaunch_rename_title));//"Введите новое имя");
+                        final EditText input = new EditText(activity);
+                        builder2.setView(input);
+                        builder2.setCancelable(true);
+                        builder2.setNegativeButton(getResources().getString(R.string.app_cancel), new DialogInterface.OnClickListener() { // Кнопка Отмена
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                dialog.dismiss(); // Отпускает диалоговое окно
+                            }
+                        });
+                        builder2.setPositiveButton(getResources().getString(R.string.app_ok), new DialogInterface.OnClickListener() { // Кнопка Отмена
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                String newName = String.valueOf(input.getText()).trim();
+
+                                if (newName.length() > 0) {
+                                    uploadFilesOrDir(finalTempDirName, tempNameFile[0], finalDBPath, newName);
+                                }else{
+                                    uploadFilesOrDir(finalTempDirName, tempNameFile[0], finalDBPath, "");
+                                }
+                                dialog.dismiss(); // Отпускает диалоговое окно
+                            }
+                        });
+                        builder2.show();
+                    }
+                    if(item == 1){
+                        if (dropboxClient.delete(finalDBPath + "/" +tempNameFile[0])){
+                            app.showToast(getString(R.string.srt_dbactivity_err_upl_dropbox));//"Ошибка при перезаписи.");
+                        }
+
+                        uploadFilesOrDir(dirname, tempNameFile[0], finalDBPath, "");
+                    }
+                    dialog.dismiss(); // Отпускает диалоговое окно
+                }
+            });
+            builder.setCancelable(true);
+            builder.setNegativeButton(getResources().getString(R.string.app_cancel), new DialogInterface.OnClickListener() { // Кнопка Отмена
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss(); // Отпускает диалоговое окно
+                }
+            });
+            builder.show();
+
+        }else if(checkRez == 0){
+            uploadFilesOrDir(dirname, filename, DBPath, "");
         }
     }
-    private void storeKeys(String key, String secret) {
-        // Save the access key for later
-        SharedPreferences prefs1 = getSharedPreferences(ACCOUNT_PREFS_NAME, 0);
-        SharedPreferences.Editor edit = prefs1.edit();
-        edit.putString(ACCESS_KEY_NAME, key);
-        edit.putString(ACCESS_SECRET_NAME, secret);
-        edit.commit();
-    }
-    private String[] getKeys() {
-        prefs = getSharedPreferences(ACCOUNT_PREFS_NAME, 0);
-        String key = prefs.getString(ACCESS_KEY_NAME, null);
-        String secret = prefs.getString(ACCESS_SECRET_NAME, null);
-        if (key != null && secret != null) {
-            String[] ret = new String[2];
-            ret[0] = key;
-            ret[1] = secret;
-            return ret;
-        } else {
-            return null;
+    private int checkFileDB(String PathDB, String filenameOrDirname){
+        DropboxAPI.Entry entries;
+
+        entries = dropboxClient.metadata(PathDB);
+        if (entries == null){
+            return -1;
         }
+        for (DropboxAPI.Entry e : entries.contents) {
+            if (!e.isDeleted) {
+                if(e.fileName().equals(filenameOrDirname)){
+                    return 1;
+                }
+            }
+        }
+        return 0;
+    }
+    private boolean uploadFilesOrDir(String dirname, String filename, String DBPath, String newfilename) {
+        //------------------------------------------------------------------------
+        // выясняем чего копируем - папку или файл
+        FileInputStream mFos;
+        if(newfilename.equals("")){
+            newfilename = filename;
+        }
+        String src = dirname + "/" + filename;
+        File toDir = new File(src);
+        if(toDir.isDirectory()){
+            if (!uploadFiles(dirname + "/" + filename, (dirname + "/" ).length(), DBPath)) {
+                return false;
+            }
+        }else{ // копирование одиночного файла
+            File f1 = new File(src);
+            try {
+                mFos = new FileInputStream(src);
+            } catch (FileNotFoundException e) {
+                return false;
+            }
+            if(dropboxClient.putFile(DBPath + "/" + newfilename, mFos, f1.length())){
+                app.showToast(getString(R.string.srt_dbactivity_err_upl_dropbox));//" Ошибка при записи файла на сервер");
+                return false;
+            }
+        }
+        //-----------------------------------------------------------------------
+        app.showToast(getString(R.string.jv_prefs_rsr_ok_text));//" Успешно выполнено");
+        return true;
+    }
+    private boolean uploadFiles(String Path, int start_pos_path, String DBPath) {
+        String[] strDirList = (new File(Path)).list();
+        String strPath = Path.substring(start_pos_path);
+        FileInputStream mFos;
+
+        for (String aStrDirList : strDirList) {
+
+            File f1 = new File(Path+ File.separator + aStrDirList);
+            if (f1.isFile()) {
+                try {
+                    mFos = new FileInputStream(f1);
+                } catch (FileNotFoundException e) {
+                    app.showToast(getString(R.string.jv_editor_openerr_text1));//" Ошибка при открытии файла");
+                    return false;
+                }
+                if(!dropboxClient.putFile(DBPath + "/" + strPath + File.separator + f1.getName(), mFos, f1.length())){
+                    app.showToast(getString(R.string.srt_dbactivity_err_upl_dropbox));//" Ошибка при записи на сервер");
+                    return false;
+                }
+            } else {
+                if (!uploadFiles(Path + File.separator + aStrDirList , start_pos_path, DBPath)) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
     // проверка интернет соединения взята отседова:
     // http://stackoverflow.com/questions/7071578/connectivitymanager-to-verify-internet-connection
@@ -4012,24 +3018,6 @@ public class ReLaunch extends Activity {
         return ((netInfoMob != null && netInfoMob.isConnectedOrConnecting()) || (netInfoWifi != null) && netInfoWifi.isConnectedOrConnecting());
     }
     //----------------------------------------------------------------------------------------------
-    public boolean endconnectDropbox() {
-        if (mDBApi.getSession().authenticationSuccessful()) {
-            try {
-                // Required to complete auth, sets the access token on the session
-                mDBApi.getSession().finishAuthentication();
-
-                AccessTokenPair tokens = mDBApi.getSession().getAccessTokenPair();
-                storeKeys(tokens.key, tokens.secret);
-
-            } catch (IllegalStateException e) {
-                app.showToast(getString(R.string.srt_dbactivity_err_authent));//"Error connect for Authentication");
-                return false;
-            }
-            return true;
-        }else{
-            return false;
-        }
-    }
     private String loadFileDB(String DropBox_Path_File, String nameFile) {
 
         SharedPreferences prefs2 =  PreferenceManager.getDefaultSharedPreferences(getBaseContext());
@@ -4061,14 +3049,14 @@ public class ReLaunch extends Activity {
         String temp;
         temp = fullName.substring("Dropbox| ".length());
 
-        try {
-            entries = mDBApi.metadata(temp, 0, null, true, null);// может быть ошибка при получении коллекции
-            if(entries.isDir){
-                mDBApi.delete(entries.path + "/");
-            }else {
-                mDBApi.delete(entries.path);
+        entries = dropboxClient.metadata(temp);// может быть ошибка при получении коллекции
+        if (entries != null) {
+            if (entries.isDir) {
+                dropboxClient.delete(entries.path + "/");
+            } else {
+                dropboxClient.delete(entries.path);
             }
-        } catch (DropboxException e) {
+        }else {
             return false;
         }
 
@@ -4081,9 +3069,8 @@ public class ReLaunch extends Activity {
         String temp;
         temp = fullName.substring("Dropbox| ".length());
 
-        try {
-            entries = mDBApi.metadata(temp, 0, null, true, null);
-        } catch (DropboxException e) {
+        entries = dropboxClient.metadata(temp);// может быть ошибка при получении коллекции
+        if (entries == null) {
             return false;
         }
         if(entries.isDir){
@@ -4112,10 +3099,7 @@ public class ReLaunch extends Activity {
                         } catch (FileNotFoundException e1) {
                             return false;
                         }
-                        try {
-                            mDBApi.getFile(e.path, null, mFos, null);
-                        } catch (DropboxException e1) {
-                            file.delete();
+                        if (!dropboxClient.getFile(e.path, mFos)){
                             return false;
                         }
                         try {
@@ -4133,10 +3117,7 @@ public class ReLaunch extends Activity {
             } catch (FileNotFoundException e1) {
                 return false;
             }
-            try {
-                mDBApi.getFile(entries.path, null, mFos, null);
-            } catch (DropboxException e1) {
-                file.delete();
+            if (!dropboxClient.getFile(entries.path, mFos)){
                 return false;
             }
             try {
@@ -4154,11 +3135,7 @@ public class ReLaunch extends Activity {
         String temp;
         temp = DBPath.substring("Dropbox| ".length());
         if(file.isDirectory()){
-            try {
-                mDBApi.createFolder(temp + File.separator + file.getName());
-            } catch (DropboxException e) {
-                e.printStackTrace();
-            }
+            dropboxClient.createFolder(temp + File.separator + file.getName());
             String[] strDirList = file.list();
             for (String aStrDirList : strDirList) {
                 File f1 = new File(aStrDirList);
@@ -4168,17 +3145,11 @@ public class ReLaunch extends Activity {
                     } catch (FileNotFoundException e) {
                         return false;
                     }
-                    try {
-                        mDBApi.putFile(temp + File.separator + f1.getName(), mFos, f1.length(), null, null);
-                    } catch (DropboxException e) {
+                    if(!dropboxClient.putFile(temp + File.separator + f1.getName(), mFos, f1.length())){
                         return false;
                     }
                 } else {
-                    try {
-                        mDBApi.createFolder(temp + File.separator + f1.getName());
-                    } catch (DropboxException e) {
-                        e.printStackTrace();
-                    }
+                    dropboxClient.createFolder(temp + File.separator + f1.getName());
                     if (!DBupload(fullNameL + File.separator + f1.getName(), DBPath + File.separator + f1.getName())) {
                         return false;
                     }
@@ -4190,9 +3161,7 @@ public class ReLaunch extends Activity {
             } catch (FileNotFoundException e) {
                 return false;
             }
-            try {
-                mDBApi.putFile(temp + File.separator + file.getName(), mFos, file.length(), null, null);
-            } catch (DropboxException e) {
+            if(!dropboxClient.putFile(temp + File.separator + file.getName(), mFos, file.length())){
                 return false;
             }
         }
@@ -4213,22 +3182,14 @@ public class ReLaunch extends Activity {
         }
 
         if(f_copy){
-            try {
-                mDBApi.copy(tempSrc, tempDst);
-            } catch (DropboxException e) {
-                e.printStackTrace();
-            }
+            dropboxClient.copy(tempSrc, tempDst);
         }else{
-            try {
-                mDBApi.move(tempSrc, tempDst);
-            } catch (DropboxException e) {
-                e.printStackTrace();
-            }
+            dropboxClient.move(tempSrc, tempDst);
         }
         return true;
     }
-    //==============================================
-    // ========= load settings ========================
+    //===============================================
+    // ========= load settings ======================
     private void loadStandartIcons() {
         // иконки для файлов заранее заносим в массив========================
         imageIcon temp_icon = new imageIcon();
@@ -4244,9 +3205,66 @@ public class ReLaunch extends Activity {
         temp_icon.nameIcon = "file_notok";
         arrIcon.add(temp_icon);
         temp_icon = new imageIcon();
-        temp_icon.icon = scaleDrawableById(R.drawable.icon, firstLineIconSizePx);
+        temp_icon.icon = scaleDrawableById(R.drawable.icon_list, firstLineIconSizePx);
         temp_icon.nameIcon = "icon";
         arrIcon.add(temp_icon);
+        temp_icon = new imageIcon();
+        temp_icon.icon = scaleDrawableById(R.drawable.install, firstLineIconSizePx);
+        temp_icon.nameIcon = "install";
+        arrIcon.add(temp_icon);
+        temp_icon = new imageIcon();
+        temp_icon.nameIcon = "opdslist";
+        temp_icon.icon = scaleDrawableById(R.drawable.ci_books, firstLineIconSizePx);
+        arrIcon.add(temp_icon);
+        temp_icon = new imageIcon();
+        temp_icon.nameIcon = "parent_ok";
+        temp_icon.icon = scaleDrawableById(R.drawable.ci_levelup_big, firstLineIconSizePx);
+        arrIcon.add(temp_icon);
+        temp_icon = new imageIcon();
+        temp_icon.nameIcon = "parent_off";
+        temp_icon.icon = scaleDrawableById(R.drawable.ci_levelup_big_gray, firstLineIconSizePx);
+        arrIcon.add(temp_icon);
+        //===== иконки всех программ =====
+        Drawable d = null;
+        Intent componentSearchIntent = new Intent();
+        componentSearchIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+        componentSearchIntent.setAction(Intent.ACTION_MAIN);
+        PackageManager pm = getPackageManager();
+        if(pm == null){
+            return;
+        }
+        List<ResolveInfo> ril = pm.queryIntentActivities(componentSearchIntent, 0);
+        String pname;
+        String aname;
+        String hname = "";
+        for (ResolveInfo ri : ril) {
+            if (ri.activityInfo != null) {
+                temp_icon = new imageIcon();
+                pname = ri.activityInfo.packageName;
+                aname = ri.activityInfo.name;
+                try {
+                    if (ri.activityInfo.labelRes != 0) {
+                        hname = (String) ri.activityInfo.loadLabel(pm);
+                    } else {
+                        hname = (String) ri.loadLabel(pm);
+                    }
+                    if (ri.activityInfo.icon != 0) {
+                        d = ri.activityInfo.loadIcon(pm);
+                    } else {
+                        d = ri.loadIcon(pm);
+                    }
+                } catch (Exception e) {
+                    // emply
+                }
+                if (d != null) {
+                    temp_icon.icon = scaleDrawable(d, firstLineIconSizePx);
+                }else{
+                    temp_icon.icon = scaleDrawableById(R.drawable.file_notok, firstLineIconSizePx);
+                }
+                temp_icon.nameIcon = pname + "%" + aname + "%" + hname;
+                arrIcon.add(temp_icon);
+            }
+        }
     }
     private void initGlobalVariable() {
         // Global arrays
@@ -4266,15 +3284,30 @@ public class ReLaunch extends Activity {
             app.FLT_MATCHES = getResources().getInteger(R.integer.FLT_MATCHES);
             app.FLT_NEW = getResources().getInteger(R.integer.FLT_NEW);
             app.FLT_NEW_AND_READING = getResources().getInteger(R.integer.FLT_NEW_AND_READING);
+            File filesDir = app.getFilesDir();
+            if(filesDir != null){
+                app.DATA_DIR = filesDir.getParent();
+            }else{
+                app.DATA_DIR = "/data/data/com.harasoft.relaunch";
+            }
         }else{
             finish();
         }
-
     }
     private void initPrefsVariable() {
         prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
         prefsEditor = prefs.edit();
-
+        // установка языка приложения
+        String lang;
+        EinkScreen.setEinkController(prefs);
+        lang = prefs.getString("lang", "default");
+        if (!lang.equals("default")) {
+            locale = new Locale(lang);
+            Locale.setDefault(locale);
+            Configuration config = new Configuration();
+            config.locale = locale;
+            getBaseContext().getResources().updateConfiguration(config, null);
+        }
         // ====== FLSimpleAdapter==================================================================
         useFaces = prefs.getBoolean("showNew", true);
         firstLineIconSizePx = Integer.parseInt(prefs.getString("firstLineIconSizePx", "48"));  // по возможности вынести из адаптера
@@ -4283,10 +3316,13 @@ public class ReLaunch extends Activity {
         doNotHyph = prefs.getBoolean("doNotHyph", false);
         hideKnownExts = prefs.getBoolean("hideKnownExts", false);
         showBookTitles = prefs.getBoolean("showBookTitles", false);
+        if (app.dataBase == null) {
+            app.dataBase = new BooksBase(this);
+        }
         rowSeparator = prefs.getBoolean("rowSeparator", false);
         disableScrollJump = prefs.getBoolean("disableScrollJump", true);
         //=================================================================================
-        // ====== refreshBottomInfo==================================================================
+        // ====== GetDateAndMewory()==================================================================
         dateUS = prefs.getBoolean("dateUS", false);
         //=================================================================================
         // ====== getAutoColsNum==================================================================
@@ -4297,12 +3333,16 @@ public class ReLaunch extends Activity {
         //=================================================================================
         // ====== setUpButton==================================================================
         notLeaveStartDir = prefs.getBoolean("notLeaveStartDir", false);
-        startDir = prefs.getString("startDir", "/sdcard,/media/My Files").split("\\,");
+
+        startDir = app.loadStartDirs();
         // ====== drawDirectory==================================================================
         showFullDirPath = prefs.getBoolean("showFullDirPath", true);
         showHidden = prefs.getBoolean("showHidden", false);
+        showOnlyKnownExts = prefs.getBoolean("showOnlyKnownExts", false);
+        showButtonParenFolder = prefs.getBoolean("showButtonParenFolder", false);
         bookTitleFormat = prefs.getString("bookTitleFormat", "%t[\n%a][. %s][-%n]");
-        //===================================================================
+		showFileOperation = prefs.getBoolean("showFileOperation", true);
+		//===================================================================
         // параметры прокрутки экрана
         try {
             app.scrollStep = Integer.parseInt(prefs.getString("scrollPerc","10"));
@@ -4319,29 +3359,64 @@ public class ReLaunch extends Activity {
         if (app.scrollStep > 100){
             app.scrollStep = 100;
         }
-        //======================================================================
-        showOnePanel = prefs.getBoolean("showOnePanel", true);
-        showTwoPanel =  prefs.getBoolean("showTwoPanel", true);
-        showThreePanel =  prefs.getBoolean("showThreePanel", true);
-        showFourPanel =  prefs.getBoolean("showFourPanel", true);
+        blockExitLauncher = prefs.getBoolean("blockExit", true);
+        //---------------------------------------------------------------------
+        // определяем есть ли возможность работать от root
+		selectRootNavigation = prefs.getBoolean("selectRootNavigation", false);
+        accessRoot = RootTools.isAccessGiven();
+        if (selectRootNavigation){
+            selectRootNavigation = accessRoot;
+        }
+        //---------------------------------------------------------------------
+        FTPTempDir = prefs.getString("ftpTempDir", "/sdcard/.FTP_temp");
+        //=======================================================================
+        fileExtendedData = prefs.getBoolean("fileExtendedFormat", false);
+        if(fileExtendedData){
+            fileExtendedDataFormat = prefs.getString("fileExtendedDataFormat", "");
+        }
+
+		currentHomeDir = prefs.getString("intentStartDir", "/");
+
+        app.readFile("app_last", APP_LRU_FILE, ":");
+        app.readFile("app_favorites", APP_FAV_FILE, ":");
+        app.readFile("lastOpened", LRU_FILE, "/");
+        app.readFile("favorites", FAV_FILE, "/");
+
+        app.askIfAmbiguous = prefs.getBoolean("askAmbig", false);
     }
     // ================ =============================
     // небольшой модуль для удалени файла или папки
-    private void delAll(String fullName, String dname, String fname) {
-        if(fullName.startsWith("Dropbox| ")) {
-            DBdelete(fullName);
+    private void delAll(String fullName, String dname, String fname, int pos) {
+        if(fullName.startsWith("FTP| ")) {
+            boolean dirBool = false;
+            if (itemsArray.get(pos).get("type").equals("dir")){
+                dirBool = true;
+            }
+            if(connectorFTP.delete(fullName,dirBool)){
+                itemsArray.remove(pos);
+            }
+        }else if(fullName.startsWith("Dropbox| ")) {
+            if(DBdelete(fullName)){
+                itemsArray.remove(pos);
+            }
         }else{
-            app.removeDirAndFile(dname, fname);
+            if(app.fileRemove(new File(dname + "/" + fname))) {
+                app.fileRemoveAllList(dname, fname);
+                if (pos != -1) {
+                    itemsArray.remove(pos);
+                }
+            }
+
         }
         drawDirectory(currentRoot, currentPosition);
     }
-    //================================================
     private void delSelect (){
         HashMap<String, String> i;
         int j = arrSelItem.size();
         final String arrFullName[] = new String[j];
         final String arrDName[] = new String[j];
         final String arrFName[] = new String[j];
+        final int arrPos[] = new int[j];
 
         String listFiles = "";
 
@@ -4350,6 +3425,7 @@ public class ReLaunch extends Activity {
             arrFullName[i1] = i.get("fname");
             arrDName[i1] = i.get("dname");
             arrFName[i1] = i.get("name");
+            arrPos[i1] = arrSelItem.get(i1);
             listFiles = listFiles + "\n" + arrFName[i1];
         }
 
@@ -4367,8 +3443,8 @@ public class ReLaunch extends Activity {
                     new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int whichButton) {
                             dialog.dismiss();
-                            for(int h = 0, k = arrFullName.length; h < k; h++) {
-                                delAll(arrFullName[h], arrDName[h], arrFName[h]);
+                            for(int h = arrFullName.length - 1, k = -1; h > k; h--) {
+                                delAll(arrFullName[h], arrDName[h], arrFName[h], arrPos[h]);
                             }
                         }
                     }
@@ -4384,9 +3460,1859 @@ public class ReLaunch extends Activity {
             builder.show();
         } else {
             for(int h = 0, k = arrFullName.length; h < k; h++) {
-                delAll(arrFullName[h], arrDName[h], arrFName[h]);
+                delAll(arrFullName[h], arrDName[h], arrFName[h], arrPos[h]);
+            }
+        } }
+    //========== Панели =============================
+    private void drawingFirstPanel (LayoutInflater ltInflater, LinearLayout ll_container){
+        // = Первая панель с документами
+        ltInflater.inflate(R.layout.ll_doc, ll_container, true);
+
+        // Home button
+        final ImageButton home_button = (ImageButton) findViewById(R.id.home_btn);
+        class HomeSimpleOnGestureListener extends
+                SimpleOnGestureListener {
+            @Override
+            public boolean onSingleTapConfirmed(MotionEvent e) {
+                tapButton("homeButtonST");
+                return true;
+            }
+
+            @Override
+            public boolean onDoubleTap(MotionEvent e) {
+                tapButton("homeButtonDT");
+                return true;
+            }
+
+            @Override
+            public void onLongPress(MotionEvent e) {
+                if (home_button.hasWindowFocus()) {
+                    tapButton("homeButtonLT");
+                }
             }
         }
 
+        HomeSimpleOnGestureListener home_gl = new HomeSimpleOnGestureListener();
+        final GestureDetector home_gd = new GestureDetector(home_gl);
+        home_button.setOnTouchListener(new OnTouchListener() {
+            public boolean onTouch(View v, MotionEvent event) {
+                home_gd.onTouchEvent(event);
+                return false;
+            }
+        });
+        //  Settings button
+        final ImageButton settings_button = (ImageButton) findViewById(R.id.settings_btn);
+        class SettingsSimpleOnGestureListener extends
+                SimpleOnGestureListener {
+            @Override
+            public boolean onSingleTapConfirmed(MotionEvent e) {
+                tapButton("settingsButtonST");
+                return true;
+            }
+
+            @Override
+            public boolean onDoubleTap(MotionEvent e) {
+                tapButton("settingsButtonDT");
+                return true;
+            }
+
+            @Override
+            public void onLongPress(MotionEvent e) {
+                if (settings_button.hasWindowFocus()) {
+                    tapButton("settingsButtonLT");
+                }
+            }
+        }
+
+        SettingsSimpleOnGestureListener settings_gl = new SettingsSimpleOnGestureListener();
+        final GestureDetector settings_gd = new GestureDetector(
+                settings_gl);
+        settings_button.setOnTouchListener(new OnTouchListener() {
+            public boolean onTouch(View v, MotionEvent event) {
+                settings_gd.onTouchEvent(event);
+                return false;
+            }
+        });
+        // Search button
+        final ImageButton search_button = (ImageButton) findViewById(R.id.search_btn);
+        class SearchSimpleOnGestureListener extends
+                SimpleOnGestureListener {
+            @Override
+            public boolean onSingleTapConfirmed(MotionEvent e) {
+                tapButton("searchButtonST");
+                return true;
+            }
+
+            @Override
+            public boolean onDoubleTap(MotionEvent e) {
+                tapButton("searchButtonDT");
+                return true;
+            }
+
+            @Override
+            public void onLongPress(MotionEvent e) {
+                if (settings_button.hasWindowFocus()) {
+                    tapButton("searchButtonLT");
+                }
+            }
+        }
+
+        SearchSimpleOnGestureListener search_gl = new SearchSimpleOnGestureListener();
+        final GestureDetector search_gd = new GestureDetector(search_gl);
+        search_button.setOnTouchListener(new OnTouchListener() {
+            public boolean onTouch(View v, MotionEvent event) {
+                search_gd.onTouchEvent(event);
+                return false;
+            }
+        });
+        // Last open book
+        final ImageButton lru_button = (ImageButton) findViewById(R.id.lru_btn);
+        class LruSimpleOnGestureListener extends
+                SimpleOnGestureListener {
+            @Override
+            public boolean onSingleTapConfirmed(MotionEvent e) {
+                tapButton("lruButtonST");
+                return true;
+            }
+
+            @Override
+            public boolean onDoubleTap(MotionEvent e) {
+                tapButton("lruButtonDT");
+                return true;
+            }
+
+            @Override
+            public void onLongPress(MotionEvent e) {
+                if (lru_button.hasWindowFocus()) {
+                    tapButton("lruButtonLT");
+                }
+            }
+        }
+
+        LruSimpleOnGestureListener lru_gl = new LruSimpleOnGestureListener();
+        final GestureDetector lru_gd = new GestureDetector(lru_gl);
+        lru_button.setOnTouchListener(new OnTouchListener() {
+            public boolean onTouch(View v, MotionEvent event) {
+                lru_gd.onTouchEvent(event);
+                return false;
+            }
+        });
+        // Favorites book
+        final ImageButton fav_button = (ImageButton) findViewById(R.id.favor_btn);
+        class FavSimpleOnGestureListener extends
+                SimpleOnGestureListener {
+            @Override
+            public boolean onSingleTapConfirmed(MotionEvent e) {
+                tapButton("favButtonST");
+                return true;
+            }
+
+            @Override
+            public boolean onDoubleTap(MotionEvent e) {
+                tapButton("favButtonDT");
+                return true;
+            }
+
+            @Override
+            public void onLongPress(MotionEvent e) {
+                if (fav_button.hasWindowFocus()) {
+                    tapButton("favButtonLT");
+                }
+            }
+        }
+
+        FavSimpleOnGestureListener fav_gl = new FavSimpleOnGestureListener();
+        final GestureDetector fav_gd = new GestureDetector(fav_gl);
+        fav_button.setOnTouchListener(new OnTouchListener() {
+            public boolean onTouch(View v, MotionEvent event) {
+                fav_gd.onTouchEvent(event);
+                return false;
+            }
+        });
     }
+    private void drawingSecondPanel (LayoutInflater ltInflater, LinearLayout ll_container) {
+        // = Вторая панель с кнопко оттображения пути
+        ltInflater.inflate(R.layout.ll_button, ll_container, true);
+        // кнопка заголовка на которой отображается текущая папка
+        tv_title = (Button) findViewById(R.id.title_txt);
+        class TvSimpleOnGestureListener extends SimpleOnGestureListener {
+            @Override
+            public boolean onSingleTapConfirmed(MotionEvent e) {
+                final String[] columns = getResources().getStringArray(R.array.output_columns_names);
+                final CharSequence[] columnsmode = new CharSequence[columns.length + 1];
+                columnsmode[0] = getResources().getString(
+                        R.string.jv_relaunch_default);
+                System.arraycopy(columns, 0, columnsmode, 1, columns.length);
+                Integer checked;
+                if (app.columns.containsKey(currentRoot)) {
+                    if (app.columns.get(currentRoot) == -1) {
+                        checked = 1;
+                    } else {
+                        checked = app.columns.get(currentRoot) + 1;
+                    }
+                } else {
+                    checked = 0;
+                }
+                // get checked
+                AlertDialog.Builder builder = new AlertDialog.Builder( ReLaunch.this);
+                // "Select application"
+                builder.setTitle(getResources().getString(R.string.jv_relaunch_select_columns));
+                builder.setSingleChoiceItems(columnsmode, checked,
+                        new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int i) {
+                                if (i == 0) {
+                                    app.columns.remove(currentRoot);
+                                } else {
+                                    if (i == 1) {
+                                        app.columns.put(currentRoot, -1);
+                                    } else {
+                                        app.columns.put(currentRoot, i - 1);
+                                    }
+                                }
+                                app.saveList("columns");
+                                drawDirectory(currentRoot, currentPosition);
+                                dialog.dismiss();
+                            }
+                        });
+                AlertDialog alert = builder.create();
+                alert.show();
+                return true;
+            }
+
+            @Override
+            public boolean onDoubleTap(MotionEvent e) {
+                return true;
+            }
+
+            @Override
+            public void onLongPress(MotionEvent e) {
+                menuSort();
+            }
+        }
+
+        TvSimpleOnGestureListener tv_gl = new TvSimpleOnGestureListener();
+        final GestureDetector tv_gd = new GestureDetector(tv_gl);
+        tv_title.setOnTouchListener(new OnTouchListener() {
+            public boolean onTouch(View v, MotionEvent event) {
+                tv_gd.onTouchEvent(event);
+                return false;
+            }
+        });
+    }
+    private void drawingThirdPanel (LayoutInflater ltInflater, LinearLayout ll_container){
+        // = Третья панель навигации
+        ltInflater.inflate(R.layout.ll_navigate, ll_container, true);
+        // Advanced button
+        final ImageButton adv = (ImageButton) findViewById(R.id.advanced_btn);
+        if (adv != null) {
+            class advSimpleOnGestureListener extends SimpleOnGestureListener {
+                @Override
+                public boolean onSingleTapConfirmed(MotionEvent e) {
+                    tapButton("advancedButtonST");
+                    return true;
+                }
+
+                @Override
+                public boolean onDoubleTap(MotionEvent e) {
+                    tapButton("advancedButtonDT");
+                    return true;
+                }
+
+                @Override
+                public void onLongPress(MotionEvent e) {
+                    if (adv.hasWindowFocus()) {
+                        tapButton("advancedButtonLT");
+                    }
+                }
+            }
+
+            advSimpleOnGestureListener adv_gl = new advSimpleOnGestureListener();
+            final GestureDetector adv_gd = new GestureDetector(adv_gl);
+            adv.setOnTouchListener(new OnTouchListener() {
+                public boolean onTouch(View v, MotionEvent event) {
+                    adv_gd.onTouchEvent(event);
+                    return false;
+                }
+            });
+        }
+
+        // кнопка перехода в родительскую папку
+        upButton = (Button) findViewById(R.id.goup_btn);
+        // gesture listener
+        class UpSimpleOnGestureListener extends SimpleOnGestureListener {
+            @Override
+            public boolean onSingleTapConfirmed(MotionEvent e) {
+                TapUpDir();
+                return true;
+            }
+        }
+
+        UpSimpleOnGestureListener up_gl = new UpSimpleOnGestureListener();
+        final GestureDetector up_gd = new GestureDetector(up_gl);
+        upButton.setOnTouchListener(new OnTouchListener() {
+            public boolean onTouch(View v, MotionEvent event) {
+                up_gd.onTouchEvent(event);
+                return false;
+            }
+        });
+
+        // up scroll button
+        upScroll = (Button) findViewById(R.id.upscroll_btn);
+        if (disableScrollJump) {
+            upScroll.setText(getResources().getString(R.string.jv_relaunch_prev));
+        } else {
+            upScroll.setText(app.scrollStep + "%");
+        }
+        class upScrlSimpleOnGestureListener extends SimpleOnGestureListener {
+            @Override
+            public boolean onSingleTapConfirmed(MotionEvent e) {
+                app.TapUpScrool(gvList, itemsArray.size());
+                return true;
+            }
+
+            @Override
+            public boolean onDoubleTap(MotionEvent e) {
+                if (!disableScrollJump) {
+                    int first = gvList.getFirstVisiblePosition();
+                    int total = itemsArray.size();
+                    first -= (total * app.scrollStep) / 100;
+                    if (first < 0)
+                        first = 0;
+                    gvList.setSelection(first);
+                    // some hack workaround against not scrolling in some cases
+                    if (total > 0) {
+                        gvList.requestFocusFromTouch();
+                        gvList.setSelection(first);
+                    }
+                }
+                return true;
+            }
+
+            @Override
+            public void onLongPress(MotionEvent e) {
+                if (upScroll.hasWindowFocus()) {
+                    if (!disableScrollJump) {
+                        int total = itemsArray.size();
+                        gvList.setSelection(0);
+                        // some hack workaround against not scrolling in some
+                        // cases
+                        if (total > 0) {
+                            gvList.requestFocusFromTouch();
+                            gvList.setSelection(0);
+                        }
+                    }
+                }
+            }
+        }
+
+        upScrlSimpleOnGestureListener upscrl_gl = new upScrlSimpleOnGestureListener();
+        final GestureDetector upscrl_gd = new GestureDetector(upscrl_gl);
+        upScroll.setOnTouchListener(new OnTouchListener() {
+            public boolean onTouch(View v, MotionEvent event) {
+                upscrl_gd.onTouchEvent(event);
+                return false;
+            }
+        });
+
+        // down scroll button
+        downScroll = (Button) findViewById(R.id.downscroll_btn);
+        if (disableScrollJump) {
+            downScroll.setText(getResources().getString(R.string.jv_relaunch_next));
+        } else {
+            downScroll.setText(app.scrollStep + "%");
+        }
+        class dnScrlSimpleOnGestureListener extends SimpleOnGestureListener {
+            @Override
+            public boolean onSingleTapConfirmed(MotionEvent e) {
+				app.TapDownScrool(gvList, itemsArray.size());
+                return true;
+            }
+
+            @Override
+            public boolean onDoubleTap(MotionEvent e) {
+                if (!disableScrollJump) {
+                    int first = gvList.getFirstVisiblePosition();
+                    int total = itemsArray.size();
+                    int last = gvList.getLastVisiblePosition();
+                    if (total == last + 1)
+                        return true;
+                    int target = first + (total * app.scrollStep) / 100;
+                    if (target <= last)
+                        target = last + 1; // Special for NOOK, otherwise it
+                    // won't redraw the listview
+                    if (target > (total - 1))
+                        target = total - 1;
+					//RepeatedDownScroll ds = new RepeatedDownScroll();
+					//ds.doIt(first, target, 0);
+					app.RepeatedDownScroll(gvList, first, target, 0);
+                }
+                return true;
+            }
+
+            @Override
+            public void onLongPress(MotionEvent e) {
+                if (downScroll.hasWindowFocus()) {
+                    if (!disableScrollJump) {
+                        int first = gvList.getFirstVisiblePosition();
+                        int total = itemsArray.size();
+                        int last = gvList.getLastVisiblePosition();
+                        if (total == last + 1)
+                            return;
+                        int target = total - 1;
+						app.RepeatedDownScroll(gvList, first, target, 0);
+                    }
+                }
+            }
+        }
+
+        dnScrlSimpleOnGestureListener dnscrl_gl = new dnScrlSimpleOnGestureListener();
+        final GestureDetector dnscrl_gd = new GestureDetector(dnscrl_gl);
+        downScroll.setOnTouchListener(new OnTouchListener() {
+            public boolean onTouch(View v, MotionEvent event) {
+                dnscrl_gd.onTouchEvent(event);
+                return false;
+            }
+        });
+    }
+    private void drawingFourthPanel (LayoutInflater ltInflater, LinearLayout ll_container){
+        // = Четвертая панель со списком файла
+        ltInflater.inflate(R.layout.ll_filelist, ll_container, true);
+
+        //=============================================================================
+        // список файлов и папок
+        String[] from = new String[] { "name" };
+        int[] to = new int[] { R.id.fl_text };
+        gvList = (GridView) findViewById(R.id.gl_list);
+        adapter = new FLSimpleAdapter1(this, itemsArray, R.layout.flist_layout, from, to);
+        gvList.setAdapter(adapter);
+        gvList.setHorizontalSpacing(0);
+        if (prefs.getBoolean("customScroll", app.customScrollDef)) {
+            if (addSView) {
+                int scrollW;
+                try {
+                    scrollW = Integer.parseInt(prefs.getString("scrollWidth", "25"));
+                } catch (NumberFormatException e) {
+                    scrollW = 25;
+                }
+                LinearLayout ll = (LinearLayout) findViewById(R.id.gl_layout);
+                final SView sv = new SView(getBaseContext());
+                LinearLayout.LayoutParams pars = new LinearLayout.LayoutParams(scrollW, ViewGroup.LayoutParams.FILL_PARENT, 1f);
+                sv.setLayoutParams(pars);
+                ll.addView(sv);
+                gvList.setOnScrollListener(new AbsListView.OnScrollListener() {
+                    public void onScroll(AbsListView view,
+                                         int firstVisibleItem, int visibleItemCount,
+                                         int totalItemCount) {
+                        sv.total = totalItemCount;
+                        sv.count = visibleItemCount;
+                        sv.first = firstVisibleItem;
+                        EinkScreen.PrepareController(null, false);
+                        sv.invalidate();
+                    }
+
+                    public void onScrollStateChanged(AbsListView view,
+                                                     int scrollState) {
+                    }
+                });
+                addSView = false;
+            }
+        } else {
+            gvList.setOnScrollListener(new AbsListView.OnScrollListener() {
+                public void onScroll(AbsListView view, int firstVisibleItem,
+                                     int visibleItemCount, int totalItemCount) {
+                    EinkScreen.PrepareController(null, false);
+                }
+
+                public void onScrollStateChanged(AbsListView view, int scrollState) {
+                }
+            });
+        }
+        class GlSimpleOnGestureListener extends SimpleOnGestureListener {
+            Context context;
+			String finalFullName;
+			String finalDr;
+			String finalFn;
+			int menuType;
+			int pos;
+			String[] list;
+
+            public GlSimpleOnGestureListener(Context context) {
+                super();
+                this.context = context;
+            }
+            public int findViewByXY(MotionEvent e) {
+                int location[] = new int[2];
+                float x = e.getRawX();
+                float y = e.getRawY();
+                int first = gvList.getFirstVisiblePosition();
+                int last = gvList.getLastVisiblePosition();
+                int count = last -first + 1;
+                for (int i = 0; i<count; i++) {
+                    View v = gvList.getChildAt(i);
+                    if(v == null){
+                        return -1;
+                    }
+                    v.getLocationOnScreen(location);
+                    int viewX = location[0];
+                    int viewY = location[1];
+
+                    if(( x > viewX && x < (viewX + v.getWidth())) && ( y > viewY && y < (viewY + v.getHeight()))){
+                        int ost = (int) (x - viewX);
+                        if(prefs.getBoolean("selectFileTapIcon", true) && (ost < (firstLineIconSizePx + 1))){
+                            if (showButtonParenFolder && (first + i) == 0){
+                                return 0;
+                            }
+                            if(arrSelItem.contains(first + i)){
+                                // пункт уже отмечен. надо снять отметку
+                                arrSelItem.remove(arrSelItem.indexOf(first + i));
+                            }else{
+                                // добавить отмеченный новый пункт в массив
+                                arrSelItem.add(first + i);
+                            }
+                            reDraw();
+                            return -1;
+                        }
+                        return first + i;
+                    }
+                }
+                return -1;
+            }
+            private void MenuSelect(String s, int pos){
+                if (s.equalsIgnoreCase(getString(R.string.app_cancel)))
+                    onContextMenuSelected(CNTXT_MENU_CANCEL, pos);
+                else if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_delete)))
+                    onContextMenuSelected(CNTXT_MENU_DELETE_F, pos);
+                else if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_delete_emp_dir)))
+                    onContextMenuSelected(CNTXT_MENU_DELETE_D_EMPTY, pos);
+                else if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_delete_non_emp_dir)))
+                    onContextMenuSelected(CNTXT_MENU_DELETE_D_NON_EMPTY, pos);
+                else if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_add)))
+                    onContextMenuSelected(CNTXT_MENU_ADD, pos);
+                else if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_mark)))
+                    onContextMenuSelected(CNTXT_MENU_MARK_FINISHED, pos);
+                else if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_unmark)))
+                    onContextMenuSelected(CNTXT_MENU_MARK_READING, pos);
+                else if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_unmarkall)))
+                    onContextMenuSelected(CNTXT_MENU_MARK_FORGET, pos);
+                else if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_createintent)))
+                    onContextMenuSelected(CNTXT_MENU_INTENT, pos);
+                else if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_openwith)))
+                    onContextMenuSelected(CNTXT_MENU_OPENWITH, pos);
+                else if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_copy)))
+                    onContextMenuSelected(CNTXT_MENU_COPY_FILE, pos);
+                else if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_move)))
+                    onContextMenuSelected(CNTXT_MENU_MOVE_FILE, pos);
+                else if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_paste)))
+                    onContextMenuSelected(CNTXT_MENU_PASTE, pos);
+                else if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_rename)))
+                    onContextMenuSelected(CNTXT_MENU_RENAME, pos);
+                else if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_create_folder)))
+                    onContextMenuSelected(CNTXT_MENU_CREATE_DIR, pos);
+                else if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_tags_rename)))
+                    onContextMenuSelected(CNTXT_MENU_TAGS_RENAME, pos);
+                else if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_set_startdir)))
+                    onContextMenuSelected(CNTXT_MENU_SET_STARTDIR, pos);
+                else if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_add_startdir)))
+                    onContextMenuSelected(CNTXT_MENU_ADD_STARTDIR, pos);
+                else if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_bookinfo)))
+                    onContextMenuSelected(CNTXT_MENU_SHOW_BOOKINFO, pos);
+                else if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_fileinfo)))
+                    onContextMenuSelected(CNTXT_MENU_FILE_INFO, pos);
+                else if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_add_Dropbox)))
+                    onContextMenuSelected(CNTXT_MENU_COPY_DROPBOX, pos);
+                else if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_add_dir_Dropbox)))
+                    onContextMenuSelected(CNTXT_MENU_COPY_DIR_DROPBOX, pos);
+                else if (s.equalsIgnoreCase(getString(R.string.app_settings_settings)))
+                    onContextMenuSelected(CNTXT_MENU_SETTINGS, pos);
+                else if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_selecte)) || s.equalsIgnoreCase(getString(R.string.jv_relaunch_unselecte)))
+                    onContextMenuSelected(CNTXT_MENU_SELECTE, pos);
+                else if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_fileunzip)))
+                    onContextMenuSelected(CNTXT_MENU_FILEUNZIP, pos);
+                else if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_permission)))
+                    onContextMenuSelected(CNTXT_MENU_PERMISSION, pos);
+				else if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_return)))
+					FirstDialog(list);
+            }
+
+            private ArrayList<String> CreateArrangeMenu(int menuType, String fullName, String dr, String fn){
+                ArrayList<String> arrangeList = new ArrayList<String>(10);
+                switch (menuType) {
+                    case 1:
+                        if (!app.contains("favorites", fullName, app.DIR_TAG)){
+                            if (!dr.startsWith("FTP| ")) {
+                                arrangeList.add(getString(R.string.jv_relaunch_add));
+                            }
+                        }
+                        // Set as Start folders & Add to Start folders
+                        if ((!app.isStartDir(fullName)) && (prefs.getBoolean("showAddStartDir", false))) {
+                            if (!dr.startsWith("FTP| ")) {
+                                arrangeList.add(getString(R.string.jv_relaunch_set_startdir));
+                                arrangeList.add(getString(R.string.jv_relaunch_add_startdir));
+                            }
+                        }
+                        break;
+                    case 2:
+                        if (!app.contains("favorites", dr, fn)) {
+                            if (!dr.startsWith("FTP| ")) {
+                                arrangeList.add(getString(R.string.jv_relaunch_add));
+                            }
+                        }
+                        // Mark as read & unread
+                        if (app.history.containsKey(fullName)) {
+                            if (app.history.get(fullName) == app.READING) {
+                                arrangeList.add(getString(R.string.jv_relaunch_mark));
+                            } else if (app.history.get(fullName) == app.FINISHED) {
+                                arrangeList.add(getString(R.string.jv_relaunch_unmark));
+                            }
+
+                            arrangeList.add(getString(R.string.jv_relaunch_unmarkall));
+                        } else {
+                            arrangeList.add(getString(R.string.jv_relaunch_mark));
+                        }
+                        // Open with
+                        if (prefs.getBoolean("openWith", true)) {
+                            arrangeList.add(getString(R.string.jv_relaunch_openwith));
+                        }
+                        // Unzip
+                        if (fn.toLowerCase().endsWith("zip")){
+                            arrangeList.add(getString(R.string.jv_relaunch_fileunzip));
+                        }
+                        break;
+                    case 3:
+                        if (!app.contains("favorites", dr, fn)) {
+                            arrangeList.add(getString(R.string.jv_relaunch_add));
+                        }
+                        // Mark & unmark && all
+                        if (app.history.containsKey(fullName)) {
+                            if (app.history.get(fullName) == app.READING) {
+                                arrangeList.add(getString(R.string.jv_relaunch_mark));
+                            } else if (app.history.get(fullName) == app.FINISHED) {
+                                arrangeList.add(getString(R.string.jv_relaunch_unmark));
+                            }
+                            arrangeList.add(getString(R.string.jv_relaunch_unmarkall));
+                        } else {
+                            arrangeList.add(getString(R.string.jv_relaunch_mark));
+                        }
+                        // Open with...
+                        if (prefs.getBoolean("openWith", true)) {
+                            arrangeList.add(getString(R.string.jv_relaunch_openwith));
+                        }
+                        // Unzip
+                        if (fn.toLowerCase().endsWith("zip")){
+                            arrangeList.add(getString(R.string.jv_relaunch_fileunzip));
+                        }
+
+                        break;
+
+                }
+                return arrangeList;
+            }
+            private ArrayList<String> CreateSystemMenu(int menuType, int position){
+                ArrayList<String> arrangeList = new ArrayList<String>(10);
+                switch (menuType) {
+                    case 1:
+                        // Permission
+                        if (selectRootNavigation){
+                            arrangeList.add(getString(R.string.jv_relaunch_permission));
+                        }
+                        // Properties
+                        arrangeList.add(getString(R.string.jv_relaunch_fileinfo));
+                        // Open settings windows
+                        arrangeList.add(getString(R.string.app_settings_settings));
+                        // Select
+                        if (prefs.getBoolean("useFileManagerFunctions", true)) {
+                            if (arrSelItem.contains(position)) {
+                                arrangeList.add(getString(R.string.jv_relaunch_unselecte));
+                            } else {
+                                arrangeList.add(getString(R.string.jv_relaunch_selecte));
+                            }
+                        }
+                        break;
+                    case 2:
+                        // Permission
+                        if (selectRootNavigation){
+                            arrangeList.add(getString(R.string.jv_relaunch_permission));
+                        }
+                        // Properties
+                        arrangeList.add(getString(R.string.jv_relaunch_fileinfo));
+                        // Open settings windows
+                        arrangeList.add(getString(R.string.app_settings_settings));
+                        // Create Intent
+                        if (prefs.getBoolean("createIntent", false)) {
+                            arrangeList.add(getString(R.string.jv_relaunch_createintent));
+                        }
+                        // Select
+                        if (arrSelItem.contains(position)) {
+                            arrangeList.add(getString(R.string.jv_relaunch_unselecte));
+                        } else {
+                            arrangeList.add(getString(R.string.jv_relaunch_selecte));
+                        }
+                        break;
+                    case 3:
+                        // Permission
+                        if (selectRootNavigation){
+                            arrangeList.add(getString(R.string.jv_relaunch_permission));
+                        }
+                        // Properties
+                        arrangeList.add(getString(R.string.jv_relaunch_fileinfo));
+                        //Open settings windows
+                        arrangeList.add(getString(R.string.app_settings_settings));
+                        // Create Intent
+                        if (prefs.getBoolean("createIntent", false)) {
+                            arrangeList.add(getString(R.string.jv_relaunch_createintent));
+                        }
+                        // Select
+                        if (arrSelItem.contains(position)) {
+                            arrangeList.add(getString(R.string.jv_relaunch_unselecte));
+                        } else {
+                            arrangeList.add(getString(R.string.jv_relaunch_selecte));
+                        }
+
+                        break;
+
+                }
+                return arrangeList;
+            }
+			private ArrayList<String> FileOperationsMenu(String fullName){
+				ArrayList<String> arrangeList = new ArrayList<String>(10);
+
+				if (prefs.getBoolean("useFileManagerFunctions", true)) {
+					// Create folder
+					arrangeList.add(getString(R.string.jv_relaunch_create_folder));
+					// Rename file with tag
+					if (!showBookTitles) {
+						arrangeList.add(getString(R.string.jv_relaunch_tags_rename));
+					}
+					// Rename
+					if (!showBookTitles) {
+						arrangeList.add(getString(R.string.jv_relaunch_rename));
+					}
+					// Paste
+					if (fileOp != 0) {
+						arrangeList.add(getString(R.string.jv_relaunch_paste));
+					}
+					// Move
+					arrangeList.add(getString(R.string.jv_relaunch_move));
+					// Copy
+					arrangeList.add(getString(R.string.jv_relaunch_copy));
+					// Delete
+					arrangeList.add(getString(R.string.jv_relaunch_delete));
+				}
+				// Dropbox
+				if(!fullName.startsWith("Dropbox| ")){
+					arrangeList.add(getString(R.string.jv_relaunch_add_Dropbox));
+					arrangeList.add(getString(R.string.jv_relaunch_add_dir_Dropbox));
+				}
+				return arrangeList;
+			}
+
+            @Override
+            public boolean onSingleTapConfirmed(MotionEvent e) {
+                int position = findViewByXY(e);
+                if (position == -1){
+                    return true;
+                }
+
+                HashMap<String, String> item = itemsArray.get(position);
+                if (item.get("type").equals("dir")) {
+                    // Goto directory
+                    if (item.get("name").equals("..")){
+                        TapUpDir();
+                    }else {
+                        pushCurrentPos(gvList, true);
+                        drawDirectory(item.get("fname"), -1);
+                    }
+                }else{
+                    String tempName = item.get("fname");
+                    String fname = tempName;
+                    if(tempName.startsWith("FTP| ")){
+                        if (downloadFTP(connectorFTP, tempName.substring(0, tempName.lastIndexOf("/")), tempName.substring(tempName.lastIndexOf("/")+1) , "")){
+                            fname = FTPTempDir + "/" + File.separator + tempName.substring(tempName.lastIndexOf("/")+1);
+                        }
+                    }
+                    if(tempName.startsWith("Dropbox| ")){
+                        fname = loadFileDB(tempName, item.get("name"));
+                    }
+                    if (app.specialAction(ReLaunch.this, fname)){
+                        pushCurrentPos(gvList, false);
+                    }else {
+                        prefsEditor.putInt("posInFolder", gvList.getFirstVisiblePosition());
+                        prefsEditor.commit();
+                        pushCurrentPos(gvList, false);
+                        if (item.get("reader").equals("Nope")){
+                            app.defaultAction(ReLaunch.this, fname);
+                        }else {
+                            // Launch reader
+							app.LaunchReader(fname);
+                        }
+                    }
+                }
+                return true;
+            }
+
+            @Override
+            public boolean onDoubleTap(MotionEvent e) {
+                int position = findViewByXY(e);
+                if (position != -1) {
+                    HashMap<String, String> item = itemsArray.get(position);
+                    String file = item.get("dname") + "/" + item.get("name");
+                    if (file.endsWith("fb2") || file.endsWith("fb2.zip") || file.endsWith("epub")) {
+                        prefsEditor.putInt("posInFolder", gvList.getFirstVisiblePosition());
+                        prefsEditor.commit();
+                        pushCurrentPos(gvList, false);
+                        String temp = file;
+                        if(temp.startsWith("Dropbox| ")) {
+                            temp = loadFileDB(temp, item.get("name"));
+                        }
+						if(temp.startsWith("FTP| ")){
+							if (downloadFTP(connectorFTP, temp.substring(0, temp.lastIndexOf("/")), temp.substring(temp.lastIndexOf("/")+1) , "")){
+								temp = FTPTempDir + "/" + File.separator + temp.substring(temp.lastIndexOf("/")+1);
+							}
+						}
+                        showBookInfo(temp);
+                    }
+                }
+                return true;
+            }
+
+            @Override
+            public void onLongPress(MotionEvent e) {
+                if (!ReLaunch.this.hasWindowFocus())
+                    return;
+                //final int menuType;
+                int position = findViewByXY(e);
+                HashMap<String, String> item;
+                String fn = null;
+                String dr = null;
+                String tp;
+                String fullName = null;
+                ArrayList<String> aList = new ArrayList<String>(10);
+                if (position == -1)
+                    menuType = 0;
+                else {
+                    item = itemsArray.get(position);
+                    fn = item.get("name");
+                    dr = item.get("dname");
+                    tp = item.get("type");
+                    fullName = dr + "/" + fn;
+                    if (tp.equals("dir")) {
+                        menuType = 1;
+                        if (fn.equals("..")){
+                            return;
+                        }
+                    }else if (fn.endsWith("fb2") || fn.endsWith("fb2.zip") || fn.endsWith("epub"))
+                        menuType = 2;
+                    else
+                        menuType = 3;
+                }
+
+                switch (menuType) {
+                    case 0:
+                        if (prefs.getBoolean("useFileManagerFunctions", true)) {
+                            aList.add(getString(R.string.jv_relaunch_create_folder));
+                            if (fileOp != 0) {
+                                aList.add(getString(R.string.jv_relaunch_paste));
+                            }
+                        }
+                        // Open settings windows
+                        aList.add(getString(R.string.app_settings_settings));
+                        break;
+                    case 1:
+
+							if (prefs.getBoolean("useFileManagerFunctions", true)) {
+								// Rename
+								aList.add(getString(R.string.jv_relaunch_rename));
+								// Move
+								aList.add(getString(R.string.jv_relaunch_move));
+								// Copy
+								aList.add(getString(R.string.jv_relaunch_copy));
+								// Paste
+								int countList = 0;
+								if (fullName.startsWith("FTP| ")) {
+									if (fullName.equals("FTP| ")) {
+										fullName = "/";
+									} else {
+										fullName = fullName.substring("FTP| ".length());
+									}
+
+									FTPFile[] FTPlist = connectorFTP.ftpFilesList(fullName);
+									if (FTPlist != null) {
+										countList = FTPlist.length;
+									}
+								} else if (fullName.startsWith("Dropbox| ")) {
+									fullName = fullName.substring("Dropbox| ".length());
+									// список файлов и папок
+									DropboxAPI.Entry entries;
+									entries = dropboxClient.metadata(fullName);// может быть ошибка при получении коллекции
+									if (entries != null) {
+										countList = entries.contents.size();
+									}
+								} else {
+									File d = new File(fullName);
+									String[] allEntries = d.list();
+									if (allEntries == null) {
+										countList = 0;
+									} else {
+										countList = allEntries.length;
+									}
+
+									if (selectRootNavigation) {
+										aList.add(getString(R.string.jv_relaunch_permission));
+									}
+								}
+								if (fileOp != 0) {
+									aList.add(getString(R.string.jv_relaunch_paste));
+								}
+								// Delete
+								if (countList > 0) {
+									aList.add(getString(R.string.jv_relaunch_delete_non_emp_dir));
+								} else {
+									aList.add(getString(R.string.jv_relaunch_delete_emp_dir));
+								}
+								// Create folder
+								aList.add(getString(R.string.jv_relaunch_create_folder));
+							}
+							// Add to Favorites
+							aList.add(getString(R.string.jv_relaunch_arrange));
+							// Dropbox
+							if (!fullName.startsWith("Dropbox| ")) {
+								aList.add(getString(R.string.jv_relaunch_Dropbox));
+							}
+							//System
+							aList.add(getString(R.string.jv_relaunch_system));
+                        break;
+                    case 2:
+						if (showFileOperation) {
+							// Annotation
+							aList.add(getString(R.string.jv_relaunch_bookinfo));
+							if (prefs.getBoolean("useFileManagerFunctions", true)) {
+								// Rename
+								if (!showBookTitles) {
+									aList.add(getString(R.string.jv_relaunch_rename));
+								}
+								// Move
+								aList.add(getString(R.string.jv_relaunch_move));
+								// Copy
+								aList.add(getString(R.string.jv_relaunch_copy));
+								// Paste
+								if (fileOp != 0) {
+									aList.add(getString(R.string.jv_relaunch_paste));
+								}
+								// Delete
+								aList.add(getString(R.string.jv_relaunch_delete));
+								// Create folder
+								aList.add(getString(R.string.jv_relaunch_create_folder));
+								// Rename file with tag
+								if (!showBookTitles) {
+									aList.add(getString(R.string.jv_relaunch_tags_rename));
+								}
+							}
+							// Add favorites
+							aList.add(getString(R.string.jv_relaunch_arrange));
+							// Dropbox
+							if (!fullName.startsWith("Dropbox| ")) {
+								aList.add(getString(R.string.jv_relaunch_Dropbox));
+							}
+							//System
+							aList.add(getString(R.string.jv_relaunch_system));
+						}else{
+							// Annotation
+							aList.add(getString(R.string.jv_relaunch_bookinfo));
+							// Add favorites
+							aList.add(getString(R.string.jv_relaunch_arrange));
+							// Mark & unmark && all
+							if (app.history.containsKey(fullName)) {
+								if (app.history.get(fullName) == app.READING) {
+									aList.add(getString(R.string.jv_relaunch_mark));
+								} else if (app.history.get(fullName) == app.FINISHED) {
+									aList.add(getString(R.string.jv_relaunch_unmark));
+								}
+								aList.add(getString(R.string.jv_relaunch_unmarkall));
+							} else {
+								aList.add(getString(R.string.jv_relaunch_mark));
+							}
+							// Select
+							if (prefs.getBoolean("useFileManagerFunctions", true)) {
+								if (arrSelItem.contains(position)) {
+									aList.add(getString(R.string.jv_relaunch_unselecte));
+								} else {
+									aList.add(getString(R.string.jv_relaunch_selecte));
+								}
+							}
+							// Open with...
+							if (prefs.getBoolean("openWith", true)) {
+								aList.add(getString(R.string.jv_relaunch_openwith));
+							}
+							// Create Intent
+							if (prefs.getBoolean("createIntent", false)) {
+								aList.add(getString(R.string.jv_relaunch_createintent));
+							}
+							// Properties
+							aList.add(getString(R.string.jv_relaunch_fileinfo));
+							// Properties
+							aList.add(getString(R.string.jv_relaunch_file_operations));
+						}
+                        break;
+                    case 3:
+						if (showFileOperation) {
+							if (prefs.getBoolean("useFileManagerFunctions", true)) {
+								// Rename
+								if (!showBookTitles)
+									aList.add(getString(R.string.jv_relaunch_rename));
+								//Move
+								aList.add(getString(R.string.jv_relaunch_move));
+								// Copy
+								aList.add(getString(R.string.jv_relaunch_copy));
+								// Paste
+								if (fileOp != 0)
+									aList.add(getString(R.string.jv_relaunch_paste));
+								// Delete
+								aList.add(getString(R.string.jv_relaunch_delete));
+								// Create folder
+								aList.add(getString(R.string.jv_relaunch_create_folder));
+							}
+							// Add favorites
+							aList.add(getString(R.string.jv_relaunch_arrange));
+							// Dropbox
+							if(!fullName.startsWith("Dropbox| ")){
+								aList.add(getString(R.string.jv_relaunch_Dropbox));
+							}
+							//System
+							aList.add(getString(R.string.jv_relaunch_system));
+						}else{
+							// Annotation
+							aList.add(getString(R.string.jv_relaunch_bookinfo));
+							// Add favorites
+							if (!app.contains("favorites", dr, fn)) {
+								if (!dr.startsWith("FTP| ")) {
+									aList.add(getString(R.string.jv_relaunch_add));
+								}
+							}
+							// Mark & unmark && all
+							if (app.history.containsKey(fullName)) {
+								if (app.history.get(fullName) == app.READING) {
+									aList.add(getString(R.string.jv_relaunch_mark));
+								} else if (app.history.get(fullName) == app.FINISHED) {
+									aList.add(getString(R.string.jv_relaunch_unmark));
+								}
+								aList.add(getString(R.string.jv_relaunch_unmarkall));
+							} else {
+								aList.add(getString(R.string.jv_relaunch_mark));
+							}
+							// Select
+							if (prefs.getBoolean("useFileManagerFunctions", true)) {
+								if (arrSelItem.contains(position)) {
+									aList.add(getString(R.string.jv_relaunch_unselecte));
+								} else {
+									aList.add(getString(R.string.jv_relaunch_selecte));
+								}
+							}
+							// Open with...
+							if (prefs.getBoolean("openWith", true)) {
+								aList.add(getString(R.string.jv_relaunch_openwith));
+							}
+							// Create Intent
+							if (prefs.getBoolean("createIntent", false)) {
+								aList.add(getString(R.string.jv_relaunch_createintent));
+							}
+							// Properties
+							aList.add(getString(R.string.jv_relaunch_fileinfo));
+							// Properties
+							aList.add(getString(R.string.jv_relaunch_file_operations));
+						}
+                        break;
+                }
+                aList.add(getString(R.string.app_cancel));
+                pos = position;
+                list = aList.toArray(new String[aList.size()]);
+
+                finalFullName = fullName;
+                finalDr = dr;
+                finalFn = fn;
+				FirstDialog(list);
+            }
+
+			private void FirstDialog(final String[] list){
+				ListAdapter cmAdapter = new ArrayAdapter<String>(app, R.layout.cmenu_list_item, list);
+
+				final AlertDialog.Builder builder = new AlertDialog.Builder(context);
+				builder.setCancelable(false);
+				builder.setAdapter(cmAdapter, new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int item) {
+						String s = list[item];
+						if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_arrange)) ||
+								s.equalsIgnoreCase(getString(R.string.jv_relaunch_Dropbox)) ||
+								s.equalsIgnoreCase(getString(R.string.jv_relaunch_system)) ||
+								s.equalsIgnoreCase(getString(R.string.jv_relaunch_file_operations))){
+							ArrayList<String> arrangeList = new ArrayList<String>(10);
+							if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_arrange))){
+								arrangeList = CreateArrangeMenu(menuType, finalFullName, finalDr, finalFn);
+							}else if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_Dropbox))){
+								arrangeList.add(getString(R.string.jv_relaunch_add_Dropbox));
+								arrangeList.add(getString(R.string.jv_relaunch_add_dir_Dropbox));
+							}else if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_system))){
+								arrangeList = CreateSystemMenu(menuType, pos);
+							}else if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_file_operations))){
+								arrangeList = FileOperationsMenu(finalFullName);
+							}
+							arrangeList.add(getString(R.string.jv_relaunch_return));
+
+							final String[] zList = arrangeList.toArray(new String[arrangeList.size()]);
+
+							AddedDialog1(zList, pos);
+						}else{
+							MenuSelect(s, pos);
+						}
+					}
+				});
+				AlertDialog alert = builder.create();
+				alert.requestWindowFeature(Window.FEATURE_NO_TITLE);
+				alert.show();
+			}
+
+			private void AddedDialog1(final String[] zList, final int pos){
+				ListAdapter adapterSubMenu = new ArrayAdapter<String>(app, R.layout.cmenu_list_item, zList);
+				final AlertDialog.Builder dialogArrange = new AlertDialog.Builder(context);
+
+				dialogArrange.setAdapter(adapterSubMenu, new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int item) {
+						String s = zList[item];
+						MenuSelect(s, pos);
+						dialog.dismiss();
+					}
+				});
+				AlertDialog aAlert = dialogArrange.create();
+				aAlert.requestWindowFeature(Window.FEATURE_NO_TITLE);
+				aAlert.show();
+			}
+        }
+
+        GlSimpleOnGestureListener gv_gl = new GlSimpleOnGestureListener(this);
+        final GestureDetector gv_gd = new GestureDetector(gv_gl);
+        gvList.setOnTouchListener(new OnTouchListener() {
+            public boolean onTouch(View v, MotionEvent event) {
+                gv_gd.onTouchEvent(event);
+                return false;
+            }
+        });
+    }
+    private void drawingFifthPanel (LayoutInflater ltInflater, LinearLayout ll_container){
+        // = Пятая панель с программами
+        ltInflater.inflate(R.layout.ll_applist, ll_container, true);
+
+        // last applications button
+        final ImageButton lrua_button = ((ImageButton) findViewById(R.id.app_last));
+        class LruaSimpleOnGestureListener extends
+                SimpleOnGestureListener {
+            @Override
+            public boolean onSingleTapConfirmed(MotionEvent e) {
+                tapButton("appLastButtonST");
+                return true;
+            }
+
+            @Override
+            public boolean onDoubleTap(MotionEvent e) {
+                tapButton("appLastButtonDT");
+                return true;
+            }
+
+            @Override
+            public void onLongPress(MotionEvent e) {
+                if (ReLaunch.this.hasWindowFocus())
+                    tapButton("appLastButtonLT");
+            }
+        }
+
+        LruaSimpleOnGestureListener lrua_gl = new LruaSimpleOnGestureListener();
+        final GestureDetector lrua_gd = new GestureDetector(lrua_gl);
+        lrua_button.setOnTouchListener(new OnTouchListener() {
+            public boolean onTouch(View v, MotionEvent event) {
+                lrua_gd.onTouchEvent(event);
+                return false;
+            }
+        });
+        // all applications button
+        final ImageButton alla_button = ((ImageButton) findViewById(R.id.all_applications_btn));
+        class AllaSimpleOnGestureListener extends
+                SimpleOnGestureListener {
+            @Override
+            public boolean onSingleTapConfirmed(MotionEvent e) {
+                tapButton("appAllButtonST");
+                return true;
+            }
+
+            @Override
+            public boolean onDoubleTap(MotionEvent e) {
+                tapButton("appAllButtonDT");
+                return true;
+            }
+
+            @Override
+            public void onLongPress(MotionEvent e) {
+                if (ReLaunch.this.hasWindowFocus())
+                    tapButton("appAllButtonLT");
+            }
+
+        }
+
+        AllaSimpleOnGestureListener alla_gl = new AllaSimpleOnGestureListener();
+        final GestureDetector alla_gd = new GestureDetector(alla_gl);
+        alla_button.setOnTouchListener(new OnTouchListener() {
+            public boolean onTouch(View v, MotionEvent event) {
+                alla_gd.onTouchEvent(event);
+                return false;
+            }
+        });
+        // applications favorites button
+        final ImageButton fava_button = ((ImageButton) findViewById(R.id.app_favorites));
+        class FavaSimpleOnGestureListener extends
+                SimpleOnGestureListener {
+
+            @Override
+            public boolean onSingleTapConfirmed(MotionEvent e) {
+                tapButton("appFavButtonST");
+                return true;
+            }
+
+            @Override
+            public boolean onDoubleTap(MotionEvent e) {
+                tapButton("appFavButtonDT");
+                return true;
+            }
+
+            @Override
+            public void onLongPress(MotionEvent e) {
+                if (ReLaunch.this.hasWindowFocus())
+                    tapButton("appFavButtonLT");
+            }
+        }
+        FavaSimpleOnGestureListener fava_gl = new FavaSimpleOnGestureListener();
+        final GestureDetector fava_gd = new GestureDetector(this, fava_gl);
+        fava_button.setOnTouchListener(new OnTouchListener() {
+            public boolean onTouch(View v, MotionEvent event) {
+                fava_gd.onTouchEvent(event);
+                return false;
+            }
+        });
+        // Memory buttons (task manager activity)
+        final LinearLayout mem_l = (LinearLayout) findViewById(R.id.mem_layout);
+        if (mem_l != null) {
+            class MemlSimpleOnGestureListener extends
+                    SimpleOnGestureListener {
+                @Override
+                public boolean onSingleTapConfirmed(MotionEvent e) {
+                    tapButton("memButtonST");
+                    return true;
+                }
+
+                @Override
+                public boolean onDoubleTap(MotionEvent e) {
+                    tapButton("memButtonDT");
+                    return true;
+                }
+
+                @Override
+                public void onLongPress(MotionEvent e) {
+                    if (mem_l.hasWindowFocus()) {
+                        tapButton("memButtonLT");
+                    }
+                }
+            }
+
+            MemlSimpleOnGestureListener meml_gl = new MemlSimpleOnGestureListener();
+            final GestureDetector meml_gd = new GestureDetector(meml_gl);
+            mem_l.setOnTouchListener(new View.OnTouchListener() {
+                public boolean onTouch(View v, MotionEvent event) {
+                    meml_gd.onTouchEvent(event);
+                    return false;
+                }
+            });
+        }
+        memLevel = (TextView) findViewById(R.id.mem_level);
+        memTitle = (TextView) findViewById(R.id.mem_title);
+
+        // Battery Layout
+        final LinearLayout bat_l = (LinearLayout) findViewById(R.id.bat_layout);
+        if (bat_l != null) {
+            class BatlSimpleOnGestureListener extends
+                    SimpleOnGestureListener {
+                @Override
+                public boolean onSingleTapConfirmed(MotionEvent e) {
+                    tapButton("batButtonST");
+                    return true;
+                }
+
+                @Override
+                public boolean onDoubleTap(MotionEvent e) {
+                    tapButton("batButtonDT");
+                    return true;
+                }
+
+                @Override
+                public void onLongPress(MotionEvent e) {
+                    if (mem_l != null && mem_l.hasWindowFocus()) {
+                        tapButton("batButtonLT");
+                    }
+                }
+            }
+
+            BatlSimpleOnGestureListener batl_gl = new BatlSimpleOnGestureListener();
+            final GestureDetector batl_gd = new GestureDetector(batl_gl);
+            bat_l.setOnTouchListener(new View.OnTouchListener() {
+                public boolean onTouch(View v, MotionEvent event) {
+                    batl_gd.onTouchEvent(event);
+                    return false;
+                }
+            });
+        }
+        // Battery buttons
+        battLevel = (TextView) findViewById(R.id.bat_level);
+        battTitle = (TextView) findViewById(R.id.bat_title);
+    }
+    private void drawingSixPanel (LayoutInflater ltInflater, LinearLayout ll_container, String id){
+        // своя панель
+        // загрузили пустую панель
+		View testPanel = ltInflater.inflate(R.layout.ll_panel_main, null, false);
+		// вылавливаем лайоут для вставки кнопок
+		LinearLayout ll_panel_main = (LinearLayout) testPanel.findViewById(R.id.linearLayout_panel_main);
+        // контекст приложения
+        Context context = getBaseContext();
+        // настройка отступов и расположения кнопки
+        LinearLayout.LayoutParams Lp = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        Lp.leftMargin = 2;
+        Lp.rightMargin = 2;
+        Lp.weight = 1;
+
+        final float scale = getResources().getDisplayMetrics().density;
+        int padding_4dp = (int) (4 * scale + 0.5f);
+        int padding_10dp = (int) (20 * scale + 0.5f);
+		Lp.height = (int) (54 * scale + 0.5f);
+        // создаем нужное колличество кнопок
+        // надо обратиться в базу
+        MyDBHelper dbHelper = new MyDBHelper(this, "PANELS");
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        Cursor c;
+        String selection = "PANEL = ?";
+        String[] selectionArgs = new String[] { id };
+        c = db.query("PANELS", null, selection, selectionArgs, null, null, null);
+        if (c != null) {
+            if (c.moveToFirst()) {
+                int runjobColumn = c.getColumnIndex("RUNJOB");
+                int namejobColumColIndex = c.getColumnIndex("NAMEJOB");
+				int runjobDCColumn = c.getColumnIndex("RUNJOB_DC");
+				int namejobColumDCColIndex = c.getColumnIndex("NAMEJOB_DC");
+				int runjobLCColumn = c.getColumnIndex("RUNJOB_LC");
+				int namejobColumLCColIndex = c.getColumnIndex("NAMEJOB_LC");
+                do {
+                    if (!c.getString(namejobColumColIndex).equals("NOTHING")) {
+                        // ------- параметры общие для всех кнопок -----
+                        final ImageButton imageButton = new ImageButton(context);
+                        imageButton.setBackgroundResource(R.drawable.main_button);
+
+                        imageButton.setPadding(padding_10dp, padding_4dp, padding_10dp, padding_4dp);
+                        imageButton.setLayoutParams(Lp);
+                        // --------------------------------------------
+						// --- получение данных по кнопке
+						// одиночное нажатие
+						String jobClick = c.getString(runjobColumn);
+						String namejobClick = c.getString(namejobColumColIndex);
+						// двойное нажатие
+						String jobDClick = c.getString(runjobDCColumn);
+						String namejobDClick = c.getString(namejobColumDCColIndex);
+						// долгое нажатие
+						String jobLClick = c.getString(runjobLCColumn);
+						String namejobLClick = c.getString(namejobColumLCColIndex);
+                        // персональные настройки каждой кнопки
+                        // --------- загрузка иконки ------------------
+                        if (jobClick.equals("RUN")) {
+                            imageButton.setImageBitmap(BitmapIconForButton(c.getString(namejobColumColIndex)));
+                        } else {
+                            imageButton.setImageBitmap(app.JobIcon(jobClick));
+                        }
+                        //-----------------------------------------------------
+
+                        // --------- действие на нажатие -------------------------
+						// одиночное нажатие
+						final String finalClick1 = jobClick;
+						final String finalClick2 = namejobClick;
+						// двойное нажатие
+						final String finalDClick1 = jobDClick;
+						final String finalDClick2 = namejobDClick;
+						// долгое нажатие
+						final String finalLClick1 = jobLClick;
+						final String finalLClick2 = namejobLClick;
+//----------------------------------------------------------------
+						// новая обработка тапов по кнопке
+						class ButtonSimpleOnGestureListener extends SimpleOnGestureListener {
+							@Override
+							public boolean onSingleTapConfirmed(MotionEvent e) {
+								SetButtonClick(finalClick1, finalClick2, imageButton);
+								return true;
+							}
+
+							@Override
+							public boolean onDoubleTap(MotionEvent e) {
+								SetButtonClick(finalDClick1, finalDClick2, imageButton);
+								return true;
+							}
+
+							@Override
+							public void onLongPress(MotionEvent e) {
+								if (ReLaunch.this.hasWindowFocus())
+									SetButtonClick(finalLClick1, finalLClick2, imageButton);
+							}
+						}
+						ButtonSimpleOnGestureListener button_gl = new ButtonSimpleOnGestureListener();
+						final GestureDetector button_gd = new GestureDetector(button_gl);
+						imageButton.setOnTouchListener(new OnTouchListener() {
+							public boolean onTouch(View v, MotionEvent event) {
+								button_gd.onTouchEvent(event);
+								return false;
+							}
+						});
+                        // -------------------------------------------------------
+						if ("BATTERY".equals(finalClick1)) {// показ расхода по приложениям
+							battLevelSec = imageButton;
+						}                        // добавляем кнопку на панель
+						ll_panel_main.addView(imageButton);
+                    }
+                } while (c.moveToNext());
+            }
+            c.close();
+        }
+        db.close();
+        dbHelper.close();
+		ll_container.addView(testPanel);
+    }
+    //========== FTP ================================
+    private boolean downloadFTP(FTPConnector connectorFTP, String dirFile, String nameFile, String localPath){
+        if (dirFile.startsWith("FTP| ")){
+            dirFile = dirFile.substring("FTP| ".length());
+        }
+        if (localPath.equals("")) {
+            File checkDir = new File(FTPTempDir);
+            if (!checkDir.exists()) {
+                if (!checkDir.mkdirs()) {
+                    return false;
+                }
+            } else {
+                app.fileRemove(new File(FTPTempDir));
+                if (!checkDir.mkdirs()) {
+                    return false;
+                }
+            }
+        }
+        return connectorFTP.download(dirFile, nameFile, localPath);
+    }
+    private boolean uploadFTP(FTPConnector connectorFTP, String dirFile, String nameFile, String FTPPath){
+        return connectorFTP.upload(dirFile, nameFile, FTPPath);
+    }
+
+    // === запуск приложения
+    private void RunApp(String nameApp){
+        Intent i = app.getIntentByLabel(nameApp);
+        if (i == null)
+            // "Activity \"" + item + "\" not found!"
+            app.showToast("\" " + nameApp + "\" " + getResources().getString(R.string.jv_allapp_not_found));
+        else {
+			boolean ok = true;
+            try {
+                i.setAction(Intent.ACTION_MAIN);
+                i.addCategory(Intent.CATEGORY_LAUNCHER);
+                startActivity(i);
+                if (prefs.getBoolean("returnToMain", false)) {
+                    finish();
+                }
+            } catch (ActivityNotFoundException e) {
+                // "Activity \"" + item + "\" not found!"
+                app.showToast("\" " + nameApp + "\" " + getResources().getString(R.string.jv_allapp_not_found));
+				ok = false;
+            }
+			if (ok) {
+				app.addToList("app_last", nameApp, "X", false);
+				saveLast();
+			}
+        }
+
+    }
+    //===== получение иконки по имени программы =====
+    private Bitmap BitmapIconForButton(String nameApp) {
+        Drawable d;
+        Bitmap temp_icon = null;
+        Intent componentSearchIntent = new Intent();
+        componentSearchIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+        componentSearchIntent.setAction(Intent.ACTION_MAIN);
+        PackageManager pm = getPackageManager();
+        if (pm == null) {
+            return null;
+        }
+        List<ResolveInfo> ril = pm.queryIntentActivities(componentSearchIntent, 0);
+        String pname;
+        String aname;
+        String hname;
+        for (ResolveInfo ri : ril) {
+            if (ri.activityInfo != null) {
+                pname = ri.activityInfo.packageName;
+                aname = ri.activityInfo.name;
+                try {
+                    if (ri.activityInfo.labelRes != 0) {
+                        hname = (String) ri.activityInfo.loadLabel(pm);
+                    } else {
+                        hname = (String) ri.loadLabel(pm);
+                    }
+                    if (nameApp.equals(pname + "%" + aname + "%" + hname)) {
+                        if (ri.activityInfo.icon != 0) {
+                            d = ri.activityInfo.loadIcon(pm);
+                        } else {
+                            d = ri.loadIcon(pm);
+                        }
+
+                        if (d != null) {
+                            temp_icon = scaleDrawable(d, firstLineIconSizePx);
+                        } else {
+                            temp_icon = scaleDrawableById(R.drawable.file_notok, firstLineIconSizePx);
+                        }
+                    }
+                } catch (Exception e) {
+                    temp_icon = scaleDrawableById(R.drawable.file_notok, firstLineIconSizePx);
+                }
+            }
+        }
+        return temp_icon;
+    }
+	//===== Проверка выхода из родительской папки =====
+	private boolean CheckUpDir(){
+		String tempDB = currentRoot;
+		boolean enabled = !upDir.equals("");
+		if(currentRoot.startsWith("Dropbox| ") && notLeaveStartDir){
+			if("Dropbox| ".length() == upDir.length()){
+				enabled = false;
+			}
+		}else if(currentRoot.startsWith("FTP| ") && notLeaveStartDir){
+			tempDB = currentRoot.substring("FTP| ".length());
+			enabled = (tempDB.startsWith(connectorFTP.rootPath) && tempDB.length() > connectorFTP.rootPath.length());
+		}else if (enabled && !tempDB.equals("/") && notLeaveStartDir) {
+			enabled = ((currentHomeDir.length() < currentRoot.length()) && currentRoot.startsWith(currentHomeDir));
+		}
+		return enabled;
+	}
+    //===== Переход в родительскую папку =====
+    private void TapUpDir() {
+		if (CheckUpDir()) {
+			Integer p = -1;
+			if (!positions.empty()){
+				p = positions.pop();
+			}
+			if(N2DeviceInfo.EINK_ONYX || N2DeviceInfo.EINK_GMINI || N2DeviceInfo.EINK_BOEYE){
+				p++;
+			}
+			drawDirectory(upDir, p);
+		}
+    }
+    private void GetDateAndMewory() {
+        // Date
+        String d;
+        Calendar c = Calendar.getInstance();
+        if (dateUS)
+            d = String.format("%02d:%02d%s %02d/%02d/%02d",
+                    c.get(Calendar.HOUR), c.get(Calendar.MINUTE),
+                    ((c.get(Calendar.AM_PM) == 0) ? "AM" : "PM"),
+                    c.get(Calendar.MONTH) + 1, c.get(Calendar.DAY_OF_MONTH),
+                    (c.get(Calendar.YEAR) - 2000));
+        else
+            d = String.format("%02d:%02d %02d/%02d/%02d",
+                    c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE),
+                    c.get(Calendar.DAY_OF_MONTH), c.get(Calendar.MONTH) + 1,
+                    (c.get(Calendar.YEAR) - 2000));
+        if (memTitle != null) //  && useHome)
+            memTitle.setText(d);
+
+        // Memory
+        MemoryInfo mi = new MemoryInfo();
+        ActivityManager activityManager = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+        activityManager.getMemoryInfo(mi);
+        if (memLevel != null) {// && useHome) {
+            // "M free"
+            memLevel.setText(mi.availMem / 1048576L
+                    + getResources().getString(R.string.jv_relaunch_m_free));
+            memLevel.setCompoundDrawablesWithIntrinsicBounds(null, null,
+					getResources().getDrawable(R.drawable.ram), null);
+        }
+    }
+
+    private void WiFiReceiver(){
+        if (battTitle != null || wifiOp != null) {
+            WifiManager wfm = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+            if (wfm.isWifiEnabled()) {
+                String nowConnected = wfm.getConnectionInfo().getSSID();
+                if (battTitle != null) {
+                    if (nowConnected != null && !nowConnected.equals("")) {
+                        battTitle.setText(nowConnected);
+                    } else {
+                        battTitle.setText(getResources().getString(R.string.jv_relaunch_wifi_is_on));
+                    }
+                    battTitle.setCompoundDrawablesWithIntrinsicBounds(
+                            getResources().getDrawable(R.drawable.wifi_on), null,
+                            null, null);
+                }
+                if (wifiOp != null){
+                    wifiOp.setImageBitmap(Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.ci_wifi_on), firstLineIconSizePx, firstLineIconSizePx,true));
+                }
+            } else {
+                // "WiFi is off"
+                if (battTitle != null) {
+                    battTitle.setText(getResources().getString(R.string.jv_relaunch_wifi_is_off));
+                    battTitle.setCompoundDrawablesWithIntrinsicBounds(
+                            getResources().getDrawable(R.drawable.wifi_off), null,
+                            null, null);
+                }
+                if (wifiOp != null){
+                    wifiOp.setImageBitmap(Bitmap.createScaledBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.ci_wifi_off), firstLineIconSizePx, firstLineIconSizePx, true));
+                }
+            }
+        }
+        GetDateAndMewory();
+    }
+
+	private ArrayList<String> dbSCREEN(){
+		ArrayList<String> listPanels = new ArrayList<String>();
+		MyDBHelper dbHelper = new MyDBHelper(getApplicationContext(), "SCREEN");
+		SQLiteDatabase db = dbHelper.getReadableDatabase();
+		if(db == null){
+			return null;
+		}
+		// делаем запрос данных из таблицы , получаем Cursor на таблицу с панелями экрана
+		Cursor c = db.query("SCREEN", null, null, null, null, null, null);
+		// ставим позицию курсора на первую строку выборки
+		// если в выборке нет строк, вернется false
+		if (c.moveToFirst()) {
+			// определяем номера столбцов по имени в выборке
+			int panelID = c.getColumnIndex("ID_PANEL");
+			do {
+				listPanels.add(c.getString(panelID));
+				// переход на следующую строку
+				// а если следующей нет (текущая - последняя), то false - выходим из цикла
+			} while (c.moveToNext());
+		}
+		c.close();
+		db.close();
+		dbHelper.close();
+		return listPanels;
+	}
+
+    private void SetPermission(String filename){
+        final File file = new File(filename);
+        String filePerm;
+        String fileOwn;
+        String fileAttr = null;
+        try {
+            Runtime rt = Runtime.getRuntime();
+
+            String[] args;
+            if (file.isDirectory()){
+                args = new String[]{"ls", "-l", file.getParent(), "|grep", filename};
+            }else {
+                args = new String[]{"ls", "-l", filename};
+            }
+            Process proc = rt.exec(args);
+            //String str = filename.replace(" ", "\\ ");
+            BufferedReader br = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+            int read;
+            char[] buffer = new char[4096];
+            StringBuilder output = new StringBuilder();
+            while ((read = br.read(buffer)) > 0) {
+                output.append(buffer, 0, read);
+            }
+            br.close();
+            proc.waitFor();
+            fileAttr = output.toString();
+        } catch (Throwable t) {
+            //emply
+        }
+        if(fileAttr != null && fileAttr.length()>0) {
+            filePerm = fileAttr.substring(0, 10);
+            fileAttr = fileAttr.replaceAll(" +", " ");
+            int iPerm = fileAttr.indexOf(" ");
+            int iOwner = fileAttr.indexOf(" ", iPerm + 1);
+            int iGroup = fileAttr.indexOf(" ", iOwner + 1);
+            fileOwn = "Owner: " + fileAttr.substring(iPerm + 1, iOwner) + "  Group: " + fileAttr.substring(iOwner + 1, iGroup);
+        }else{
+            return;
+        }
+        Permissions permissions = new Permissions(filePerm);
+
+        final Dialog dialog = new Dialog(this);
+        dialog.getWindow().requestFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.permission);
+        // имя файла
+        TextView textView = (TextView) dialog.findViewById(R.id.tVFileName);
+        textView.setText(file.getName());
+        // владелец
+        textView = (TextView) dialog.findViewById(R.id.tvOwner);
+        textView.setText(fileOwn);
+        // для владельца
+        CheckBox checkBox = (CheckBox) dialog.findViewById(R.id.cBur);
+        checkBox.setChecked(permissions.ur);
+        checkBox = (CheckBox) dialog.findViewById(R.id.cBuw);
+        checkBox.setChecked(permissions.uw);
+        checkBox = (CheckBox) dialog.findViewById(R.id.cBux);
+        checkBox.setChecked(permissions.ux);
+        // для группы
+        checkBox = (CheckBox) dialog.findViewById(R.id.cBgr);
+        checkBox.setChecked(permissions.gr);
+        checkBox = (CheckBox) dialog.findViewById(R.id.cBgw);
+        checkBox.setChecked(permissions.gw);
+        checkBox = (CheckBox) dialog.findViewById(R.id.cBgx);
+        checkBox.setChecked(permissions.gx);
+        // для остальных
+        checkBox = (CheckBox) dialog.findViewById(R.id.cBor);
+        checkBox.setChecked(permissions.or);
+        checkBox = (CheckBox) dialog.findViewById(R.id.cBow);
+        checkBox.setChecked(permissions.ow);
+        checkBox = (CheckBox) dialog.findViewById(R.id.cBox);
+        checkBox.setChecked(permissions.ox);
+        // рекурсивно для папок
+        textView = (TextView) dialog.findViewById(R.id.textView50);
+        checkBox = (CheckBox) dialog.findViewById(R.id.cBdr);
+        if (file.isDirectory()){
+            textView.setVisibility(View.VISIBLE);
+            checkBox.setVisibility(View.VISIBLE);
+        }else{
+            textView.setVisibility(View.INVISIBLE);
+            checkBox.setVisibility(View.INVISIBLE);
+        }
+
+        Button btn = (Button) dialog.findViewById(R.id.btnCancel);
+        btn.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                dialog.dismiss();
+            }
+        });
+        btn = (Button) dialog.findViewById(R.id.btnOk);
+        btn.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                Permissions permissionsEnd = new Permissions(
+                        ((CheckBox) dialog.findViewById(R.id.cBur)).isChecked(),
+                        ((CheckBox) dialog.findViewById(R.id.cBuw)).isChecked(),
+                        ((CheckBox) dialog.findViewById(R.id.cBux)).isChecked(),
+                        ((CheckBox) dialog.findViewById(R.id.cBgr)).isChecked(),
+                        ((CheckBox) dialog.findViewById(R.id.cBgw)).isChecked(),
+                        ((CheckBox) dialog.findViewById(R.id.cBgx)).isChecked(),
+                        ((CheckBox) dialog.findViewById(R.id.cBor)).isChecked(),
+                        ((CheckBox) dialog.findViewById(R.id.cBow)).isChecked(),
+                        ((CheckBox) dialog.findViewById(R.id.cBox)).isChecked()
+                );
+                RootCommands.applyPermissions(file, permissionsEnd);
+                dialog.dismiss();
+            }
+        });
+
+
+        dialog.show();
+
+
+    }
+
+	private void SetButtonClick(String final1, String final2, ImageButton imageButton){
+		//;
+		if ("RUN".equals(final1)) {// внешняя программа
+			RunApp(final2);
+		} else if ("FAVDOCN".equals(final1)) {// страница фаворитов документов
+			ListActions la = new ListActions(app, ReLaunch.this);
+			la.runItem("favorites", Integer.parseInt(final2) - 1);
+		} else if ("LRUN".equals(final1)) {// страница запущенных ДОКУМЕНТОВ
+			ListActions la = new ListActions(app, ReLaunch.this);
+			la.runItem("lastOpened", Integer.parseInt(final2) - 1);
+		} else if ("HOMEN".equals(final1)) {// страница домашних папок
+			openHome();
+		} else if ("HOMEMENU".equals(final1)) {// всплывающее меню домашних папок
+			menuHome();
+		} else if ("HOMESCREEN".equals(final1)) {// экран домашних папок
+			screenHome();
+		} else if ("LRUMENU".equals(final1)) {// всплывающее меню запущенных документов
+			ListActions la = new ListActions(app, ReLaunch.this);
+			la.showMenu("lastOpened");
+		} else if ("LRUSCREEN".equals(final1)) {// экран запущенных документов
+			menuLastopened();
+		} else if ("FAVDOCMENU".equals(final1)) {// всплывающее меню фаворитов документов
+			ListActions la = new ListActions(app, ReLaunch.this);
+			la.showMenu("favorites");
+		} else if ("FAVDOCSCREEN".equals(final1)) {// экран фаворитов документов
+			menuFavorites();
+		} else if ("ADVANCED".equals(final1)) {// расширенные настройки
+			Intent i = new Intent(ReLaunch.this, Advanced.class);
+			startActivity(i);
+		} else if ("SETTINGS".equals(final1)) {// настройки
+			menuSettings();
+		} else if ("APPMANAGER".equals(final1)) {// все приложения
+			Intent intent = new Intent(ReLaunch.this, TaskManager.class);
+			startActivity(intent);
+		} else if ("BATTERY".equals(final1)) {// показ расхода по приложениям
+			battLevelSec = imageButton;
+			Intent intent = new Intent(Intent.ACTION_POWER_USAGE_SUMMARY);
+			startActivity(intent);
+		} else if ("FAVAPP".equals(final1)) {// всплывающее меню фаворитов приложений
+			Intent intent = new Intent(ReLaunch.this, AllApplications.class);
+			intent.putExtra("list", "app_favorites");
+			intent.putExtra("title", getResources().getString(R.string.jv_relaunch_fav_a));
+			startActivity(intent);
+		} else if ("ALLAPP".equals(final1)) {//
+			Intent intent = new Intent(ReLaunch.this, AllApplications.class);
+			intent.putExtra("list", "app_all");
+			// "All applications"
+			intent.putExtra("title", getResources().getString(R.string.jv_relaunch_all_a));
+			startActivity(intent);
+		} else if ("LASTAPP".equals(final1)) {
+			Intent intent = new Intent(ReLaunch.this, AllApplications.class);
+			intent.putExtra("list", "app_last");
+			// "Last recently used applications"
+			intent.putExtra("title", getResources().getString(R.string.jv_relaunch_lru_a));
+			startActivity(intent);
+		} else if ("SEARCH".equals(final1)) {
+			menuSearch();
+		} else if ("LOCK".equals(final1)) {
+			actionLock();
+		} else if ("POWEROFF".equals(final1)) {
+			actionPowerOff();
+		} else if ("REBOOT".equals(final1)) {
+			actionReboot();
+		} else if ("SWITCHWIFI".equals(final1)) {
+			wifiOp = imageButton;
+			actionSwitchWiFi();
+		} else if ("DROPBOX".equals(final1)) {
+			screenDropbox();
+		} else if ("OPDS".equals(final1)) {
+			screenOPDS();
+		} else if ("FTP".equals(final1)) {
+			screenFTP();
+		} else if ("SYSSETTINGS".equals(final1)) {
+			startActivity(new Intent(android.provider.Settings.ACTION_SETTINGS));
+		} else if ("UPDIR".equals(final1)) {
+			TapUpDir();
+		} else if ("UPSCROOL".equals(final1)) {
+			app.TapUpScrool(gvList, itemsArray.size());
+		} else if ("DOWNSCROOL".equals(final1)) {
+			app.TapDownScrool(gvList, itemsArray.size());
+		}
+	}
+
+	private void DownScroll( int target) {
+		int first = gvList.getFirstVisiblePosition();
+		final int ftarget = target;
+		gvList.clearFocus();
+		gvList.post(new Runnable() {
+			public void run() {
+				gvList.setSelection(ftarget);
+			}
+		});
+		final int ffirst = first;
+		gvList.postDelayed(new Runnable() {
+			public void run() {
+				int nfirst = gvList.getFirstVisiblePosition();
+				if (nfirst == ffirst) {
+					DownScroll(ftarget);
+				}
+			}
+		}, 150);
+	}
 }

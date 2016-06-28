@@ -25,10 +25,8 @@ public class EinkScreen {
 
 	public static void PrepareController(View view, boolean isPartially) {
 		if (N2DeviceInfo.EINK_NOOK) {
-			// System.err.println("Sleep = " + isPartially);
 			if (isPartially || IsSleep != isPartially) {
 				SleepController(isPartially, view);
-				// if (isPartially)
 				return;
 			}
 			if (RefreshNumber == -1) {
@@ -50,8 +48,7 @@ public class EinkScreen {
 				return;
 			}
 			if (UpdateMode > 0 && (UpdateModeInterval > 0 || UpdateMode == 1)) {
-				if (RefreshNumber == 0
-						|| (UpdateMode == cmodeOneshot && RefreshNumber < UpdateModeInterval)) {
+				if (RefreshNumber == 0 || (UpdateMode == cmodeOneshot && RefreshNumber < UpdateModeInterval)) {
 					switch (UpdateMode) {
 					case cmodeActive:
 						SetMode(view, cmodeActive);
@@ -68,20 +65,6 @@ public class EinkScreen {
 					RefreshNumber++;
 				}
 			}
-
-			/*
-			 * if (UpdateMode == 1 && UpdateModeInterval != 0) { if
-			 * (RefreshNumber == 0) { // быстрый режим, один
-			 * раз устанавливается
-			 * N2EpdController.setMode(N2EpdController.REGION_APP_3,
-			 * N2EpdController.WAVE_GL16, N2EpdController.MODE_ACTIVE, view); //
-			 * why not MODE_ACTIVE_ALL? } else if (UpdateModeInterval ==
-			 * RefreshNumber) { // одно качественное
-			 * обновление для быстрого режима
-			 * N2EpdController.setMode(N2EpdController.REGION_APP_3,
-			 * N2EpdController.WAVE_GU, N2EpdController.MODE_CLEAR_ALL, view);
-			 * RefreshNumber = -1; } RefreshNumber ++; }
-			 */
 		}
  	}
 
@@ -89,7 +72,6 @@ public class EinkScreen {
 		if (!N2DeviceInfo.EINK_NOOK) {
 			return;
 		}
-		System.err.println("+++ResetController " + mode);
 		switch (mode) {
 		case cmodeClear:
 			if (UpdateMode == cmodeActive) {
@@ -108,20 +90,10 @@ public class EinkScreen {
 		UpdateMode = mode;
 	}
 
-	public static void ResetController(View view) {
-		if (!N2DeviceInfo.EINK_NOOK || UpdateMode == cmodeClear) {
-			return;
-		}
-		System.err.println("+++Soft reset Controller ");
-		SetMode(view, cmodeClear);
-		RefreshNumber = -1;
-	}
-
 	public static void SleepController(boolean toSleep, View view) {
 		if (!N2DeviceInfo.EINK_NOOK || toSleep == IsSleep) {
 			return;
 		}
-		System.err.println("+++SleepController " + toSleep);
 		IsSleep = toSleep;
 		if (IsSleep) {
 			switch (UpdateMode) {
@@ -143,17 +115,14 @@ public class EinkScreen {
 		case cmodeClear:
 			N2EpdController.setMode(N2EpdController.REGION_APP_3,
 					N2EpdController.WAVE_GC, N2EpdController.MODE_ONESHOT_ALL);
-			// N2EpdController.MODE_CLEAR, view);
 			break;
 		case cmodeOneshot:
 			N2EpdController.setMode(N2EpdController.REGION_APP_3,
 					N2EpdController.WAVE_GU, N2EpdController.MODE_ONESHOT_ALL);
-			// N2EpdController.MODE_ONESHOT_ALL, view);
 			break;
 		case cmodeActive:
 			N2EpdController.setMode(N2EpdController.REGION_APP_3,
 					N2EpdController.WAVE_GL16, N2EpdController.MODE_ACTIVE_ALL);
-			// N2EpdController.MODE_ACTIVE_ALL, view);
 			break;
 		}
 	}
@@ -162,8 +131,7 @@ public class EinkScreen {
         if (prefs != null) {
             Integer einkUpdateMode;
             try {
-                einkUpdateMode = Integer.parseInt(prefs.getString(
-                        "einkUpdateMode", "1"));
+                einkUpdateMode = Integer.parseInt(prefs.getString("einkUpdateMode", "1"));
             } catch (Exception e) {
                 einkUpdateMode = 1;
             }
@@ -174,8 +142,7 @@ public class EinkScreen {
 
                 Integer einkUpdateInterval;
                 try {
-                    einkUpdateInterval = Integer.parseInt(prefs.getString(
-                            "einkUpdateInterval", "10"));
+                    einkUpdateInterval = Integer.parseInt(prefs.getString("einkUpdateInterval", "10"));
                 } catch (Exception e) {
                     einkUpdateInterval = 10;
                 }

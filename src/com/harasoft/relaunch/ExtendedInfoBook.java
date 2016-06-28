@@ -41,6 +41,9 @@ public class ExtendedInfoBook extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         app = (ReLaunchApp) getApplicationContext();
+        if(app == null){
+            finish();
+        }
         app.setFullScreenIfNecessary(this);
         setContentView(R.layout.viewer_layout);
         // убираем не нужные нам кнопку редактирования и область редактирования
@@ -58,8 +61,7 @@ public class ExtendedInfoBook extends Activity {
             layout.removeView((findViewById(R.id.textViewExtInfo)));
         //================================================================================
         LinearLayout ll = (LinearLayout)findViewById(R.id.linLayForAdd);
-        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.FILL_PARENT, LinearLayout.LayoutParams.FILL_PARENT);
+
         ScrollView scroolTV = new ScrollView(this);
         ll.addView(scroolTV);
         // TV
@@ -182,7 +184,7 @@ public class ExtendedInfoBook extends Activity {
             int count;
             while ((ze = zis.getNextEntry()) != null){
                 if(unzipFileName.equals(ze.getName())){
-                    FileOutputStream fout = this.openFileOutput(unzipFileName, Context.MODE_WORLD_READABLE);
+                    FileOutputStream fout = this.openFileOutput(unzipFileName, Context.MODE_PRIVATE);
                     // cteni zipu a zapis
                     while ((count = zis.read(buffer)) != -1){
                         fout.write(buffer, 0, count);

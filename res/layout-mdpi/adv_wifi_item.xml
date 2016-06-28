@@ -12,8 +12,7 @@
         android:layout_width="wrap_content"
         android:layout_height="fill_parent"
         android:layout_marginLeft="4dp"
-        android:background="@color/normal_bg"
-        android:src="@drawable/dir_ok" >
+        android:background="@color/normal_bg" >
     </ImageView>
 
     <LinearLayout
@@ -31,7 +30,6 @@
             android:layout_marginLeft="4dp"
             android:background="@color/normal_bg"
             android:gravity="center_vertical"
-            android:text="SSID"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textColor="@color/normal_fg" >
         </TextView>
@@ -43,7 +41,6 @@
             android:layout_marginLeft="4dp"
             android:background="@color/normal_bg"
             android:gravity="center_vertical"
-            android:text="capabilities"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:textColor="@color/normal_fg" >
         </TextView>
@@ -55,7 +52,6 @@
             android:layout_marginLeft="4dp"
             android:background="@color/normal_bg"
             android:gravity="center_vertical"
-            android:text="other"
             android:textAppearance="?android:attr/textAppearanceMedium"
             android:textColor="@color/normal_fg" >
         </TextView>

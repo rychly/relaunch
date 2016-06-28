@@ -90,8 +90,8 @@ public class Base64Coder {
      * @return   A String containing the decoded data.
      * @throws   IllegalArgumentException if the input is not valid Base64 encoded data.
      */
-    public static String decodeString (String s) {
-        return new String(decode(s)); }
+   /* public static String decodeString (String s) {
+        return new String(decode(s)); }*/
 
     /**
      * Decodes a byte array from Base64 format.

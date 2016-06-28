@@ -4,9 +4,13 @@
     <string-array name="allowed_devices">
         <item>zoom2</item>
         <item>EBX-5047</item>
+        <item>C63ML</item>
+        <item>I63MLP_HD</item>
+        <item>T76ML</item>
+        <item>T62D</item>
     </string-array>
     <string-array name="allowed_manufacturers">
-        <item>BarnesAndNobble</item>
+        <item>BarnesAndNoble</item>
         <item>sony</item>
     </string-array>
     <string-array name="allowed_models">

@@ -52,7 +52,6 @@
                 android:paddingLeft="8dp"
                 android:paddingRight="2dp"
                 android:paddingTop="2dp"
-                android:text="Filename"
                 android:textAppearance="?android:attr/textAppearanceMedium"
                 android:textColor="@color/normal_fg"
                 android:textStyle="bold" >
@@ -97,7 +96,6 @@
         android:layout_marginTop="4dp"
         android:layout_weight="0"
         android:background="@color/normal_bg_gray"
-        android:text="TextView"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:textColor="#000000" >
     </TextView>
