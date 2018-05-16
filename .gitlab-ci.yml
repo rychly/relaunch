@@ -1,0 +1,35 @@
+# http://doc.gitlab.com/ce/ci/yaml/README.html
+# https://hub.docker.com/_/gradle/
+# https://developer.android.com/studio/index.html#downloads
+
+image: openjdk:8-jdk
+
+variables:
+  PUBLIC: "public"
+
+.android_sdk: &android_sdk
+  variables:
+    ANDROID_SDK_TOOLS: "3859397"
+    ANDROID_BUILD_TOOLS: "27.0.3"
+    ANDROID_API: "7"
+    ANDROID_HOME: "${CI_PROJECT_DIR}/.."
+  before_script:
+    - wget --quiet -O "${ANDROID_HOME}/tools.zip" "https://dl.google.com/android/repository/sdk-tools-linux-${ANDROID_SDK_TOOLS}.zip" && unzip -q "${ANDROID_HOME}/tools.zip" -d "${ANDROID_HOME}" && echo "Android SDK tools ${ANDROID_SDK_TOOLS} package downloaded and extracted"
+    - yes | ${ANDROID_HOME}/tools/bin/sdkmanager --licenses | sed '/^---------------------------------------$/,/^---------------------------------------$/d' || true
+    - ${ANDROID_HOME}/tools/bin/sdkmanager "platform-tools" "platforms;android-${ANDROID_API}" "build-tools;${ANDROID_BUILD_TOOLS}"
+
+stages:
+  - build
+
+pages:
+  stage: build
+  only:
+    - rychly/master
+  <<: *android_sdk
+  script:
+    - ./gradlew -PANDROID_BUILD_TARGET_SDK_VERSION=${ANDROID_API} -PANDROID_BUILD_TOOLS_VERSION=${ANDROID_BUILD_TOOLS} -PANDROID_BUILD_SDK_VERSION=${ANDROID_API} packageDebug
+    - mkdir -p "${PUBLIC}"
+    - mv -v ./build/outputs/apk/debug/*-debug.apk "${PUBLIC}/"
+  artifacts:
+    paths:
+      - ${PUBLIC}
