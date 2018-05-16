@@ -92,11 +92,16 @@
         <item>RUN</item>
         <item>DROPBOX</item>
         <item>OPDS</item>
-        <item>FTP</item>
         <item>SYSSETTINGS</item>
         <item>UPDIR</item>
-        <item>UPSCROOL</item>
-        <item>DOWNSCROOL</item>
+        <item>UPSCROLL</item>
+        <item>UPSCROLLPERC</item>
+        <item>UPSCROLLBEGIN</item>
+        <item>DOWNSCROLL</item>
+        <item>DOWNSCROLLPERC</item>
+        <item>DOWNSCROLLEND</item>
+        <item>SORTMENU</item>
+        <item>SELNUMCOL</item>
     </string-array>
     <string-array name="arr_button_actions_names">
         <item>@string/app_settings_nothing</item>
@@ -124,11 +129,16 @@
         <item>@string/app_settings_run</item>
         <item>@string/app_settings_dropbox</item>
         <item>@string/app_settings_opds</item>
-        <item>@string/app_settings_ftp</item>
         <item>@string/app_settings_sys_settings</item>
         <item>@string/app_settings_up_dir</item>
         <item>@string/app_settings_up_scrool</item>
+        <item>@string/app_settings_up_perc</item>
+        <item>@string/app_settings_up_begin</item>
         <item>@string/app_settings_down_scrool</item>
+        <item>@string/app_settings_down_perc</item>
+        <item>@string/app_settings_down_end</item>
+        <item>@string/app_settings_sort_menu</item>
+        <item>@string/app_settings_sel_num_col</item>
     </string-array>
     <string-array name="output_columns_values">
         <item>-1</item>
@@ -167,21 +177,12 @@
         <item>@string/arr_screen_orientation_names_3</item>
     </string-array>
 
-    <string-array name="start_mode_values">
-        <item>LAUNCHER</item>
-        <item>PROGRAM</item>
-        <item>UNKNOWN</item>
-    </string-array>
-    <string-array name="start_mode_names">
-        <item>@string/arr_start_mode_names_1</item>
-        <item>@string/arr_start_mode_names_2</item>
-        <item>@string/arr_start_mode_names_3</item>
-    </string-array>
     <string-array name="work_mode_values">
         <item>FILES</item>
         <item>BOOKS</item>
         <item>UNKNOWN</item>
     </string-array>
+
     <string-array name="work_mode_names">
         <item>@string/arr_work_mode_names_1</item>
         <item>@string/arr_work_mode_names_2</item>
@@ -192,64 +193,13 @@
         <item>System</item>
         <item>English</item>
         <item>Русский</item>
-        <item>Español</item>
-	</string-array> 
+	</string-array>
+
 	<string-array name="entryvalues_lang">
 		<item>default</item> 
-		<item>en</item>
+		<item>en_US</item>
 		<item>ru</item>
-		<item>es</item>
 	</string-array>
-    <string-array name="array_buttons_values">
-        <item>NOTHING</item>
-        <item>homeButtonDT</item>
-        <item>homeButtonLT</item>
-        <item>lruButtonDT</item>
-        <item>lruButtonLT</item>
-        <item>favButtonDT</item>
-        <item>favButtonLT</item>
-        <item>settingsButtonDT</item>
-        <item>settingsButtonLT</item>
-        <item>advancedButtonDT</item>
-        <item>advancedButtonLT</item>
-        <item>memButtonDT</item>
-        <item>memButtonLT</item>
-        <item>batButtonDT</item>
-        <item>batButtonLT</item>
-        <item>appFavButtonDT</item>
-        <item>appFavButtonLT</item>
-        <item>appAllButtonDT</item>
-        <item>appAllButtonLT</item>
-        <item>appLastButtonDT</item>
-        <item>appLastButtonLT</item>
-        <item>searchButtonDT</item>
-        <item>searchButtonLT</item>
-    </string-array>
-    <string-array name="array_buttons_names">
-        <item>@string/arr_einkUpdateMode_names_1</item>
-        <item>@string/pref_i_homeButtonDT_title</item>
-        <item>@string/pref_i_homeButtonLT_title</item>
-        <item>@string/pref_i_lruButtonDT_title</item>
-        <item>@string/pref_i_lruButtonLT_title</item>
-        <item>@string/pref_i_favButtonDT_title</item>
-        <item>@string/pref_i_favButtonLT_title</item>
-        <item>@string/pref_i_settingsButtonDT_title</item>
-        <item>@string/pref_i_settingsButtonLT_title</item>
-        <item>@string/pref_i_advancedButtonDT_title</item>
-        <item>@string/pref_i_advancedButtonLT_title</item>
-        <item>@string/pref_i_memButtonDT_title</item>
-        <item>@string/pref_i_memButtonLT_title</item>
-        <item>@string/pref_i_batButtonDT_title</item>
-        <item>@string/pref_i_batButtonLT_title</item>
-        <item>@string/pref_i_appFavButtonDT_title</item>
-        <item>@string/pref_i_appFavButtonLT_title</item>
-        <item>@string/pref_i_appAllButtonDT_title</item>
-        <item>@string/pref_i_appAllButtonLT_title</item>
-        <item>@string/pref_i_appLastButtonDT_title</item>
-        <item>@string/pref_i_appLastButtonLT_title</item>
-        <item>@string/pref_i_searchButtonDT_title</item>
-        <item>@string/pref_i_searchButtonLT_title</item>
-    </string-array>
 
     <string-array name="array_panel_names">
         <item>@string/pref_i_add_new</item>

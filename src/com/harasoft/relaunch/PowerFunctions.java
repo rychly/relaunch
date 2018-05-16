@@ -11,10 +11,9 @@ import android.content.DialogInterface;
 import android.os.SystemClock;
 import android.widget.Toast;
 
-public class PowerFunctions {
+class PowerFunctions {
 
-	public static boolean actionLock(Activity act, boolean isRoot) {
-        if (isRoot) {
+	static boolean actionLock(Activity act) {
             Process p;
             // Preform su to get root privledges
             try {
@@ -38,14 +37,9 @@ public class PowerFunctions {
                 getToast(act);
                 return false;
             }
-        }else{
-            getToast(act);
-            return false;
-        }
 	}
 
-	public static void actionReboot(Activity act, boolean isRoot) {
-        if (isRoot) {
+	static void actionReboot(Activity act) {
             final Process p;
             // Preform su to get root privledges
             try {
@@ -60,7 +54,7 @@ public class PowerFunctions {
                 builder.setPositiveButton(act.getResources().getString(R.string.app_yes),
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
-                                fact.setContentView(R.layout.reboot);
+                                fact.setContentView(R.layout.dialog_layout_reboot);
                                 Timer timer = new Timer();
                                 timer.schedule(new TimerTask() {
                                     public void run() {
@@ -91,14 +85,10 @@ public class PowerFunctions {
             } catch (IOException e) {
                 getToast(act);
             }
-        }else{
-            getToast(act);
-        }
 
 	}
 
-	public static void actionPowerOff(Activity act, boolean isRoot) {
-        if (isRoot) {
+	static void actionPowerOff(Activity act) {
             final Process p;
             // Preform su to get root privledges
             try {
@@ -113,7 +103,7 @@ public class PowerFunctions {
                 builder.setPositiveButton(act.getResources().getString(R.string.app_yes),
                         new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int whichButton) {
-                                fact.setContentView(R.layout.poweroff);
+                                fact.setContentView(R.layout.dialog_layout_poweroff);
                                 Timer timer = new Timer();
                                 timer.schedule(new TimerTask() {
                                     public void run() {
@@ -145,9 +135,6 @@ public class PowerFunctions {
             } catch (IOException e) {
                 getToast(act);
             }
-        } else {
-            getToast(act);
-        }
     }
 
     private static void getToast(Activity act){

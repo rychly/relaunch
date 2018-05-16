@@ -3,6 +3,8 @@ package com.harasoft.relaunch;
 import android.app.Activity;
 import android.content.*;
 import android.graphics.Typeface;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
@@ -13,6 +15,7 @@ import android.text.SpannableString;
 import android.view.*;
 import android.webkit.WebView;
 import android.widget.*;
+import com.harasoft.relaunch.Utils.UtilIcons;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -24,22 +27,21 @@ public class Advanced extends Activity {
 
 	SharedPreferences prefs;
 	ReLaunchApp app;
-	Button rebootBtn;
-	Button powerOffBtn;
 	//int myId = -1;
-	boolean addSView = true;
+	private boolean addSView = true;
 
-	WifiManager wfm;
-	Button wifiOnOff;
-	Button wifiScan;
-	List<NetInfo> wifiNetworks = new ArrayList<NetInfo>();
-	WiFiAdapter adapter;
-	ListView lv_wifi;
-	IntentFilter i1;
-	IntentFilter i2;
-	BroadcastReceiver b1;
-	BroadcastReceiver b2;
-	String connectedSSID;
+	private WifiManager wfm;
+	private Button wifiOnOff;
+	private Button wifiScan;
+	private List<NetInfo> wifiNetworks = new ArrayList<>();
+	private WiFiAdapter adapter;
+	private ListView lv_wifi;
+	private IntentFilter i1;
+	private IntentFilter i2;
+	private BroadcastReceiver b1;
+	private BroadcastReceiver b2;
+	private String connectedSSID;
+	UtilIcons utilIcons;
 
 	static class NetInfo {
 		static int unknownLevel = -5000;
@@ -148,7 +150,7 @@ public class Advanced extends Activity {
 			View v = convertView;
 			if (v == null) {
 				LayoutInflater vi = (LayoutInflater) app.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-				v = vi.inflate(R.layout.adv_wifi_item, null);
+				v = vi.inflate(R.layout.item_advanced_wifi, parent, false);
                 if (v == null) {
                     return null;
                 }
@@ -261,18 +263,20 @@ public class Advanced extends Activity {
 	}
 
 	private String sp(int n) {
-		String rc = "";
-		for (int i = 0; i < n; i++)
-			rc += "&nbsp;";
-		return rc;
+		StringBuilder str_rc = new StringBuilder();
+		for (int i = 0; i < n; i++) {
+			str_rc.append("&nbsp;");
+		}
+		return str_rc.toString();
 	}
 /*
 	private int getMyId() {
 		int rc = -1;
-
+		Pattern p = Pattern.compile("uid=(\\d+)\\(");
+		Matcher m;
 		for (String l : execFg("id")) {
-			Pattern p = Pattern.compile("uid=(\\d+)\\(");
-			Matcher m = p.matcher(l);
+
+			m = p.matcher(l);
 			if (m.find()) {
 				try {
 					rc = Integer.parseInt(m.group(1));
@@ -290,10 +294,9 @@ public class Advanced extends Activity {
 	private List<String> readFile(String fname) {
 		BufferedReader br;
 		String readLine;
-		List<String> rc = new ArrayList<String>();
+		List<String> rc = new ArrayList<>();
 		try {
-			br = new BufferedReader(new InputStreamReader(new FileInputStream(
-					fname)), 1000);
+			br = new BufferedReader(new InputStreamReader(new FileInputStream(fname)), 1000);
 		} catch (FileNotFoundException e) {
 			return rc;
 		}
@@ -319,7 +322,7 @@ public class Advanced extends Activity {
 
 	// Execute foreground command and return result as list of strings
 	private List<String> execFg(String cmd) {
-		List<String> rc = new ArrayList<String>();
+		List<String> rc = new ArrayList<>();
 		try {
 
 			Process p = Runtime.getRuntime().exec(cmd);
@@ -344,7 +347,7 @@ public class Advanced extends Activity {
 	private ArrayList<Info> createInfoFS() {
 		// Filesystem
 		String[] ingnoreFs = getResources().getStringArray(R.array.filesystems_to_ignore);
-		ArrayList<Info> infos = new ArrayList<Info>();
+		ArrayList<Info> infos = new ArrayList<>();
 		for (String s : readFile("/proc/mounts")) {
 			String[] f = s.split("\\s+");
 			if (f.length < 4) {
@@ -392,7 +395,7 @@ public class Advanced extends Activity {
 	}
 
 	private List<NetInfo> readScanResults(WifiManager w) {
-		List<NetInfo> rc = new ArrayList<NetInfo>();
+		List<NetInfo> rc = new ArrayList<>();
 		List<ScanResult> rc1 = w.getScanResults();
 		List<WifiConfiguration> rc2 = w.getConfiguredNetworks();
 
@@ -468,10 +471,6 @@ public class Advanced extends Activity {
 			// "Turn WiFi off"
 			wifiOnOff.setText(getResources().getString(
 					R.string.jv_advanced_turn_wifi_off));
-			wifiOnOff.setCompoundDrawablesWithIntrinsicBounds(getResources()
-					.getDrawable(R.drawable.wifi_off), getResources()
-					.getDrawable(R.drawable.ci_wifi_on), getResources()
-					.getDrawable(R.drawable.wifi_off), null);
 			wifiOnOff.setOnClickListener(new View.OnClickListener() {
 				public void onClick(View v) {
 					wfm.setWifiEnabled(false);
@@ -483,15 +482,11 @@ public class Advanced extends Activity {
 			});
 			wifiNetworks = readScanResults(wfm);
 			wifiScan.setEnabled(true);
-			wifiScan.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ci_wifiscan, 0, 0);
+			wifiScan.setCompoundDrawablesWithIntrinsicBounds(null, new BitmapDrawable(getResources(), utilIcons.getIcon("WIFISCANON")), null, null);
 		} else {
 			// "Turn WiFi on"
 			wifiOnOff.setText(getResources().getString(
 					R.string.jv_advanced_turn_wifi_on));
-			wifiOnOff.setCompoundDrawablesWithIntrinsicBounds(getResources()
-					.getDrawable(R.drawable.wifi_on), getResources()
-					.getDrawable(R.drawable.ci_wifi_on), getResources()
-					.getDrawable(R.drawable.wifi_on), null);
 			wifiOnOff.setOnClickListener(new View.OnClickListener() {
 				public void onClick(View v) {
 					wfm.setWifiEnabled(true);
@@ -503,8 +498,9 @@ public class Advanced extends Activity {
 			});
 			wifiNetworks.clear();
 			wifiScan.setEnabled(false);
-			wifiScan.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ci_wifiscan_gray, 0, 0);
+			wifiScan.setCompoundDrawablesWithIntrinsicBounds(null, new BitmapDrawable(getResources(), utilIcons.getIcon("WIFISCANOFF")), null, null);
 		}
+		wifiOnOff.setCompoundDrawablesWithIntrinsicBounds(null, new BitmapDrawable(getResources(), utilIcons.getIcon("SWITCHWIFI")), null, null);
 		EinkScreen.PrepareController(null, false);
 		adapter.notifyDataSetChanged();
 	}
@@ -515,30 +511,28 @@ public class Advanced extends Activity {
 
 		prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
 
-        EinkScreen.setEinkController(prefs);
-
 		app = ((ReLaunchApp) getApplicationContext());
         if(app == null ) {
             finish();
         }
-        app.setFullScreenIfNecessary(this);
-		setContentView(R.layout.advanced_layout);
-
+        app.setOptionsWindowActivity(this);
+		setContentView(R.layout.layout_advanced);
+		utilIcons = new UtilIcons(getBaseContext());
 		// "Advanced functions, info, etc."
-		((TextView) findViewById(R.id.results_title)).setText(getResources()
-				.getString(R.string.jv_advanced_title));
-		findViewById(R.id.results_btn)
-				.setOnClickListener(new View.OnClickListener() {
+		ImageView adv_exit = (ImageView) findViewById(R.id.adv_btn_exit);
+		adv_exit.setImageBitmap(utilIcons.getIcon("EXIT"));
+		adv_exit.setOnClickListener(new View.OnClickListener() {
                     public void onClick(View v) {
                         finish();
                     }
                 });
-
+		ImageView adv_icon = (ImageView) findViewById(R.id.adv_icon);
+		adv_icon.setImageBitmap(utilIcons.getIcon("ADVANCED"));
 		// UID
 		//myId = getMyId();
 
 		// Wifi
-		wfm = (WifiManager) this.getSystemService(Context.WIFI_SERVICE);
+		wfm = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
 		wifiNetworks = readScanResults(wfm);
 		// Wifi info
 		lv_wifi = (ListView) findViewById(R.id.wifi_lv);
@@ -592,15 +586,17 @@ public class Advanced extends Activity {
 		}
 
 		wifiScan = (Button) findViewById(R.id.wifi_scan_btn);
+		final Drawable wifi_gray = new BitmapDrawable(getResources(), utilIcons.getIcon("WIFISCANOFF"));
 		wifiScan.setOnClickListener(new View.OnClickListener() {
 			public void onClick(View v) {
 				wfm.startScan();
-				wifiScan.setEnabled(false);
-				wifiScan.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ci_wifiscan_gray, 0, 0);
+				wifiScan.setEnabled(false); //
+				wifiScan.setCompoundDrawablesWithIntrinsicBounds(null, wifi_gray, null, null);
 			}
 		});
 
 		// Receive broadcast when scan results are available
+		final Drawable wifi_on = new BitmapDrawable(getResources(), utilIcons.getIcon("WIFISCANON"));
 		i1 = new IntentFilter();
 		i1.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
 		b1 = new BroadcastReceiver() {
@@ -608,7 +604,7 @@ public class Advanced extends Activity {
 			public void onReceive(Context context, Intent intent) {
 				wifiNetworks = readScanResults(wfm);
 				wifiScan.setEnabled(true);
-				wifiScan.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ci_wifiscan, 0, 0);
+				wifiScan.setCompoundDrawablesWithIntrinsicBounds(null, wifi_on, null, null);
 				adapter.notifyDataSetChanged();
 			}
 		};
@@ -626,7 +622,7 @@ public class Advanced extends Activity {
 			public void onReceive(Context context, Intent intent) {
 				wifiNetworks = readScanResults(wfm);
 				wifiScan.setEnabled(true);
-				wifiScan.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ci_wifiscan, 0, 0);
+				wifiScan.setCompoundDrawablesWithIntrinsicBounds(null, wifi_on, null, null);
 				adapter.notifyDataSetChanged();
 				updateWiFiInfo();
 			}
@@ -638,6 +634,7 @@ public class Advanced extends Activity {
 
         // WiFi settings + Nook shadow settings
         final Button wifiSetup = (Button) findViewById(R.id.wifi_setup_btn);
+		wifiSetup.setCompoundDrawablesWithIntrinsicBounds(null, new BitmapDrawable(getResources(), utilIcons.getIcon("WIFISETUP")), null, null);
         class FavSimpleOnGestureListener extends
                 GestureDetector.SimpleOnGestureListener {
             @Override
@@ -677,12 +674,6 @@ public class Advanced extends Activity {
 
             @Override
             public void onLongPress(MotionEvent e) {
-                if (wifiSetup.hasWindowFocus()) {
-                    if (N2DeviceInfo.EINK_NOOK) {
-                        Intent i = new Intent(Advanced.this, NookShadowSettings.class);
-                        startActivity(i);
-                    }
-                }
             }
         }
 
@@ -697,53 +688,35 @@ public class Advanced extends Activity {
 
 		// Lock button
 		final Activity parent = this;
+
 		Button lockBtn = (Button) findViewById(R.id.lock_btn);
-		if (ReLaunch.accessRoot) {
 			lockBtn.setEnabled(true);
-			lockBtn.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ci_lock, 0, 0);
+			lockBtn.setCompoundDrawablesWithIntrinsicBounds( null, new BitmapDrawable(getResources(), utilIcons.getIcon("LOCK")), null, null);
 			lockBtn.setOnClickListener(new View.OnClickListener() {
 				public void onClick(View v) {
-					if (PowerFunctions.actionLock(parent, ReLaunch.accessRoot)) {
+					if (PowerFunctions.actionLock(parent)) {
 						parent.finish();
 					}
 				}
 			});
-		}else{
-			lockBtn.setEnabled(false);
-			lockBtn.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ci_lock_gray, 0, 0);
-		}
-
-
 		// Reboot button
-        rebootBtn = (Button) findViewById(R.id.reboot_btn);
-		if (ReLaunch.accessRoot) {
+		Button rebootBtn = (Button) findViewById(R.id.reboot_btn);
 			rebootBtn.setEnabled(true);
-			rebootBtn.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ci_reboot, 0, 0);
+			rebootBtn.setCompoundDrawablesWithIntrinsicBounds( null, new BitmapDrawable(getResources(), utilIcons.getIcon("REBOOT")), null, null);
 			rebootBtn.setOnClickListener(new View.OnClickListener() {
 				public void onClick(View v) {
-					PowerFunctions.actionReboot(parent, ReLaunch.accessRoot);
+					PowerFunctions.actionReboot(parent);
 				}
 			});
-		}else{
-			rebootBtn.setEnabled(false);
-			rebootBtn.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ci_reboot_gray, 0, 0);
-		}
-
-
 		// Power Off button
-		powerOffBtn = (Button) findViewById(R.id.poweroff_btn);
-		if (ReLaunch.accessRoot) {
+		Button powerOffBtn = (Button) findViewById(R.id.poweroff_btn);
 			powerOffBtn.setEnabled(true);
-			powerOffBtn.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ci_power, 0, 0);
+			powerOffBtn.setCompoundDrawablesWithIntrinsicBounds( null, new BitmapDrawable(getResources(), utilIcons.getIcon("POWEROFF")), null, null);
 			powerOffBtn.setOnClickListener(new View.OnClickListener() {
 				public void onClick(View v) {
-					PowerFunctions.actionPowerOff(parent, ReLaunch.accessRoot);
+					PowerFunctions.actionPowerOff(parent);
 				}
 			});
-		}else{
-			powerOffBtn.setEnabled(false);
-			powerOffBtn.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ci_power_gray, 0, 0);
-		}
 
 
 		// Web info view
@@ -752,76 +725,65 @@ public class Advanced extends Activity {
 		final int ntitle1 = 3;
 		final int ntitle2 = 8;
 		// "<h2><center>Disks/partitions</center></h2><table>"
-		String s = "<h3><center>"
-				+ getResources().getString(
-						R.string.jv_advanced_mount_diskspartitions)
-				+ "</center></h3><table>";
-		s += "<tr>"
+		StringBuilder str_mount = new StringBuilder("<h3><center>");
+			str_mount.append(getResources().getString(R.string.jv_advanced_mount_diskspartitions));
+			str_mount.append("</center></h3><table>");
+			str_mount.append("<tr>");
 		// + "<td><b>" + sp(ntitle1) + "Mount point" + sp(ntitle2) + "</b></td>"
-				+ "<td><b>"
-				+ sp(ntitle1)
-				+ getResources().getString(
-						R.string.jv_advanced_mount_mountpoint)
-				+ sp(ntitle2)
-				+ "</b></td>"
-				// + "<td><b>" + sp(ntitle1) + "FS" + sp(ntitle2) + "</b></td>"
-				+ "<td><b>"
-				+ sp(ntitle1)
-				+ getResources().getString(R.string.jv_advanced_mount_FS)
-				+ sp(ntitle2)
-				+ "</b></td>"
-				// + "<td><b>" + sp(ntitle1) + "total" + sp(ntitle2) +
-				// "</b></td>"
-				+ "<td><b>"
-				+ sp(ntitle1)
-				+ getResources().getString(R.string.jv_advanced_mount_total)
-				+ sp(ntitle2)
-				+ "</b></td>"
-				// + "<td><b>" + sp(ntitle1) + "used" + sp(ntitle2) +
-				// "</b></td>"
-				+ "<td><b>"
-				+ sp(ntitle1)
-				+ getResources().getString(R.string.jv_advanced_mount_used)
-				+ sp(ntitle2)
-				+ "</b></td>"
-				// + "<td><b>" + sp(ntitle1) + "free" + sp(ntitle2) +
-				// "</b></td>"
-				+ "<td><b>"
-				+ sp(ntitle1)
-				+ getResources().getString(R.string.jv_advanced_mount_free)
-				+ sp(ntitle2)
-				+ "</b></td>"
-				// + "<td><b>" + sp(ntitle1) + "RO/RW" + sp(ntitle2) +
-				// "</b></td>"
-				+ "<td><b>" + sp(ntitle1)
-				+ getResources().getString(R.string.jv_advanced_mount_rorw)
-				+ sp(ntitle2) + "</b></td>" + "</tr>";
-		for (Info i : infos)
-			s += "<tr>" + "<td>"
-					+ i.mpoint
-					+ "</td>"
-					+ "<td>"
-					+ i.fs
-					+ "</td>"
-					+ "<td>"
-					+ i.total
-					+ "</td>"
-					+ "<td>"
-					+ i.used
-					+ "</td>"
-					+ "<td>"
-					+ i.free
-					+ "</td>"
-					// + "<td>" + (i.ro ? "RO" : "RW") + "</b></td>"
-					+ "<td>"
-					+ (i.ro ? getResources().getString(
-							R.string.jv_advanced_mount_ro) : getResources()
-							.getString(R.string.jv_advanced_mount_rw))
-					+ "</b></td>" + "</tr>";
-		s += "</table>";
-		wv.loadDataWithBaseURL(null, s, "text/html", "utf-8", null);
-
-		ScreenOrientation.set(this, prefs);
+			str_mount.append("<td><b>");
+			str_mount.append(sp(ntitle1));
+			str_mount.append(getResources().getString(R.string.jv_advanced_mount_mountpoint));
+			str_mount.append(sp(ntitle2));
+			str_mount.append("</b></td>");
+		// + "<td><b>" + sp(ntitle1) + "FS" + sp(ntitle2) + "</b></td>"
+			str_mount.append("<td><b>");
+			str_mount.append(sp(ntitle1));
+			str_mount.append(getResources().getString(R.string.jv_advanced_mount_FS));
+			str_mount.append(sp(ntitle2));
+			str_mount.append("</b></td>");
+		// + "<td><b>" + sp(ntitle1) + "total" + sp(ntitle2) + "</b></td>"
+			str_mount.append("<td><b>");
+			str_mount.append(sp(ntitle1));
+			str_mount.append(getResources().getString(R.string.jv_advanced_mount_total));
+			str_mount.append(sp(ntitle2));
+			str_mount.append("</b></td>");
+		// + "<td><b>" + sp(ntitle1) + "used" + sp(ntitle2) + "</b></td>"
+			str_mount.append("<td><b>");
+			str_mount.append(sp(ntitle1));
+			str_mount.append(getResources().getString(R.string.jv_advanced_mount_used));
+			str_mount.append(sp(ntitle2));
+			str_mount.append("</b></td>");
+		// + "<td><b>" + sp(ntitle1) + "free" + sp(ntitle2) + "</b></td>"
+			str_mount.append("<td><b>");
+			str_mount.append(sp(ntitle1));
+			str_mount.append(getResources().getString(R.string.jv_advanced_mount_free));
+			str_mount.append(sp(ntitle2));
+			str_mount.append("</b></td>");
+		// + "<td><b>" + sp(ntitle1) + "RO/RW" + sp(ntitle2) + "</b></td>"
+			str_mount.append("<td><b>");
+			str_mount.append(sp(ntitle1));
+			str_mount.append(getResources().getString(R.string.jv_advanced_mount_rorw));
+			str_mount.append(sp(ntitle2));
+			str_mount.append("</b></td></tr>");
+		for (Info i : infos) {
+			str_mount.append("<tr><td>");
+			str_mount.append(i.mpoint);
+			str_mount.append("</td><td>");
+			str_mount.append(i.fs);
+			str_mount.append("</td><td>");
+			str_mount.append(i.total);
+			str_mount.append("</td><td>");
+			str_mount.append(i.used);
+			str_mount.append("</td><td>");
+			str_mount.append(i.free);
+			str_mount.append("</td><td>");
+			str_mount.append((i.ro ? getResources().getString(
+					R.string.jv_advanced_mount_ro) : getResources()
+					.getString(R.string.jv_advanced_mount_rw)));
+			str_mount.append("</b></td></tr>");
+		}
+		str_mount.append("</table>");
+		wv.loadDataWithBaseURL(null, str_mount.toString(), "text/html", "utf-8", null);
 	}
 
 	@Override

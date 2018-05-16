@@ -71,7 +71,8 @@
 
     <!-- Context Menu, Home Folders -->
     <string name="jv_results_home_list_remove"> ∅ Remove from Here</string>
-    <string name="jv_results_add_homedir"> ↸ Edit Home Folders</string>
+    <string name="jv_results_add_homedir"> + Add Home Folder</string>
+    <string name="jv_results_edit_homedir"> ↸ Edit Home Folders</string>
     <string name="jv_results_move_up"> ▲ Move Up</string>
     <string name="jv_results_move_down"> ▼ Move Down</string>
 
@@ -79,7 +80,8 @@
     <string name="jv_allapp_move_up"> ▲ Move Up</string>
     <string name="jv_allapp_move_down"> ▼ Move Down</string>
     <string name="jv_allapp_add"> ★ Add to Favorites</string>
-    <string name="jv_allapp_remove"> ☆ Remove from Favorites</string>
+    <string name="jv_allapp_fav_remove"> ☆ Remove from Favorites</string>
+    <string name="jv_allapp_last_remove"> ☆ Remove from LastRun</string>
     <string name="jv_allapp_uninstall"> ∅ Uninstall</string>
 
 	<!-- Context Menu, Other Items -->
@@ -261,10 +263,6 @@ on the back to start again."</string>
 
     <!-- Settings -->
     <string name="pref_c_mGeneral_title">Common Settings</string>
-    <string name="pref_i_startMode_title">Operating Mode</string>
-    <string name="arr_start_mode_names_1">Run as System Launcher</string>
-    <string name="arr_start_mode_names_2">Run as a Regular Application</string>
-    <string name="arr_start_mode_names_3">Determined by Advanced Settings</string>
     <string name="pref_i_workMode_title">Interface Choice</string>
     <string name="arr_work_mode_names_1">File Manager</string>
     <string name="arr_work_mode_names_2">Library</string>
@@ -287,6 +285,8 @@ on the back to start again."</string>
     <string name="jv_prefs_decline_changes_text">Would you like to save and apply the configuration changes you have just made? The application will be restarted.</string>
     <string name="jv_prefs_select_number">Select Number</string>
     <string name="jv_prefs_select_application">Select Item</string>
+    <string name="pref_i_Information_for_Device_title">Device</string>
+    <string name="jv_prefs_info_device_title">About device</string>
 
     <!-- Settings / Advanced -->
     <string name="pref_s_screenAdvanced_title">Advanced Settings ▶</string>
@@ -298,10 +298,9 @@ on the back to start again."</string>
     <string name="pref_s_scroll_title">Quick Scrolling and Scrollbar Appearance ▶</string>
     <string name="pref_s_search_title">Search Options ▶</string>
     <string name="pref_s_viewer_title">Built-In Viewer and Editor ▶</string>
+    <string name="pref_s_columnSize_title">List Size Columns ▶</string>
     <string name="pref_s_listSize_title">List Size Constraints ▶</string>
-    <string name="pref_s_screenDropBox_title">Dropbox Integration ▶</string>
     <string name="pref_s_screenOPDS_title">Open Publication Distribution System (OPDS) ▶</string>
-    <string name="pref_s_screenFTP_title">FTP Client ▶</string>
     <string name="pref_s_system_title">Maintenance Tasks ▶</string>
     <string name="pref_i_restart_title">↻ Save Configuration Changes and Restart</string>
     <string name="pref_i_fileAssociations_title">File Type Associations ▶</string>
@@ -309,11 +308,6 @@ on the back to start again."</string>
     <string name="pref_i_fileFilter_title">Filtering Rules ▶</string>
 
     <!-- Settings / Advanced / Home Folders and File Viewing -->
-    <string name="pref_i_showAddStartDir_title">Allow Changes to Home Folders</string>
-    <string name="pref_i_showAddStartDir_on">Home folders can be changed through the context menu</string>
-    <string name="pref_i_showAddStartDir_off">Home folders can only be changed in the settings</string>
-    <string name="pref_i_startDir_title">Home Folders</string>
-    <string name="pref_i_startDir_desc">Separate multiple entries with commas</string>
     <string name="pref_i_saveDir_title">Start Where You Left Off</string>
     <string name="pref_i_saveDir_on">The launcher will start from the last visited folder</string>
     <string name="pref_i_saveDir_off">The launcher will start from the first designated home folder</string>
@@ -343,10 +337,6 @@ on the back to start again."</string>
     <string name="pref_i_fileExtendedFormat_off">Detailed information will be omitted from view</string>
     <string name="pref_i_fileExtendedDataFormat_title">Detailed Information Format</string>
     <string name="pref_i_fileExtendedDataFormat_sum" formatted="false">%Sb – size in bytes, %SKb – size in kilobytes, %SMb – size in megabytes, %D – date, %T – time</string>
-    <string name="LangTitle">Interface Language</string>
-    <string name="LangDialogTitle">Choose Application Language</string>
-    <string name="LangSummary">"The language has been changed,
-please restart ReLaunch to apply."</string>
     <string name="pref_i_showOnlyKnownExts_title">Show only files with created association</string>
     <string name="pref_i_showOnlyKnownExts_on">Registered only</string>
     <string name="pref_i_showOnlyKnownExts_off">Filter is off </string>
@@ -380,9 +370,9 @@ please restart ReLaunch to apply."</string>
     <string name="pref_i_fullScreen_title">Full Screen</string>
     <string name="pref_i_fullScreen_on">ReLaunch will work in full-screen mode</string>
     <string name="pref_i_fullScreen_off">The status bar on top will remain visible</string>
-    <string name="pref_i_showNew_title">Differentiate New and Read Items</string>
-    <string name="pref_i_showNew_on">Newly added files will be shown in bold</string>
-    <string name="pref_i_showNew_off">All files will be shown in the same way</string>
+    <string name="pref_i_showNewBook_title">Differentiate New and Read Items</string>
+    <string name="pref_i_showNewBook_on">Newly added files will be shown in bold</string>
+    <string name="pref_i_showNewBook_off">All files will be shown in the same way</string>
     <string name="pref_i_firstLineFontSizePx_title">List Item Font Size</string>
     <string name="pref_i_firstLineFontSizePx_sum">Global font size for file and folder names in pixels</string>
     <string name="pref_i_secondLineFontSizePx_title">Item Details Font Size</string>
@@ -392,35 +382,20 @@ please restart ReLaunch to apply."</string>
     <string name="pref_i_showFullDirPath_title">Show Full Path as Folder Title</string>
     <string name="pref_i_showFullDirPath_on">Full path to folder will be shown as its title</string>
     <string name="pref_i_showFullDirPath_off">Only the immediate folder name will be shown as the title</string>
-    <string name="pref_i_doNotHyph_title">Keep Names in Single Line Each</string>
-    <string name="pref_i_doNotHyph_off">Allow names to break into multiple lines</string>
-    <string name="pref_i_doNotHyph_on">Do not allow names to break into multiple lines</string>
-    <string name="pref_i_columnsDirsFiles_title">Columns in Files and Folders View (Default)</string>
-    <string name="arr_output_columns_names_1">Automatically Decide</string>
-    <string name="arr_output_columns_names_2">Single</string>
-    <string name="arr_output_columns_names_3">Double</string>
-    <string name="arr_output_columns_names_4">Triple</string>
-    <string name="arr_output_columns_names_5">Quadruple</string>
-    <string name="arr_output_columns_names_6">Quintuple</string>
-    <string name="pref_i_columnsHomeList_title">Columns in Home Folders List</string>
-    <string name="pref_i_columnsLRU_title">Columns in Recently Read List</string>
-    <string name="pref_i_columnsFAV_title">Columns in Favorites List</string>
-    <string name="pref_i_columnsSearch_title">Columns in Search Results List</string>
-    <string name="pref_i_columnsAppAll_title">Columns in Application Drawer</string>
-    <string name="pref_i_columnsAppFav_title">Columns in Application Favorites</string>
-    <!-- Code Limitation: OPDS Catalog List does not have a separate string for columns -->
-    <string name="pref_i_ftpSize_title">Columns in FTP Server List</string>
-    <string name="pref_i_columnsAlgIntensity_title">Column Number Decision Algorithm</string>
-    <string name="arr_output_columns_intensity_names_1">Aggressive (Prefer More Columns)</string>
-    <string name="arr_output_columns_intensity_names_2">Balanced</string>
-    <string name="arr_output_columns_intensity_names_3">Conservative (Prefer Fewer Columns)</string>
-    <string name="pref_i_rowSeparator_title">Use Row Separator in File and Folder List</string>
+    <string name="pref_i_singleLineMode_title">Keep Names in Single Line Each</string>
+    <string name="pref_i_singleLineMode_off">Allow names to break into multiple lines</string>
+    <string name="pref_i_singleLineMode_on">Do not allow names to break into multiple lines</string>
+    <string name="pref_i_showRowSeparator_title">Use Row Separator in File and Folder List</string>
     <string name="pref_i_showFileOperation_title">Show File Operations First in Context Menu</string>
     <string name="pref_i_showFileOperation_on">Show File Operation</string>
     <string name="pref_i_showFileOperation_off">Show Book Operation</string>
     <string name="pref_i_hideTitle_title">ReLaunch header</string>
     <string name="pref_i_hideTitle_on">ReLaunch header on</string>
     <string name="pref_i_hideTitle_off">ReLaunch header off </string>
+    <string name="pref_i_showLang_title">Interface Language</string>
+    <string name="pref_i_showLangDialog_title">Choose Application Language</string>
+    <string name="pref_i_showLangSummary">"The language has been changed,
+        please restart ReLaunch to apply."</string>
 
     <!-- Settings / Advanced / Interface Customization / Panel Arrangement and Customizatioh -->
     <string name="jv_setting_screen">Panel Arrangement and Customization</string>
@@ -435,6 +410,41 @@ please restart ReLaunch to apply."</string>
     <string name="pref_i_select_application">Select Item</string>
     <string name="pref_i_manualButton1_title">Button</string>
     <string name="pref_i_add_new">Add New</string>
+    <string name="app_settings_nothing">Do Nothing</string>
+    <string name="app_settings_home_number">Open Home Folder #</string>
+    <string name="app_settings_home_menu">Home Folders Pop-Up</string>
+    <string name="app_settings_home">Home Folders</string>
+    <string name="app_settings_lru_doc_number">Open Recently Read #</string>
+    <string name="app_settings_lru_doc_menu">Recently Read Pop-Up</string>
+    <string name="app_settings_lru_doc">Recently Read</string>
+    <string name="app_settings_favorites_doc_number">Open Favorite #</string>
+    <string name="app_settings_favorites_doc_menu">Favorites Pop-Up</string>
+    <string name="app_settings_favorites_doc">Favorites</string>
+    <string name="app_settings_advanced">Power Menu</string>
+    <string name="app_settings_settings">Settings</string>
+    <string name="app_settings_app_manager">Task Manager</string>
+    <string name="app_settings_battery">Battery Consumption</string>
+    <string name="app_settings_favorites_app">Application Favorites</string>
+    <string name="app_settings_all_app">App Drawer</string>
+    <string name="app_settings_last_app">Recently Used Applications</string>
+    <string name="app_settings_search">Search</string>
+    <string name="app_settings_lock">Lock</string>
+    <string name="app_settings_power_off">Power Off</string>
+    <string name="app_settings_reboot">Reboot</string>
+    <string name="app_settings_switch_wifi">Toggle Wi-Fi</string>
+    <string name="app_settings_run">Launch External Application</string>
+    <string name="app_settings_dropbox">Access Dropbox</string>
+    <string name="app_settings_opds">Access OPDS</string>
+    <string name="app_settings_sys_settings">System Settings</string>
+    <string name="app_settings_up_dir">Parent Folder</string>
+    <string name="app_settings_up_scrool">Previous Page</string>
+    <string name="app_settings_up_perc">Jump Up Percent</string>
+    <string name="app_settings_up_begin">Jump Begin</string>
+    <string name="app_settings_down_scrool">Next Page</string>
+    <string name="app_settings_down_perc">Jump Down Percent</string>
+    <string name="app_settings_down_end">Jump End</string>
+    <string name="app_settings_sort_menu">Sorting Files</string>
+    <string name="app_settings_sel_num_col">Number Columns</string>
 
     <!-- Settings / Advanced / Filtering and File Operations -->
     <!-- See: Filtering Rules -->
@@ -465,9 +475,6 @@ please restart ReLaunch to apply."</string>
     <string name="pref_i_selectFileTapIcon_title">Select on Icon Tap</string>
     <string name="pref_i_selectFileTapIcon_on">Tapping the icon will select the item</string>
     <string name="pref_i_selectFileTapIcon_off">Tapping the icon will open the item, just as tapping its name would</string>
-    <string name="pref_i_selectRootNavigation_title">Request Superuser Access</string>
-    <string name="pref_i_selectRootNavigation_on">Superuser access will be requested for navigation</string>
-    <string name="pref_i_selectRootNavigation_off">No superuser privileges will be requested</string>
 
     <!-- Settings / Advanced / Filtering and File Operations / Filtering Rules -->
     <string name="filters_view_layout_title">Filtering Rules</string>
@@ -485,92 +492,13 @@ please restart ReLaunch to apply."</string>
     <string name="jv_filters_cant_be_empty">Filter value cannot be left empty.</string>
     <string name="jv_filters_or">OR</string>
 
-    <!-- Settings / Advanced / On-Screen Button Actions -->
-    <string name="pref_i_homeButtonST_title">Home Button Single Tap Action</string>
-    <string name="pref_i_homeButtonDT_title">Home Button Double Tap Action</string>
-    <string name="pref_i_homeButtonLT_title">Home Button Tap and Hold Action</string>
-    <string name="pref_i_lruButtonST_title">Recently Read Button Single Tap Action</string>
-    <string name="pref_i_lruButtonDT_title">Recently Read Button Double Tap Action</string>
-    <string name="pref_i_lruButtonLT_title">Recently Read Button Tap and Hold Action</string>
-    <string name="pref_i_favButtonST_title">Favorites Button Single Tap Action</string>
-    <string name="pref_i_favButtonDT_title">Favorites Button Double Tap Action</string>
-    <string name="pref_i_favButtonLT_title">Favorites Button Tap and Hold Action</string>
-    <string name="pref_i_settingsButtonST_title">Settings Button Single Tap Action</string>
-    <string name="pref_i_settingsButtonDT_title">Settings Button Double Tap Action</string>
-    <string name="pref_i_settingsButtonLT_title">Settings Button Tap and Hold Action</string>
-    <string name="pref_i_advancedButtonST_title">Power Menu Button Single Tap Action</string>
-    <string name="pref_i_advancedButtonDT_title">Power Menu Button Double Tap Action</string>
-    <string name="pref_i_advancedButtonLT_title">Power Menu Button Tap and Hold Action</string>
-    <string name="pref_i_memButtonST_title">Tasks Button Single Tap Action</string>
-    <string name="pref_i_memButtonDT_title">Tasks Button Double Tap Action</string>
-    <string name="pref_i_memButtonLT_title">Tasks Button Tap and Hold Action</string>
-    <string name="pref_i_batButtonST_title">Battery &amp; Wi-Fi Button Single Tap Action</string>
-    <string name="pref_i_batButtonDT_title">Battery &amp; Wi-Fi Button Double Tap Action</string>
-    <string name="pref_i_batButtonLT_title">Battery &amp; Wi-Fi Button Tap and Hold Action</string>
-    <string name="pref_i_appFavButtonST_title">Application Favorites Button Single Tap Action</string>
-    <string name="pref_i_appFavButtonDT_title">Application Favorites Button Double Tap Action</string>
-    <string name="pref_i_appFavButtonLT_title">Application Favorites Button Tap and Hold Action</string>
-    <string name="pref_i_appAllButtonST_title">Application Drawer Button Single Tap Action</string>
-    <string name="pref_i_appAllButtonDT_title">Application Drawer Button Double Tap Action</string>
-    <string name="pref_i_appAllButtonLT_title">Application Drawer Button Tap and Hold Action</string>
-    <string name="pref_i_appLastButtonST_title">Recent Applications Button Single Tap Action</string>
-    <string name="pref_i_appLastButtonDT_title">Recent Applications Button Double Tap Action</string>
-    <string name="pref_i_appLastButtonLT_title">Recent Applications Button Tap and Hold Action</string>
-    <string name="pref_i_searchButtonST_title">Search Button Single Tap Action</string>
-    <string name="pref_i_searchButtonDT_title">Search Button Double Tap Action</string>
-    <string name="pref_i_searchButtonLT_title">Search Button Tap and Hold Action</string>
-
-    <!-- Settings / Advanced / On-Screen Button Actions, Action Pop-Up --> 
-    <string name="app_settings_nothing">Do Nothing</string>
-    <string name="app_settings_home_number">Open Home Folder #</string>
-    <string name="app_settings_home_menu">Home Folders Pop-Up</string>
-    <string name="app_settings_home">Home Folders</string>
-    <string name="app_settings_lru_doc_number">Open Recently Read #</string>
-    <string name="app_settings_lru_doc_menu">Recently Read Pop-Up</string>
-    <string name="app_settings_lru_doc">Recently Read</string>
-    <string name="app_settings_favorites_doc_number">Open Favorite #</string>
-    <string name="app_settings_favorites_doc_menu">Favorites Pop-Up</string>
-    <string name="app_settings_favorites_doc">Favorites</string>
-    <string name="app_settings_advanced">Power Menu</string>
-    <string name="app_settings_settings">Settings</string>
-    <string name="app_settings_app_manager">Task Manager</string>
-    <string name="app_settings_battery">Battery Consumption</string>
-    <string name="app_settings_favorites_app">Application Favorites</string>
-    <string name="app_settings_all_app">App Drawer</string>
-    <string name="app_settings_last_app">Recently Used Applications</string>
-    <string name="app_settings_search">Search</string>
-    <string name="app_settings_lock">Lock</string>
-    <string name="app_settings_power_off">Power Off</string>
-    <string name="app_settings_reboot">Reboot</string>
-    <string name="app_settings_switch_wifi">Toggle Wi-Fi</string>
-    <string name="app_settings_run">Launch External Application</string>
-    <string name="app_settings_dropbox">Access Dropbox</string>
-    <string name="app_settings_opds">Access OPDS</string>
-    <string name="app_settings_ftp">FTP Client</string>
-    <string name="app_settings_sys_settings">System Settings</string>
-    <string name="app_settings_up_dir">Parent Folder</string>
-    <string name="app_settings_up_scrool">Previous Page</string>
-    <string name="app_settings_down_scrool">Next Page</string>
-
     <!-- Settings / Advanced / Launcher Features -->
-    <string name="pref_i_homeMode_title">Launcher Mode When Invoked as Home</string>
-    <string name="pref_i_homeMode_on">When started by the Home button, ReLaunch will run as launcher</string>
-    <string name="pref_i_homeMode_off">When started by the Home button, ReLaunch will run as a regular application</string>
-    <string name="pref_i_libraryMode_title">Launcher Mode When Invoked as Library</string>
-    <string name="pref_i_libraryMode_on">When started by the Library button, ReLaunch will run as launcher</string>
-    <string name="pref_i_libraryMode_off">When started by the Library button, ReLaunch will run as a regular application</string>
-    <string name="pref_i_shopMode_title">Launcher Mode When Invoked as Shop</string>
-    <string name="pref_i_shopMode_on">When started by the Shop button, ReLaunch will run as launcher</string>
-    <string name="pref_i_shopMode_off">When started by the Shop button, ReLaunch will run as a regular application</string>
     <string name="pref_i_returnToMain_title">Go Back Home on Application Launch</string>
     <string name="pref_i_returnToMain_on">After launching an application, ReLaunch will return to the main screen</string>
     <string name="pref_i_returnToMain_off">After launching an application, ReLaunch will stay in the application list</string>
     <string name="pref_i_filterSelf_title">Hide ReLaunch from Application Drawer</string>
     <string name="pref_i_filterSelf_on">ReLaunch will not be shown in Application Drawer</string>
     <string name="pref_i_filterSelf_off">Application Drawer will also show ReLaunch</string>
-    <string name="pref_i_dateUS_title">Use American Date Formatting</string>
-    <string name="pref_i_dateUS_on">US-style date format will be used (mm/dd/yyyy)</string>
-    <string name="pref_i_dateUS_off">European-style date format will be used (dd.mm.yyyy)</string>
     <string name="pref_i_blockExit_title">Allow Quitting ReLaunch</string>
     <string name="pref_i_blockExit_on">It is permitted to close the application</string>
     <string name="pref_i_blockExit_off">Closing the application is not allowed</string>
@@ -605,7 +533,28 @@ please restart ReLaunch to apply."</string>
     <string name="pref_i_viewerMaxSize_sum">Largest file size in kilobytes (thousands of bytes) that can be opened with the built-in viewer</string>
     <string name="pref_i_editorMaxSize_title">Editor File Size Limit</string>
     <string name="pref_i_editorMaxSize_sum">Largest file size in bytes that can be opened with the built-in editor</string>
-    
+
+    <!-- Settings / Advanced / List Size Columns -->
+    <string name="pref_i_columnsDirsFiles_title">Columns in Files and Folders View (Default)</string>
+    <string name="pref_i_columnsHomeList_title">Columns in Home Folders List</string>
+    <string name="pref_i_columnsLRU_title">Columns in Recently Read List</string>
+    <string name="pref_i_columnsFAV_title">Columns in Favorites List</string>
+    <string name="pref_i_columnsSearch_title">Columns in Search Results List</string>
+    <string name="pref_i_columnsAppAll_title">Columns in Application Drawer</string>
+    <string name="pref_i_columnsAppFav_title">Columns in Application Favorites</string>
+    <string name="pref_i_columnsAppLRU_title">Columns in Recently Used Application</string>
+    <string name="pref_i_columnsOPDSSize_title">Columns in OPDS List</string>
+    <string name="pref_i_columnsAlgIntensity_title">Column Number Decision Algorithm</string>
+    <string name="arr_output_columns_intensity_names_1">Aggressive (Prefer More Columns)</string>
+    <string name="arr_output_columns_intensity_names_2">Balanced</string>
+    <string name="arr_output_columns_intensity_names_3">Conservative (Prefer Fewer Columns)</string>
+    <string name="arr_output_columns_names_1">Automatically Decide</string>
+    <string name="arr_output_columns_names_2">Single</string>
+    <string name="arr_output_columns_names_3">Double</string>
+    <string name="arr_output_columns_names_4">Triple</string>
+    <string name="arr_output_columns_names_5">Quadruple</string>
+    <string name="arr_output_columns_names_6">Quintuple</string>
+
     <!-- Settings / Advanced / List Size Constraints -->
     <string name="pref_i_lruSize_title">Recently Read List Limit</string>
     <string name="pref_i_lruSize_sum">Number of recently read items that will be remembered</string>
@@ -615,42 +564,26 @@ please restart ReLaunch to apply."</string>
     <string name="pref_i_appLruSize_sum">Number of recently used applications that will be remembered</string>
     <string name="pref_i_appFavSize_title">Application Favorites List Limit</string>
     <string name="pref_i_appFavSize_sum">Maximum number of applications that can be marked as favorite</string>
-    <string name="pref_i_opdsSize_title">OPDS Catalog List</string>
-    <string name="pref_i_opdsSize_sum">Maximum number of OPDS catalogs that will be remembered</string>
 
     <!-- Settings / Advanced / Dropbox Integration -->
-    <string name="pref_i_Local_folder_DropBox">Local Folder</string>
-    <string name="pref_i_Local_folder_DropBox_info">Location the files will be saved to</string>
-    <string name="pref_i_DropBox_folder">Dropbox Folder</string>
-    <string name="pref_i_DropBox_folder_info">Folder the files will be downloaded from</string>
-    <string name="pref_i_delLocFiles_title">Automatically Delete Local Files</string>
-    <string name="pref_i_delLocFiles_off">Retain local files not present on the server</string>
-    <string name="pref_i_delLocFiles_on">Local files will be deleted if not present on the server</string>
-    <string name="pref_i_delDBFiles_title">Automatically Delete Remote Files</string>
-    <string name="pref_i_delDBFiles_on">Dropbox files will be deleted if not present on the device</string>
-    <string name="pref_i_delDBFiles_off">Retain Dropbox files not present on the device</string>
-    <string name="pref_i_dropboxSetButton_title">On-Screen Button Trigger</string>
-    <string name="pref_i_showDropbox_title">Show Dropbox as Root Folder</string>
 
     <!-- Settings / Advanced / Open Publication Distribution System (OPDS) -->
     <string name="pref_i_Local_folder_OPDS">Local Folder</string>
     <string name="pref_i_Local_folder_OPDS_info">Location the files will be saved to</string>
     <string name="opds_file_load">Load OPDS</string>
 
-    <!-- Settings / Advanced / FTP Client -->
-    <string name="pref_i_Local_folder_FTP">FTP Folder</string>
-    <string name="pref_i_Local_folder_FTP_info">Local folder for temporary FTP files</string>
-
     <!-- Settings / Advanced / Maintenance Tasks -->
     <string name="pref_i_saveSettings_title">⇱ Backup Settings to SD Card</string>
     <string name="pref_i_loadSettings_title">⇲ Restore Settings from SD Card</string>
     <string name="pref_i_cleanupDatabaseBooks_title">ⓑ Wipe Book Cache Database</string>
     <string name="pref_i_cleanupDatabaseOPDS_title">ⓞ Clear OPDS Database</string>
-    <string name="pref_i_cleanupDatabaseFTP_title">ⓕ Clear FTP Server Database</string>
     <string name="pref_i_cleanupDatabasePANELS_title">ⓟ Clear Panels Database</string>
+    <string name="pref_i_cleanupDatabaseColumns_title">© Clear Columns Database</string>
+    <string name="pref_i_cleanupDatabaseAppFavorites_title">ⓕ Clear App Favorites Database</string>
+    <string name="pref_i_cleanupDatabaseAppLast_title">ⓕ Clear Last Run Apps Database</string>
+    <string name="pref_i_cleanupDatabaseFavorites_title">ⓕ Clear Favorites Database</string>
+    <string name="pref_i_cleanupDatabaseLastRun_title">ⓡ Clear Recently Read Database</string>
     <string name="pref_i_deleteDatabaseAll_title">ⓐ Clear All Databases</string>
-    <string name="pref_i_cleanupLRU_title">ⓡ Clear Recently Read</string>
-    <string name="pref_i_cleanupFAV_title">ⓕ Clear Favorites</string>
     <string name="jv_prefs_rsr_ok_title">SD Card Settings Backup</string>
     <string name="jv_prefs_rsr_ok_text">Your settings have been successfully backed up to SD card.</string>
     <string name="jv_prefs_rsr_okrst_text">Your settings have been successfully restored from the SD card. The application will now restart with the new settings.</string>
@@ -659,14 +592,16 @@ please restart ReLaunch to apply."</string>
     <string name="jv_prefs_cleanup_database_title">Database Tasks</string>
     <string name="jv_prefs_cleanup_database_text">Are you sure you want to wipe the cache?</string>
     <string name="jv_prefs_cleanup_databaseOPDS_text">Are you sure you want to clear the OPDS library list?</string>
-    <string name="jv_prefs_cleanup_databaseFTP_text">Are you sure you want to clear the FTP server list?</string>
     <string name="jv_prefs_cleanup_databasePANELS_text">Are you sure you really want to remove any custom panels and restore the default panel settings?</string>
+    <string name="jv_prefs_cleanup_databaseColumns_text">Are you sure you want to clear the Columns list?</string>
+    <string name="jv_prefs_cleanup_databaseAppFavorites_text">Are you sure you want to clear the App Favorites list?</string>
+    <string name="jv_prefs_cleanup_databaseAppLast_text">Are you sure you want to clear the Last Run Apps list?</string>
+    <string name="jv_prefs_cleanup_databaseFavorites_text">Are you sure you want to clear the Favorites list?</string>
+    <string name="jv_prefs_cleanup_databaseLastRun_text">Are you sure you want to clear the Recently Read list?</string>
     <string name="jv_prefs_delete_databaseALL_text">Are you sure you want to remove all database files?</string>
     <string name="jv_prefs_clear_lists_title">List Tasks</string>
-    <string name="jv_prefs_clear_lru_text">Are you sure you want to clear the Recently Read list?</string>
-    <string name="jv_prefs_clear_favorites_text">Are you sure you want to clear the Favorites list?</string>
     <string name="pref_i_backupDir_title">Backup Folder</string>
-    <string name="pref_i_backupDir_desc">Введите полный путь к папке бэкапа</string>
+    <string name="pref_i_backupDir_desc">Enter full path to the Backup Folder</string>
 
 
     <!-- Sort Order -->
@@ -709,14 +644,6 @@ please restart ReLaunch to apply."</string>
     <string name="jv_results_login_opds">User Name</string>
     <string name="jv_results_checkbox_opds">Use password</string>
     <string name="jv_relaunch_clean_opds">Clear OPDS Catalog Database</string>
-
-    <!-- FTP Client -->
-    <string name="jv_relaunch_FTP_catalogs">FTP Server List</string>
-    <string name="jv_results_add_ftp">Add FTP Server</string>
-    <string name="jv_results_server_ftp">FTP Host (e.g. ftp.example.com):</string>
-    <string name="jv_results_path_ftp">FTP Path (e.g. /pub):</string>
-    <string name="jv_results_port_ftp">FTP Port (typically 21):</string>
-    <string name="jv_relaunch_clean_ftp">Clear FTP Server Database</string>
     
     <!-- Dialogs & Toasts -->
     <string name="jv_relaunch_turning_wifi_on">Enabling Wi-Fi…</string>
@@ -755,6 +682,7 @@ please restart ReLaunch to apply."</string>
     <string name="jv_results_delete_ne_dir_text2">and all of its contents?</string>
     <string name="jv_relaunch_del_sel_file_title">Confirm Deletion of Multiple Files</string>
     <string name="jv_relaunch_del_sel_file_text1">The following files will be deleted:</string>
+    <string name="jv_relaunch_del_sel_file_text2">\?</string>
     <string name="jv_relaunch_error_title">Error</string>
     <string name="jv_relaunch_paste_fail_text">Unable to paste</string>
     <string name="jv_relaunch_rename_fail_text">Unable to rename</string>
@@ -775,13 +703,20 @@ please restart ReLaunch to apply."</string>
     <string name="jv_buttonsetL_title">Add / Edit dubble-tap action</string>
     <string name="jv_buttonsetD_title">Add / Edit long-tap action</string>
     <string name="jv_button_new_title">Add / Edit toolbar\'s button</string>
+    <string name="jv_button_select_icon_title">Select icon button</string>
     <string name="jv_button_select_click">Select</string>
 
     <!-- Changelog -->
-    <string name="model_warning">&lt;h2>Possible Incompatibility Warning&lt;/h2>&lt;br>&lt;center>&lt;b>This function is intended for the Nook Simple Touch and Sony PRS-T1 only. Would you like to continue anyway?&lt;/b>&lt;/center></string>
     <string name="jv_relaunch_whats_new">Welcome to ReLaunch!</string>
     <string name="jv_rla_see_changelog">About ReLaunch</string>
     <string name="jv_rla_whats_new_title">About ReLaunch</string>
     <string name="jv_rla_about_prev">&lt;h1>&lt;center>ReLaunch&lt;/center>&lt;/h1>&lt;center>&lt;b>Replacement Launcher for Nook Simple Touch&lt;/b>&lt;/center>&lt;br>&lt;center>Version: &lt;b></string>
     <string name="jv_rla_about_post">&lt;/b>&lt;/center>&lt;br>&lt;center>Original source code: &lt;a href=\"https://github.com/yiselieren/ReLaunch/\">https://github.com/yiselieren/ReLaunch/&lt;/a>&lt;br>&lt;br>Follow the current development at The-Ebook.org thread:&lt;br>&lt;a href=\"http://www.the-ebook.org/forum/viewtopic.php?t=20425\">http://www.the-ebook.org/forum/viewtopic.php?t=20425&lt;/a>&lt;/center></string>
+
+    <!-- contentDescription -->
+    <string name="bt_exit">Exit</string>
+    <string name="bt_arrowup">Up</string>
+    <string name="bt_arrowdown">Down</string>
+    <string name="iv_act_icon">Activity Icon</string>
+
 </resources>

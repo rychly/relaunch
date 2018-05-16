@@ -1,10 +1,7 @@
 package com.harasoft.relaunch;
 
 import android.app.Activity;
-import android.content.ActivityNotFoundException;
-import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
+import android.content.*;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -15,35 +12,39 @@ import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.*;
 import android.widget.AdapterView.AdapterContextMenuInfo;
 import android.widget.AdapterView.OnItemClickListener;
+import com.harasoft.relaunch.Utils.UtilApp;
+import com.harasoft.relaunch.Utils.UtilAppFav;
+import com.harasoft.relaunch.Utils.UtilAppRun;
+import com.harasoft.relaunch.Utils.UtilIcons;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
 
 public class AllApplications extends Activity {
 	final String TAG = "AllApps";
 
-	final int UNINSTALL_ACT = 1;
+	private final int UNINSTALL_ACT = 1;
 
-	final int CNTXT_MENU_RMFAV = 1;
-	final int CNTXT_MENU_ADDFAV = 2;
-	final int CNTXT_MENU_UNINSTALL = 3;
-	final int CNTXT_MENU_CANCEL = 4;
-	final int CNTXT_MENU_MOVEUP = 5;
-	final int CNTXT_MENU_MOVEDOWN = 6;
+	private final int CNTXT_MENU_RMFAV = 1;
+	private final int CNTXT_MENU_ADDFAV = 2;
+	private final int CNTXT_MENU_UNINSTALL = 3;
+	private final int CNTXT_MENU_CANCEL = 4;
+	private final int CNTXT_MENU_MOVEUP = 5;
+	private final int CNTXT_MENU_MOVEDOWN = 6;
+	private final int CNTXT_MENU_RMLAST = 7;
 
 	ReLaunchApp app;
-	ArrayList<String> itemsArray = new ArrayList<String>();
-	ArrayList<ReLaunchApp.AppInfo> appsArray = new ArrayList<ReLaunchApp.AppInfo>();
+	private ArrayList<UtilApp.Info> appsArray;
 	AppAdapter adapter;
-	GridView lv;
-	String listName;
-	String title;
+	private String listName;
+	private String title;
 	SharedPreferences prefs;
-	boolean addSView = true;
-	int gcols = 2;
+	private boolean addSView = true;
+	private int gcols = 2;
     LayoutInflater vi;
+	private UtilApp utilApp;
+	private UtilAppFav utilAppFav;
+	private UtilAppRun utilAppRun;
+	private UtilIcons utilIcons;
 
 
 	static class ViewHolder {
@@ -52,7 +53,7 @@ public class AllApplications extends Activity {
 	}
 
 	class AppAdapter extends ArrayAdapter<String> {
-		ReLaunchApp.AppInfo appInfo;
+		UtilApp.Info appInfo;
 		AppAdapter(Context context, int resource, ArrayList<String> data) {
 			super(context, resource, data);
 
@@ -69,7 +70,7 @@ public class AllApplications extends Activity {
 			View v = convertView;
 			appInfo = appsArray.get(position);
 			if (v == null) {
-				v = vi.inflate(R.layout.applications_item,  parent, false);
+				v = vi.inflate(R.layout.item_allapplication,  parent, false);
                 if(v == null){
                     return null;
                 }
@@ -89,28 +90,18 @@ public class AllApplications extends Activity {
 		}
 	}
 
-	private void rereadAppList() {
+	private void rereadAppList(String listName) {
 		// создание списка
-		if (listName.equals("app_all")){
-			appsArray = app.getAppInfoArrayList();
-		}else {
-			checkListByName();
-			appsArray = createArray();
+		appsArray = utilApp.getAppInfoArrayList();
+		if (listName.equals("app_last")) {
+			checkListByName(utilAppRun.getList());
 		}
-		// сортировка
-		if (!listName.equals("app_favorites")) {
-			Collections.sort(appsArray, new Comparator<ReLaunchApp.AppInfo>() {
-				public int compare(ReLaunchApp.AppInfo o1, ReLaunchApp.AppInfo o2) {
-					return o1.appName.compareTo(o2.appName);
-				}
-			});
+		if (listName.equals("app_favorites")) {
+			checkListByName(utilAppFav.getList());
 		}
-		// получение имен программ
-		for (ReLaunchApp.AppInfo anAppsArray : appsArray) {
-			itemsArray.add(anAppsArray.appName);
-		}
+		// Collections.sort(itemsArray);
 		// формирование заголовка окна
-		((TextView) findViewById(R.id.app_title)).setText(title + " (" + itemsArray.size() + ")");
+		((TextView) findViewById(R.id.app_title)).setText(title + " (" + appsArray.size() + ")");
 		// обновление экрана
 		EinkScreen.PrepareController(null, false);
 		adapter.notifyDataSetChanged();
@@ -125,9 +116,9 @@ public class AllApplications extends Activity {
         if(app == null ) {
             finish();
         }
-        EinkScreen.setEinkController(prefs);
-        app.setFullScreenIfNecessary(this);
-        setContentView(R.layout.all_applications);
+		app.setOptionsWindowActivity(this);
+        setContentView(R.layout.layout_allapplications);
+
         vi = (LayoutInflater) getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		// Create applications list
 		final Intent data = getIntent();
@@ -135,48 +126,53 @@ public class AllApplications extends Activity {
 			setResult(Activity.RESULT_CANCELED);
 			finish();
 		}
-		app.setAppInfoArrayList(app.createAppList(getPackageManager()));
+		//app.setAppInfoArrayList(app.createAppList(getPackageManager()));
+		utilApp = new UtilApp(getBaseContext(), getPackageManager());
+		utilIcons = new UtilIcons(getBaseContext());
 		listName = data.getExtras().getString("list");
-
+		appsArray = utilApp.getAppInfoArrayList();
 		// set app icon
 		ImageView app_icon = (ImageView) findViewById(R.id.app_icon);
 		if (listName.equals("app_all")) {
             title = getResources().getString(R.string.jv_relaunch_all_a);
-            app_icon.setImageDrawable(getResources().getDrawable(R.drawable.ci_grid));
-			String cols = prefs.getString("columnsAppAll", "-1");
+            app_icon.setImageBitmap(utilIcons.getIcon("ALLAPP"));
+			String cols = prefs.getString("columnsAppAll", "1");
 			gcols = Integer.parseInt(cols);
-			appsArray = app.getAppInfoArrayList();
 		}
 		if (listName.equals("app_last")) {
             title = getResources().getString(R.string.jv_relaunch_lru_a);
-            app_icon.setImageDrawable(getResources().getDrawable(R.drawable.ci_lrea));
-            gcols = 2;
-			checkListByName();
-			appsArray = createArray();
+			utilAppRun = new UtilAppRun(getBaseContext());
+			app_icon.setImageBitmap(utilIcons.getIcon("LASTAPP"));
+			String cols = prefs.getString("columnsAppFav", "1");
+
+			gcols = Integer.parseInt(cols);
+			checkListByName(utilAppRun.getList());
         }
 		if (listName.equals("app_favorites")) {
             title = getResources().getString(R.string.jv_relaunch_fav_a);
-			app_icon.setImageDrawable(getResources().getDrawable(R.drawable.ci_fava));
-			String cols = prefs.getString("columnsAppFav", "-1");
+            utilAppFav = new UtilAppFav(getBaseContext());
+			app_icon.setImageBitmap(utilIcons.getIcon("FAVAPP"));
+			String cols = prefs.getString("columnsAppFav", "1");
 			gcols = Integer.parseInt(cols);
-			checkListByName();
-			appsArray = createArray();
+			checkListByName(utilAppFav.getList());
 		}
 
-		(findViewById(R.id.app_btn)).setOnClickListener(new View.OnClickListener() {
+		ImageView app_exit = (ImageView) findViewById(R.id.app_btn_exit);
+		app_exit.setImageBitmap(utilIcons.getIcon("EXIT"));
+		app_exit.setOnClickListener(new View.OnClickListener() {
 					public void onClick(View v) {
 						finish();
 					}
 				});
 
-		adapter = new AppAdapter(this, R.layout.applications_item, itemsArray);
-		lv = (GridView) findViewById(R.id.app_grid);
+		adapter = new AppAdapter(this, R.layout.item_allapplication, new ArrayList<String>());
+		GridView lv = (GridView) findViewById(R.id.app_grid);
 		if (gcols <= 0) {
             gcols = 2;
         }
 		lv.setNumColumns(gcols);
 		lv.setAdapter(adapter);
-		rereadAppList();
+		rereadAppList(listName);
 
 		registerForContextMenu(lv);
 		if (prefs.getBoolean("customScroll", app.customScrollDef)) {
@@ -221,9 +217,9 @@ public class AllApplications extends Activity {
 			public void onItemClick(AdapterView<?> parent, View view,
 					int position, long id) {
 
-				ReLaunchApp.AppInfo item = appsArray.get(position);
+				UtilApp.Info item = appsArray.get(position);
 
-				Intent i = app.getIntentByLabel(item);
+				Intent i = createIntent(item.appPackage, item.appActivity);
 				if (i == null)
 					// "Activity \"" + item + "\" not found!"
 					app.showToast("\" " + item.appName + "\" " + getResources().getString(R.string.jv_allapp_not_found));
@@ -242,19 +238,19 @@ public class AllApplications extends Activity {
 						ok = false;
 					}
 					if (ok) {
-						app.addToList("app_last", item.appName, ":", false);
-						saveList("app_last");
+						utilAppRun = new UtilAppRun(getBaseContext());
+						utilAppRun.addAppRun(item.appPackage);
+						utilAppRun = null;
 					}
 				}
 			}
 		});
-		ScreenOrientation.set(this, prefs);
 	}
 
 	@Override
 	protected void onResume() {
 		super.onResume();
-		rereadAppList();
+		rereadAppList(listName);
 		app.generalOnResume(TAG);
 	}
 
@@ -262,33 +258,41 @@ public class AllApplications extends Activity {
 	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
 		AdapterContextMenuInfo info = (AdapterContextMenuInfo) menuInfo;
 		int pos = info.position;
-		String i = itemsArray.get(pos);
+		String appPackage = appsArray.get(pos).appPackage;
 
-		if (listName.equals("app_favorites")) {
-			if (pos > 0) {
-                // "Move one position up"
-                menu.add(Menu.NONE, CNTXT_MENU_MOVEUP, Menu.NONE, getResources().getString(R.string.jv_allapp_move_up));
-            }
-			if (pos < (itemsArray.size() - 1)) {
-                // "Move one position down"
-                menu.add(Menu.NONE, CNTXT_MENU_MOVEDOWN, Menu.NONE, getResources().getString(R.string.jv_allapp_move_down));
-            }
-			// "Remove from favorites"
-			menu.add(Menu.NONE, CNTXT_MENU_RMFAV, Menu.NONE, getResources().getString(R.string.jv_allapp_remove));
-		} else {
-			List<String[]> lit = app.getList("app_favorites");
-			boolean in_fav = false;
-			for (String[] r : lit) {
-				if (r[0].equals(i)) {
-					in_fav = true;
-					break;
+		switch (listName) {
+			case "app_last":
+				if (pos > 0) {
+					// "Move one position up"
+					menu.add(Menu.NONE, CNTXT_MENU_MOVEUP, Menu.NONE, getResources().getString(R.string.jv_allapp_move_up));
 				}
-			}
-			if (!in_fav) {
-                // "Add to favorites"
-                menu.add(Menu.NONE, CNTXT_MENU_ADDFAV, Menu.NONE, getResources().getString(R.string.jv_allapp_add));
-            }
+				if (pos < (appsArray.size() - 1)) {
+					// "Move one position down"
+					menu.add(Menu.NONE, CNTXT_MENU_MOVEDOWN, Menu.NONE, getResources().getString(R.string.jv_allapp_move_down));
+				}
+				// "Remove from last"
+				menu.add(Menu.NONE, CNTXT_MENU_RMLAST, Menu.NONE, getResources().getString(R.string.jv_allapp_last_remove));
+				break;
+			case "app_favorites":
+				if (pos > 0) {
+					// "Move one position up"
+					menu.add(Menu.NONE, CNTXT_MENU_MOVEUP, Menu.NONE, getResources().getString(R.string.jv_allapp_move_up));
+				}
+				if (pos < (appsArray.size() - 1)) {
+					// "Move one position down"
+					menu.add(Menu.NONE, CNTXT_MENU_MOVEDOWN, Menu.NONE, getResources().getString(R.string.jv_allapp_move_down));
+				}
+				// "Remove from favorites"
+				menu.add(Menu.NONE, CNTXT_MENU_RMFAV, Menu.NONE, getResources().getString(R.string.jv_allapp_fav_remove));
+				break;
+			default:
+				utilAppFav = new UtilAppFav(getBaseContext());
+				if (!utilAppFav.isAppFav(appPackage)) {
+					// "Add to favorites"
+					menu.add(Menu.NONE, CNTXT_MENU_ADDFAV, Menu.NONE, getResources().getString(R.string.jv_allapp_add));
+				}
 
+				break;
 		}
 		// "Uninstall"
 		menu.add(Menu.NONE, CNTXT_MENU_UNINSTALL, Menu.NONE, getResources()
@@ -299,7 +303,7 @@ public class AllApplications extends Activity {
 	}
 
 	@Override
-	public boolean onContextItemSelected(MenuItem item)                                                                                                                                     {
+	public boolean onContextItemSelected(MenuItem item) {
 		if (item.getItemId() == CNTXT_MENU_CANCEL) {
             return true;
         }
@@ -318,18 +322,15 @@ public class AllApplications extends Activity {
 			break;
 		case CNTXT_MENU_RMFAV:
 			// удаляем его из списка
-			itemsArray.remove(pos);
+			utilAppFav.delAppFav(appsArray.get(pos).appPackage);
 			appsArray.remove(pos);
-			// сохраняем список
-			app.setList(listName, convArrToStr(itemsArray));
-			saveList(listName);
 			// обновляем изображение
-			EinkScreen.PrepareController(null, false);
 			adapter.notifyDataSetChanged();
 			break;
 		case CNTXT_MENU_ADDFAV:
-			app.addToList("app_favorites", itemsArray.get(pos), ":", true);
-			saveList("app_favorites");
+			utilAppFav = new UtilAppFav(getBaseContext());
+			utilAppFav.addAppFav(appsArray.get(pos).appPackage);
+			utilAppFav = null;
 			break;
 		case CNTXT_MENU_UNINSTALL:
 			PackageManager pm = getPackageManager();
@@ -338,7 +339,7 @@ public class AllApplications extends Activity {
                 return false;
             }
 			PackageInfo pi;
-			ReLaunchApp.AppInfo appInfoTemp = appsArray.get(pos);
+			UtilApp.Info appInfoTemp = appsArray.get(pos);
 			try {
 				pi = pm.getPackageInfo(appInfoTemp.appPackage, 0);
 			} catch (Exception e) {
@@ -375,6 +376,13 @@ public class AllApplications extends Activity {
 				}
 			}
 			break;
+		case CNTXT_MENU_RMLAST:
+			// удаляем его из списка
+			utilAppRun.delAppFav(appsArray.get(pos).appPackage);
+			appsArray.remove(pos);
+			// обновляем изображение
+			adapter.notifyDataSetChanged();
+			break;
 		}
 		return true;
 	}
@@ -383,77 +391,43 @@ public class AllApplications extends Activity {
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 		switch (requestCode) {
 		case UNINSTALL_ACT:
-			rereadAppList();
+			rereadAppList(listName);
 			break;
 		default:
 			//return;
 		}
 	}
-
-	private ArrayList<ReLaunchApp.AppInfo> createArray(){
-		ArrayList<ReLaunchApp.AppInfo> tempArray = new ArrayList<ReLaunchApp.AppInfo>();
-		List<String[]> tempAppList = app.getList(listName);
-		for (String[] tempApp : tempAppList) {
-			for (ReLaunchApp.AppInfo anAppsArray : appsArray) {
-				if (anAppsArray.appPackage.equals(tempApp[0])) {
-					tempArray.add(anAppsArray);
-					break;
-				}
-			}
-		}
-		return tempArray;
-	}
-
-	private void checkListByName() {
-		List<String[]> rc = app.getList(listName);
-		ArrayList<String> rc1 = new ArrayList<String>();
+	private void checkListByName(ArrayList<String> listAppPackages) {
+		ArrayList<UtilApp.Info> outList = new ArrayList<>();
 		String packageName;
-		for (String[] r : rc) {
-			for (ReLaunchApp.AppInfo anAppsArray : appsArray) {
+		for (String inItem : listAppPackages) {
+			for (UtilApp.Info anAppsArray : appsArray) {
 				packageName = anAppsArray.appPackage;
-				if (packageName.equals(r[0])) {
-					rc1.add(packageName);
+				if (packageName.equals(inItem)) {
+					outList.add(anAppsArray);
 					break;
 				}
 			}
 		}
-		if (rc.size() != rc1.size()){
-			saveList(listName);
-			app.setList(listName, convArrToStr(rc1));
-		}
+		appsArray = outList;
 	}
-	private void saveList(String listN){
-		int appMax;
-		if (listN.equals("app_last")) {
-			try {
-				appMax = Integer.parseInt(prefs.getString("appLruSize", "30"));
-			} catch (NumberFormatException e) {
-				appMax = 30;
-			}
-		}else if (listN.equals("app_favorites")) {
-			try {
-				appMax = Integer.parseInt(prefs.getString("appFavSize", "30"));
-			} catch (NumberFormatException e) {
-				appMax = 30;
-			}
-		}else {
-			return;
+	private void saveList(String listName){
+		if (listName.equals("app_last")) {
+			utilAppRun.setListAppRun(appsArray);
 		}
-		app.writeFile(listN, ReLaunch.APP_LRU_FILE, appMax, ":");
+		if (listName.equals("app_favorites")) {
+			utilAppFav.setListAppFav(appsArray);
+		}
 	}
 	private void moveUp(int pos){
 		if (pos > 0) {
 			// сохраняем перемещаемый элемент
-			String itemTemp = itemsArray.get(pos);
-			ReLaunchApp.AppInfo appInfoTemp = appsArray.get(pos);
+			UtilApp.Info appInfoTemp = appsArray.get(pos);
 			// удаляем его из списка
-			itemsArray.remove(pos);
 			appsArray.remove(pos);
 			// вставляем ниже по списку
-			itemsArray.add(pos - 1, itemTemp);
 			appsArray.add(pos - 1, appInfoTemp);
 			// сохраняем список
-			app.setList(listName, convArrToStr(itemsArray));
 			saveList(listName);
 			// обновляем изображение
 			EinkScreen.PrepareController(null, false);
@@ -461,36 +435,32 @@ public class AllApplications extends Activity {
 		}
 	}
 	private void moveDown(int pos){
-		if (pos < (itemsArray.size() - 1)) {
+		if (pos < (appsArray.size() - 1)) {
 			// сохраняем перемещаемый элемент
-			String itemTemp = itemsArray.get(pos);
-			ReLaunchApp.AppInfo appInfoTemp = appsArray.get(pos);
+			UtilApp.Info appInfoTemp = appsArray.get(pos);
 			// удаляем его из списка
-			itemsArray.remove(pos);
 			appsArray.remove(pos);
 			// вставляем ниже по списку
-			if (pos + 1 >= itemsArray.size() - 1) {
-				itemsArray.add(itemTemp);
+			if (pos + 1 >= appsArray.size() - 1) {
 				appsArray.add(appInfoTemp);
 			} else {
-				itemsArray.add(pos + 1, itemTemp);
 				appsArray.add(pos + 1, appInfoTemp);
 			}
-			itemsArray.add(pos + 1, itemTemp);
-			appsArray.add(pos + 1, appInfoTemp);
 			// сохраняем список
-			app.setList(listName, convArrToStr(itemsArray));
 			saveList(listName);
 			// обновляем изображение
 			EinkScreen.PrepareController(null, false);
 			adapter.notifyDataSetChanged();
 		}
 	}
-	private List<String[]> convArrToStr(ArrayList<String> arrayList){
-		List<String[]> temp = new ArrayList<String[]>();
-		for (String anArrayList : arrayList) {
-			temp.add(new String[]{anArrayList, ""});
+	private Intent createIntent(String appPackage, String appActivity){
+		if(appPackage != null && appActivity != null) {
+			Intent i = new Intent();
+			i.setComponent(new ComponentName(appPackage, appActivity));
+			i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+			return i;
+		}else {
+			return null;
 		}
-		return temp;
 	}
 }

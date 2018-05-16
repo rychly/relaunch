@@ -1,33 +1,39 @@
-gamba69@gmail.com: I left the project for an indefinite period... sorry.
+haron
+======== на ближайший релиз =====
+- чистка кода и правка ошибок
+- работа OPDS
+- меню настроек изменить.
+======== на следующий релиз =====
+- применение изменений настроек без перезагрузки программы
+- в HttpBasicAuthentication посмотреть возможность обновления кода и изменить работу с базой
+======== дальняя перспектива ===
+- расширение фильтров для показа файлов
+- расширение способов сортировки списка файлов
+- работа с разными устройствами, посмотреть как у FBReader
+- попытаться создать универсальный адаптер или хотябы сократить их колличество
+======== типа может и попробую сделать
+- переход под сборку для новых платформ
+- есть библиотеки для работ с облачными платформами на подобии Dropbox, попробовать одну из них
+- current lib FTP4J no supports. Change.
+- работа с рутом - полностью переделывать.
 
-==========
-CASUAL
-- add more "smart" buttons (change first screen buttons behavior and configuration)
-	-- for search button: search with input only search string, repeat last search (without confirmations), open search window
-- (NOT POPULATED, BEFORE 1.3!!!) add screens for "Help" and "Appreciation" (with links, for example, to CoolReader, icons lib pack and so on).
-FUTURE >1.3
-- (delayed at least for 1.3) may be some extended functionality for advanced screen (i.e. start to configure selected WiFi net, for example)
-- (delayed at least for 1.3) add manual scrolling for Sony devices
+-----
 
-==========
-DONE
-- (DONE) more file manager functions (with optional on-off future)
-- (DONE) save configuration to sdcard (for restore) and save library state (fav, lru and so on)
-- (DONE) add "Not show known file suffixes" functionality
-- (DONE) add "Not show known directory prefixes" functionality
-- (DONE) add close fav, searches, lru after file launched functionality
-- (DONE) add font size settings
-- (DONE) external power source indication
-- (DONE) fixed somewhere "unscrolling" on scroll buttons
-- (DONE) reimport EInk support from CoolReader
-- (DONE) request confirmation before restore default settings
-- (DONE) add restart ReLaunch after restore default settings
-- (DONE) -- Smart buttons -- for Up button - go up twice, go to "nearest" homedir
-- (DONE) -- Smart buttons -- for %scroll button - go up-down twice percents, go 0% go 100% up down
-- (DONE) -- Smart buttons -- may be some "smart" functionality for other buttons (bottom buttons too?)
-- (DONE) -- Smart buttons 	-- for LRU button: open first, open second, open as menu(?), open as screen
-- (DONE) -- Smart buttons -- for FAV button: open first, open second, open as menu(?), open as screen
-- (DONE) icons in Nook style, some redesign of layouts to more usabilility (for example, search
-situations where onscreen keyboard not opened for text fields (by default) and text fields not
-"autofocused" and reorganize search form, which is partially "closed" if onscreen 
-keyboard is on), etc.
+haron
+======== for the nearest release =====
+- code cleaning and error correction
+- Operation of OPDS
+- Change the settings menu.
+======== On the next release =====
+- Apply settings changes without restarting the program
+- in HttpBasicAuthentication see the possibility of updating the code and change the work with the database
+======== distant perspective ===
+- extension of filters for displaying files
+- extension of ways to sort the list of files
+- work with different devices, look like FBReader
+- try to create a universal adapter or at least reduce their quantity
+======== type can and will try to do
+- transition to an assembly for new platforms
+- there are libraries for working with cloud platforms like Dropbox, try one of them
+- current lib FTP4J no supports. Change.
+- work with root - completely redo.

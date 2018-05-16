@@ -1,6 +1,6 @@
 package com.harasoft.relaunch;
 
-/**
+/*
  * originate from CoolReader
  * http://http://sourceforge.net/projects/crengine/
  */
@@ -11,17 +11,17 @@ import android.view.View;
 public class EinkScreen {
 
 	// / variables
-	public static int UpdateMode = -1;
+	private static int UpdateMode = -1;
 	// 0 - CLEAR_ALL, set only for old_mode == 2
 	// 1 - ONESHOT, always set in prepare
 	// 2 - ACTIVE, set in prepare
-	public static int UpdateModeInterval;
-	public static int RefreshNumber = -1;
-	public static boolean IsSleep = false;
+	private static int UpdateModeInterval;
+	private static int RefreshNumber = -1;
+	private static boolean IsSleep = false;
 	// constants
-	public final static int cmodeClear = 0;
-	public final static int cmodeOneshot = 1;
-	public final static int cmodeActive = 2;
+	private final static int cmodeClear = 0;
+	private final static int cmodeOneshot = 1;
+	private final static int cmodeActive = 2;
 
 	public static void PrepareController(View view, boolean isPartially) {
 		if (N2DeviceInfo.EINK_NOOK) {

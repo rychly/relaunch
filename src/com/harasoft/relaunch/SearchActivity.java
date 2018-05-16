@@ -3,6 +3,7 @@ package com.harasoft.relaunch;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -10,6 +11,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -20,39 +22,42 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.ArrayAdapter;
-import android.widget.CheckBox;
-import android.widget.EditText;
-import android.widget.Spinner;
-import android.widget.TextView;
+import android.widget.*;
+import com.harasoft.relaunch.Preferences.PrefsActivity;
+import com.harasoft.relaunch.Support.ResourceLocation;
+import com.harasoft.relaunch.Support.TypeResource;
+import com.harasoft.relaunch.Utils.UtilIcons;
 
 public class SearchActivity extends Activity {
 	final String TAG = "Search";
-	int SEARCH_FILE;
-	int SEARCH_LASTDIR;
-	int SEARCH_FPATH;
-	int SEARCH_PATH;
+	private int SEARCH_FILE;
+	private int SEARCH_LASTDIR;
+	private int SEARCH_FPATH;
+	private int SEARCH_PATH;
 
-	SharedPreferences prefs;
-	Spinner searchAs;
-	Spinner searchIn;
-	CheckBox searchCase;
-	CheckBox searchKnown;
-	CheckBox searchSort;
-	EditText searchRoot;
-	EditText searchTxt;
-	InputMethodManager imm;
-	ReLaunchApp app;
+	private final static int SEARCH_ACT = 1;
 
-	ProgressDialog pd;
-	boolean stop_search = false;
+	private SharedPreferences prefs;
+	private Spinner searchAs;
+	private Spinner searchIn;
+	private CheckBox searchCase;
+	private CheckBox searchKnown;
+	private CheckBox searchSort;
+	private EditText searchRoot;
+	private EditText searchTxt;
+	private InputMethodManager imm;
+	private ReLaunchApp app;
+
+	private ProgressDialog pd;
+	private boolean stop_search = false;
 
 	// Search parameters and result
-	List<String[]> searchResults;
-	int filesCount;
+	private List<String[]> searchResults;
+	private static List<HashMap<String, String>> search_results = new ArrayList<>();
+	private int filesCount;
 
 	private void resetSearch() {
-		searchResults = new ArrayList<String[]>();
+		searchResults = new ArrayList<>();
 		filesCount = 0;
 		stop_search = false;
 
@@ -77,7 +82,7 @@ public class SearchActivity extends Activity {
 		pd.show();
 	}
 
-	public AsyncTask<Boolean, Integer, String> createAsyncTask() {
+	private AsyncTask<Boolean, Integer, String> createAsyncTask() {
 		return new AsyncTask<Boolean, Integer, String>() {
 			Boolean case_sens;
 			Boolean known_only;
@@ -96,17 +101,38 @@ public class SearchActivity extends Activity {
 					n[1] = app.DIR_TAG;
 					boolean found = false;
 					for (String r[] : searchResults) {
-						if (r[0].equals(n[0]) && r[1].equals(n[1])) {
+						if (r[0].equals(n[0]) && r[1].equals(app.DIR_TAG)) {
 							found = true;
 							break;
 						}
 					}
-					if (!found)
+					if (!found) {
+						n[0] = dname; // fullPath;
+						n[1] = app.DIR_TAG;
 						searchResults.add(n);
+						// новый код
+						HashMap<String, String> item = new HashMap<>();
+						item.put("id", Integer.toString(search_results.size() + 1));
+						item.put("firstLine", fname);
+						item.put("secondLine", dname);
+						item.put("type", Integer.toString(TypeResource.DIR));
+						item.put("resource", Integer.toString(ResourceLocation.LOCAL));
+
+						search_results.add(item);
+					}
 				} else {
 					n[0] = dname;
 					n[1] = fname;
 					searchResults.add(n);
+					// новый код
+					HashMap<String, String> item = new HashMap<>();
+					item.put("id", Integer.toString(search_results.size() + 1));
+					item.put("firstLine", fname);
+					item.put("secondLine", dname);
+					item.put("type", Integer.toString(TypeResource.FILE));
+					item.put("resource", Integer.toString(ResourceLocation.LOCAL));
+
+					search_results.add(item);
 				}
 			}
 
@@ -189,7 +215,7 @@ public class SearchActivity extends Activity {
 			protected String doInBackground(Boolean... params) {
 				Boolean all = params[0];
 
-				searchResults = new ArrayList<String[]>();
+				searchResults = new ArrayList<>();
 				filesCount = 0;
 				try {
 					searchReport = Integer.parseInt(prefs.getString(
@@ -208,7 +234,6 @@ public class SearchActivity extends Activity {
 				SharedPreferences.Editor editor = prefs.edit();
 				editor.putBoolean("searchSort", search_sort);
 				editor.putString("searchRoot", root);
-				editor.commit();
 
 				if (all) {
 					case_sens = false;
@@ -230,11 +255,11 @@ public class SearchActivity extends Activity {
 					editor.putInt("searchIn", searchIn.getSelectedItemPosition());
 					editor.putString("searchRoot", root);
 					editor.putString("searchPrev", pattern);
-					editor.commit();
 
 					// Search
 					addEntries(root);
 				}
+				editor.commit();
 
 				return "OK"; // no localization? correct me
 			}
@@ -260,14 +285,11 @@ public class SearchActivity extends Activity {
 					SRComparator o1c = new SRComparator();
 					Collections.sort(searchResults, o1c);
 				}
-				app.setList("searchResults", searchResults);
 				Intent intent = new Intent(SearchActivity.this,ResultsActivity.class);
 				intent.putExtra("list", "searchResults");
 				// "Search results"
-				intent.putExtra("title",getResources().getString(R.string.jv_search_results));
-				intent.putExtra("rereadOnStart", false);
 				intent.putExtra("total", filesCount);
-				startActivity(intent);
+				startActivityForResult(intent, SEARCH_ACT);
 			}
 
 			@Override
@@ -289,8 +311,10 @@ public class SearchActivity extends Activity {
         if(app == null ) {
             finish();
         }
-        app.setFullScreenIfNecessary(this);
-		setContentView(R.layout.search);
+		app.setOptionsWindowActivity(this);
+		setContentView(R.layout.layout_search);
+
+		UtilIcons utilIcons = new UtilIcons(getBaseContext());
 
 		SEARCH_FILE = getResources().getInteger(R.integer.SEARCH_FILE);
 		SEARCH_LASTDIR = getResources().getInteger(R.integer.SEARCH_LASTDIR);
@@ -320,8 +344,18 @@ public class SearchActivity extends Activity {
             }
         });
 
+		Intent data = getIntent();
+		if(data != null && data.getExtras() != null){
+			SharedPreferences.Editor editor = prefs.edit();
+			editor.putString("searchRoot", data.getExtras().getString("current_root"));
+			editor.commit();
+		}
+
+
 		// Set main search button
-		(findViewById(R.id.search_btn)).setOnClickListener(new View.OnClickListener() {
+		Button search_run = (Button) findViewById(R.id.search_btn);
+		search_run.setCompoundDrawablesWithIntrinsicBounds( new BitmapDrawable(getResources(), utilIcons.getIcon("RUN")), null, null, null);
+		search_run.setOnClickListener(new View.OnClickListener() {
 					public void onClick(View v) {
 						resetSearch();
 						createAsyncTask().execute(false);
@@ -329,7 +363,9 @@ public class SearchActivity extends Activity {
 				});
 
 		// Search all button
-		(findViewById(R.id.search_all)).setOnClickListener(new View.OnClickListener() {
+		Button search_all = (Button) findViewById(R.id.search_all);
+		search_all.setCompoundDrawablesWithIntrinsicBounds( new BitmapDrawable(getResources(), utilIcons.getIcon("OPDS")), null, null, null);
+		search_all.setOnClickListener(new View.OnClickListener() {
 					public void onClick(View v) {
 						resetSearch();
 						createAsyncTask().execute(true);
@@ -337,13 +373,18 @@ public class SearchActivity extends Activity {
 				});
 
 		// Back button - work as cancel
-		( findViewById(R.id.back_btn)).setOnClickListener(new View.OnClickListener() {
+		ImageView search_btn_exit = (ImageView) findViewById(R.id.search_btn_exit);
+		search_btn_exit.setImageBitmap(utilIcons.getIcon("EXIT"));
+		search_btn_exit.setOnClickListener(new View.OnClickListener() {
 					public void onClick(View v) {
+						setResult(Activity.RESULT_CANCELED);
 						finish();
 					}
 				});
 
-		ScreenOrientation.set(this, prefs);
+		// Icon
+		ImageView search_icon = (ImageView) findViewById(R.id.search_icon);
+		search_icon.setImageBitmap(utilIcons.getIcon("SEARCH"));
 	}
 
 	@Override
@@ -376,10 +417,7 @@ public class SearchActivity extends Activity {
 		searchIn.setSelection(prefs.getInt("searchIn", 0), false);
 
 		// set search root
-		searchRoot.setText(prefs.getString("searchRoot", ReLaunch.currentRoot));
-        if (String.valueOf(searchRoot.getText()).equals("")){
-            searchRoot.setText(ReLaunch.currentRoot);
-        }
+		searchRoot.setText(prefs.getString("searchRoot", ""));
 
 		// Set search text
 		searchTxt.setText(prefs.getString("searchPrev", ""));
@@ -413,6 +451,32 @@ public class SearchActivity extends Activity {
 			return true;
 		default:
 			return true;
+		}
+	}
+
+	static List<HashMap<String, String>> getSearch_results(){
+		return search_results;
+	}
+
+	@Override
+	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		if (resultCode != Activity.RESULT_OK)
+			return;
+		Intent intent;
+		switch (requestCode) {
+			case SEARCH_ACT:
+				if (data.getBooleanExtra("file", false)) {
+					setResult(RESULT_CANCELED);
+				}else {
+					intent = new Intent();
+					intent.putExtra("newDir", data.getStringExtra("newDir"));
+					intent.putExtra("resource_location", data.getIntExtra("resource_location", 0));
+					setResult(RESULT_OK, intent);
+				}
+				finish();
+				break;
+			default:
+				//return;
 		}
 	}
 }

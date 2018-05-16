@@ -9,7 +9,7 @@ import java.util.zip.ZipInputStream;
  * http://stackoverflow.com/questions/7485114/how-to-zip-and-unzip-the-files
  * http://stackoverflow.com/questions/3382996/how-to-unzip-files-programmatically-in-android
  */
-public class ZipUtil {
+class ZipUtil {
 /*
     public static void zip(String[] files, String zipFile) throws IOException {
         BufferedInputStream origin = null;
@@ -39,7 +39,7 @@ public class ZipUtil {
         }
     }*/
 
-    public boolean unzip(String zipFile) {
+    boolean unzip(String zipFile) {
         try {
             File f = new File(zipFile);
             String location = f.getParent();

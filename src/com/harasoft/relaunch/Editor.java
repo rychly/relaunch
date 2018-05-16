@@ -13,6 +13,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.text.Editable;
@@ -20,15 +21,16 @@ import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import com.harasoft.relaunch.Utils.UtilIcons;
 
 public class Editor extends Activity implements TextWatcher {
 	final String TAG = "Editor";
 
 	ReLaunchApp app;
-	Button saveBtn;
-	Button cancelBtn;
-	EditText editTxt;
-	String textBuffer;
+	private Button saveBtn;
+	private Button cancelBtn;
+	private EditText editTxt;
+	private String textBuffer;
 	SharedPreferences prefs;
 
 	private boolean rereadFile(String fname, EditText editTxt) {
@@ -159,9 +161,9 @@ public class Editor extends Activity implements TextWatcher {
         if(app == null ) {
             finish();
         }
-        app.setFullScreenIfNecessary(this);
-		setContentView(R.layout.editor_layout);
-
+		app.setOptionsWindowActivity(this);
+		setContentView(R.layout.layout_editor);
+		UtilIcons utilIcons = new UtilIcons(getBaseContext());
 		// Read parameters
 		final Intent data = getIntent();
 		if (data.getExtras() == null)
@@ -214,6 +216,7 @@ public class Editor extends Activity implements TextWatcher {
 			builder.show();
 		} else {
 			saveBtn = (Button) findViewById(R.id.edit_save);
+			saveBtn.setCompoundDrawablesWithIntrinsicBounds( new BitmapDrawable(getResources(), utilIcons.getIcon("SAVE")), null, null, null);
 			saveBtn.setOnClickListener(new View.OnClickListener() {
 				public void onClick(View v) {
 					final String newBuf = String.valueOf(editTxt.getText());
@@ -229,6 +232,7 @@ public class Editor extends Activity implements TextWatcher {
 			});
 
 			cancelBtn = (Button) findViewById(R.id.edit_cancel);
+			cancelBtn.setCompoundDrawablesWithIntrinsicBounds( new BitmapDrawable(getResources(), utilIcons.getIcon("DELETE")), null, null, null);
 			cancelBtn.setOnClickListener(new View.OnClickListener() {
 				public void onClick(View v) {
 					final String newBuf = String.valueOf(editTxt.getText());
@@ -279,7 +283,6 @@ public class Editor extends Activity implements TextWatcher {
 			((EditText) findViewById(R.id.edit_title)).setText(fname);
 			rereadFile(fname, editTxt);
 		}
-		ScreenOrientation.set(this, prefs);
 	}
 
 	@Override

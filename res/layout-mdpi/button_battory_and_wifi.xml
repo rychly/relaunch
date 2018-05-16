@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:id="@+id/appl_last"
+              android:orientation="vertical"
+              android:layout_width="wrap_content"
+              android:layout_height="fill_parent"
+              android:minWidth="120dp"
+              android:background="@drawable/main_button"
+              android:clickable="true">
+    <TextView
+            android:id="@+id/battory_title"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginLeft="4dp"
+            android:layout_marginRight="4dp"
+            android:background="@color/normal_transparent"
+            android:gravity="center"
+            android:textColor="@color/normal_fg"
+            android:textAppearance="@android:style/TextAppearance.Small">
+    </TextView>
+
+    <TextView
+            android:id="@+id/battory_level"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginLeft="4dp"
+            android:layout_marginRight="4dp"
+            android:background="@color/normal_transparent"
+            android:gravity="center"
+            android:textColor="@color/normal_fg"
+            android:textStyle="bold"
+            android:textAppearance="@android:style/TextAppearance.Medium">
+    </TextView>
+
+</LinearLayout>

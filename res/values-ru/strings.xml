@@ -70,6 +70,7 @@
     <!-- Context Menu, Home Folders -->
     <string name="jv_results_home_list_remove">Удалить из списка Домашние папки</string>
     <string name="jv_results_add_homedir">Добавление Домашней папки</string>
+    <string name="jv_results_edit_homedir">Редактирование Домашней папки</string>
     <string name="jv_results_move_up">Переместить вверх</string>
     <string name="jv_results_move_down">Переместить вниз</string>
 
@@ -77,7 +78,8 @@
     <string name="jv_allapp_move_up">Переместить вверх</string>
     <string name="jv_allapp_move_down">Переместить вниз</string>
     <string name="jv_allapp_add">Добавить в \"Избранные приложения\"</string>
-    <string name="jv_allapp_remove">Удалить из \"Избранных приложений\"</string>
+    <string name="jv_allapp_fav_remove">Удалить из \"Избранных приложений\"</string>
+    <string name="jv_allapp_last_remove">Удалить из \"Запущенных приложений\"</string>
     <string name="jv_allapp_uninstall">Удалить программу</string>
 
     <!-- Context Menu, Other Items -->
@@ -234,10 +236,6 @@
 
     <!-- Settings -->
     <string name="pref_c_mGeneral_title">Основные настройки</string>
-    <string name="pref_i_startMode_title">Режим запуска</string>
-    <string name="arr_start_mode_names_1">Запускать как рабочий стол</string>
-    <string name="arr_start_mode_names_2">Запускать как обычную программу</string>
-    <string name="arr_start_mode_names_3">Определяется расширенными настройками</string>
     <string name="pref_i_workMode_title">Режим работы</string>
     <string name="arr_work_mode_names_1">Режим файлового менеджера</string>
     <string name="arr_work_mode_names_2">Режим библиотеки</string>
@@ -260,6 +258,8 @@
     <string name="jv_prefs_decline_changes_text">Вы хотите сохранить все внесенные изменения?</string>
     <string name="jv_prefs_select_number">Укажите порядковый №</string>
     <string name="jv_prefs_select_application">Выберите приложение</string>
+    <string name="pref_i_Information_for_Device_title">Устройство</string>
+    <string name="jv_prefs_info_device_title">Об устройстве</string>
 
     <!-- Settings / Advanced -->
     <string name="pref_s_screenAdvanced_title">&gt; Расширенные настройки</string>
@@ -271,22 +271,16 @@
     <string name="pref_s_scroll_title">&gt; Прокрутка</string>
     <string name="pref_s_search_title">&gt; Поиск</string>
     <string name="pref_s_viewer_title">&gt; Просмотр и редактирование</string>
+    <string name="pref_s_columnSize_title">&gt; Число колонок</string>
     <string name="pref_s_listSize_title">&gt; Размеры списков</string>
-    <string name="pref_s_screenDropBox_title">&gt; Настройка Dropbox</string>
     <string name="pref_s_screenOPDS_title">&gt; Настройка OPDS</string>
-    <string name="pref_s_screenFTP_title">&gt; Настройки FTP</string>
     <string name="pref_s_system_title">&gt; Служебные операции</string>
     <string name="pref_i_restart_title">Сохранить настройки и перезапустить</string>
-    <string name="pref_i_fileAssociations_title">Настройка ассоциаций файлов</string>
+    <string name="pref_i_fileAssociations_title">&gt; Настройка ассоциаций файлов</string>
     <string name="pref_s_screenManualPanel_title">&gt; Настройка расположения панелей</string>
-    <string name="pref_i_fileFilter_title">Настройка файлового фильтра</string>
+    <string name="pref_i_fileFilter_title">&gt; Настройка файлового фильтра</string>
 
     <!-- Settings / Advanced / Home Folders and File Viewing -->
-    <string name="pref_i_showAddStartDir_title">Включить выбор начальной папки</string>
-    <string name="pref_i_showAddStartDir_on">Показывать в контекстном меню выбор папки</string>
-    <string name="pref_i_showAddStartDir_off">Не показывать пункт "Выбрать начальную папку"</string>
-    <string name="pref_i_startDir_title">Домашняя папка(и)</string>
-    <string name="pref_i_startDir_desc">Начинать просмотр отсюда, если указано (см. ниже)</string>
     <string name="pref_i_saveDir_title">Сохранять последнюю посещенную папку</string>
     <string name="pref_i_saveDir_on">Начинать с последней посещенной папки</string>
     <string name="pref_i_saveDir_off">Начинать с указанной папки (см. выше)</string>
@@ -323,9 +317,6 @@
     <string name="pref_i_fileExtendedFormat_off">Не показывать</string>
     <string name="pref_i_fileExtendedDataFormat_title">Шаблон вывода дополнительных данных файла</string>
     <string formatted="false" name="pref_i_fileExtendedDataFormat_sum">%Sb - размер в byte, %SKb - размер в Kbyte, %SMb - размер в Mbyte, %T - время</string>
-    <string name="LangTitle">Язык</string>
-    <string name="LangDialogTitle">Выберите язык:</string>
-    <string name="LangSummary">Язык приложения.\nПерегрузите ReLaunch.</string>
     <string name="pref_i_showOnlyKnownExts_title">Показывать только те файлы, для которых были созданы ассоциации</string>
     <string name="pref_i_showOnlyKnownExts_on">Только зарегистрированные</string>
     <string name="pref_i_showOnlyKnownExts_off">Фильтр отключен</string>
@@ -363,10 +354,10 @@
     <string name="pref_i_fullScreen_title">Полноэкранный режим</string>
     <string name="pref_i_fullScreen_on">Использовать весь экран</string>
     <string name="pref_i_fullScreen_off">Показывать системный заголовок</string>
-    <string name="pref_i_showNew_title">Отображать новые/прочитанные книги</string>
-    <string name="pref_i_showNew_on">Использовать цвет/шрифт для отображения новых и
+    <string name="pref_i_showNewBook_title">Отображать новые/прочитанные книги</string>
+    <string name="pref_i_showNewBook_on">Использовать цвет/шрифт для отображения новых и
         прочитанных книг</string>
-    <string name="pref_i_showNew_off">Показывать все файлы как обычно</string>
+    <string name="pref_i_showNewBook_off">Показывать все файлы как обычно</string>
     <string name="pref_i_firstLineFontSizePx_title">Размер шрифта имен файлов/папок</string>
     <string name="pref_i_firstLineFontSizePx_sum">Размер шрифта основной строки имен файлов и папок во всех
         списках… px</string>
@@ -378,32 +369,16 @@
     <string name="pref_i_showFullDirPath_title">Полный путь к папке</string>
     <string name="pref_i_showFullDirPath_on">Показывать полный путь в строке заголовка</string>
     <string name="pref_i_showFullDirPath_off">Показывать имя папки в строке заголовка</string>
-    <string name="pref_i_doNotHyph_title">Однострочный режим вывода</string>
-    <string name="pref_i_doNotHyph_off">Вывод названия файла в несколько строк</string>
-    <string name="pref_i_doNotHyph_on">Вывод названия файла в одну строку</string>
-    <string name="pref_i_columnsDirsFiles_title">Список папок и файлов (по умолчанию)</string>
-    <string name="arr_output_columns_names_1">Автоматическое число колонок</string>
-    <string name="arr_output_columns_names_2">1 колонка</string>
-    <string name="arr_output_columns_names_3">2 колонки</string>
-    <string name="arr_output_columns_names_4">3 колонки</string>
-    <string name="arr_output_columns_names_5">4 колонки</string>
-    <string name="arr_output_columns_names_6">5 колонок</string>
-    <string name="pref_i_columnsHomeList_title">Список Начальных папок</string>
-    <string name="pref_i_columnsLRU_title">Список Недавно открытых</string>
-    <string name="pref_i_columnsFAV_title">Список Избранного</string>
-    <string name="pref_i_columnsSearch_title">Список результатов поиска</string>
-    <string name="pref_i_columnsAppAll_title">Все приложения</string>
-    <string name="pref_i_columnsAppFav_title">Избранные приложения</string>
-    <!-- Code Limitation: OPDS Catalog List does not have a separate string for columns -->
-    <string name="pref_i_ftpSize_title">Список серверов FTP</string>
-    <string name="pref_i_columnsAlgIntensity_title">Алгоритм определения числа колонок</string>
-    <string name="arr_output_columns_intensity_names_1">Агрессивный (больше колонок)</string>
-    <string name="arr_output_columns_intensity_names_2">Умереный</string>
-    <string name="arr_output_columns_intensity_names_3">Вялый (меньше колонок)</string>
-    <string name="pref_i_rowSeparator_title">Показывать разделитель строк в списке файлов</string>
+    <string name="pref_i_singleLineMode_title">Однострочный режим вывода</string>
+    <string name="pref_i_singleLineMode_off">Вывод названия файла в несколько строк</string>
+    <string name="pref_i_singleLineMode_on">Вывод названия файла в одну строку</string>
+    <string name="pref_i_showRowSeparator_title">Показывать разделитель строк в списке файлов</string>
     <string name="pref_i_showFileOperation_title">Показывать первыми файловые операции</string>
     <string name="pref_i_showFileOperation_on">Показать файловые операции</string>
     <string name="pref_i_showFileOperation_off">Показать операции с книгами</string>
+    <string name="pref_i_showLang_title">Язык</string>
+    <string name="pref_i_showLangDialog_title">Выберите язык:</string>
+    <string name="pref_i_showLangSummary">Язык приложения.\nПерегрузите ReLaunch.</string>
 
     <!-- Settings / Advanced / Interface Customization / Panel Arrangement and Customizatioh -->
     <string name="jv_setting_screen">Положение панелей на экране</string>
@@ -418,6 +393,41 @@
     <string name="pref_i_select_application">Выберите приложение</string>
     <string name="pref_i_manualButton1_title">Кнопка</string>
     <string name="pref_i_add_new">Новая</string>
+    <string name="app_settings_nothing">Ничего не делать</string>
+    <string name="app_settings_home_number">Открыть начальную папку №</string>
+    <string name="app_settings_home_menu">Открыть меню выбора начальной папки</string>
+    <string name="app_settings_home">Открыть окно списка начальных папок</string>
+    <string name="app_settings_lru_doc_number">Открыть Недавно открытый №</string>
+    <string name="app_settings_lru_doc_menu">Открыть меню Недавно открытых</string>
+    <string name="app_settings_lru_doc">Открыть окно Недавно открытых</string>
+    <string name="app_settings_favorites_doc_number">Открыть Избранное №</string>
+    <string name="app_settings_favorites_doc_menu">Открыть меню Избранного</string>
+    <string name="app_settings_favorites_doc">Открыть окно избранного</string>
+    <string name="app_settings_advanced">Открыть окно \"Дополнительные функции\"</string>
+    <string name="app_settings_settings">Открыть окно \"Настройки\"</string>
+    <string name="app_settings_app_manager">Открыть окно \"Менеджер приложений\"</string>
+    <string name="app_settings_battery">Открыть окно \"Расход батареи\"</string>
+    <string name="app_settings_favorites_app">Открыть окно \"Избранные приложения\"</string>
+    <string name="app_settings_all_app">Открыть окно \"Все приложения\"</string>
+    <string name="app_settings_last_app">Открыть \"Недавно запущеные приложения\"</string>
+    <string name="app_settings_search">Открыть окно \"Поиск\"</string>
+    <string name="app_settings_lock">Заблокировать устройство</string>
+    <string name="app_settings_power_off">Выключить устройство</string>
+    <string name="app_settings_reboot">Перезагрузить устройство</string>
+    <string name="app_settings_switch_wifi">Переключить состояние WiFi</string>
+    <string name="app_settings_run">Выполнить приложение</string>
+    <string name="app_settings_dropbox">Dropbox</string>
+    <string name="app_settings_opds">OPDS</string>
+    <string name="app_settings_sys_settings">Системные настройки</string>
+    <string name="app_settings_up_dir">Переход в родительскую папку</string>
+    <string name="app_settings_up_scrool">Прокрутка списка на экран вверх</string>
+    <string name="app_settings_up_perc">Прокрутка вверх на проценты</string>
+    <string name="app_settings_up_begin">Прокрутка в начало</string>
+    <string name="app_settings_down_scrool">Прокрутка списка на экран вниз</string>
+    <string name="app_settings_down_perc">Прокрутка вниз на проценты</string>
+    <string name="app_settings_down_end">Врокрутка в конец</string>
+    <string name="app_settings_sort_menu">Сортировка файлов</string>
+    <string name="app_settings_sel_num_col">Число колонок</string>
 
     <!-- Settings / Advanced / Filtering and File Operations -->
     <!-- See: Filtering Rules -->
@@ -453,9 +463,6 @@
     <string name="pref_i_selectFileTapIcon_title">Выбор при тапе на иконку</string>
     <string name="pref_i_selectFileTapIcon_off">Не выделять</string>
     <string name="pref_i_selectFileTapIcon_on">Выделять</string>
-    <string name="pref_i_selectRootNavigation_title">Использовать Root доступ</string>
-    <string name="pref_i_selectRootNavigation_on">Запрашивать root права</string>
-    <string name="pref_i_selectRootNavigation_off">Без root прав</string>
 
     <!-- Settings / Advanced / Filtering and File Operations / Filtering Rules -->
     <string name="filters_view_layout_title">Настройки файлового фильтра</string>
@@ -473,92 +480,13 @@
     <string name="jv_filters_cant_be_empty">Необходимо указать значение!</string>
     <string name="jv_filters_or">ИЛИ</string>
 
-    <!-- Settings / Advanced / On-Screen Button Actions -->
-    <string name="pref_i_homeButtonST_title">Одиночное нажатие кнопки \"К Началу\"</string>
-    <string name="pref_i_homeButtonDT_title">Двойное нажатие кнопки \"К Началу\"</string>
-    <string name="pref_i_homeButtonLT_title">Длительное нажатие кнопки \"К Началу\"</string>
-    <string name="pref_i_lruButtonST_title">Одиночное нажатие кнопки \"Недавно открытые\"</string>
-    <string name="pref_i_lruButtonDT_title">Двойное нажатие кнопки \"Недавно открытые\"</string>
-    <string name="pref_i_lruButtonLT_title">Длительное нажатие кнопки \"Недавно открытые\"</string>
-    <string name="pref_i_favButtonST_title">Одиночное нажатие кнопки \"Избранное\"</string>
-    <string name="pref_i_favButtonDT_title">Двойное нажатие кнопки \"Избранное\"</string>
-    <string name="pref_i_favButtonLT_title">Длительное нажатие кнопки \"Избранное\"</string>
-    <string name="pref_i_settingsButtonST_title">Одиночное нажатие кнопки \"Настройки\"</string>
-    <string name="pref_i_settingsButtonDT_title">Двойное нажатие кнопки \"Настройки\"</string>
-    <string name="pref_i_settingsButtonLT_title">Длительное нажатие кнопки \"Настройки\"</string>
-    <string name="pref_i_advancedButtonST_title">Одиночное нажатие кнопки \"Доп.функции\"</string>
-    <string name="pref_i_advancedButtonDT_title">Двойное нажатие кнопки \"Доп.функции\"</string>
-    <string name="pref_i_advancedButtonLT_title">Длительное нажатие кнопки \"Доп.функции\"</string>
-    <string name="pref_i_memButtonST_title">Одиночное нажатие кнопки \"Об.памяти\"</string>
-    <string name="pref_i_memButtonDT_title">Двойное нажатие кнопки \"Об.памяти\"</string>
-    <string name="pref_i_memButtonLT_title">Длительное нажатие кнопки \"Об.памяти\"</string>
-    <string name="pref_i_batButtonST_title">Одиночное нажатие кнопки \"Ост. батареи\"</string>
-    <string name="pref_i_batButtonDT_title">Двойное нажатие кнопки \"Ост. батареи\"</string>
-    <string name="pref_i_batButtonLT_title">Длительное нажатие кнопки \"Ост. батареи\"</string>
-    <string name="pref_i_appFavButtonST_title">Одиночное нажатие кнопки \"Избранные приложения\"</string>
-    <string name="pref_i_appFavButtonDT_title">Двойное нажатие кнопки \"Избранные приложения\"</string>
-    <string name="pref_i_appFavButtonLT_title">Длительное нажатие кнопки \"Избранные приложения\"</string>
-    <string name="pref_i_appAllButtonST_title">Одиночное нажатие кнопки \"Все приложения\"</string>
-    <string name="pref_i_appAllButtonDT_title">Двойное нажатие кнопки \"Все приложения\"</string>
-    <string name="pref_i_appAllButtonLT_title">Длительное нажатие кнопки \"Все приложения\"</string>
-    <string name="pref_i_appLastButtonST_title">Одиночное нажатие кнопки \"Недавно запущенные приложения\"</string>
-    <string name="pref_i_appLastButtonDT_title">Двойное нажатие кнопки \"Недавно запущенные приложения\"</string>
-    <string name="pref_i_appLastButtonLT_title">Длительное нажатие кнопки \"Недавно запущенные приложения\"</string>
-    <string name="pref_i_searchButtonST_title">Одиночное нажатие кнопки  \"Поиск\"</string>
-    <string name="pref_i_searchButtonDT_title">Двойное нажатие кнопки \"Поиск\"</string>
-    <string name="pref_i_searchButtonLT_title">Длительное нажатие кнопки \"Поиск\"</string>
-
-    <!-- Settings / Advanced / On-Screen Button Actions, Action Pop-Up -->
-    <string name="app_settings_nothing">Ничего не делать</string>
-    <string name="app_settings_home_number">Открыть начальную папку №</string>
-    <string name="app_settings_home_menu">Открыть меню выбора начальной папки</string>
-    <string name="app_settings_home">Открыть окно списка начальных папок</string>
-    <string name="app_settings_lru_doc_number">Открыть Недавно открытый №</string>
-    <string name="app_settings_lru_doc_menu">Открыть меню Недавно открытых</string>
-    <string name="app_settings_lru_doc">Открыть окно Недавно открытых</string>
-    <string name="app_settings_favorites_doc_number">Открыть Избранное №</string>
-    <string name="app_settings_favorites_doc_menu">Открыть меню Избранного</string>
-    <string name="app_settings_favorites_doc">Открыть окно избранного</string>
-    <string name="app_settings_advanced">Открыть окно \"Дополнительные функции\"</string>
-    <string name="app_settings_settings">Открыть окно \"Настройки\"</string>
-    <string name="app_settings_app_manager">Открыть окно \"Менеджер приложений\"</string>
-    <string name="app_settings_battery">Открыть окно \"Расход батареи\"</string>
-    <string name="app_settings_favorites_app">Открыть окно \"Избранные приложения\"</string>
-    <string name="app_settings_all_app">Открыть окно \"Все приложения\"</string>
-    <string name="app_settings_last_app">Открыть \"Недавно запущеные приложения\"</string>
-    <string name="app_settings_search">Открыть окно \"Поиск\"</string>
-    <string name="app_settings_lock">Заблокировать устройство</string>
-    <string name="app_settings_power_off">Выключить устройство</string>
-    <string name="app_settings_reboot">Перезагрузить устройство</string>
-    <string name="app_settings_switch_wifi">Переключить состояние WiFi</string>
-    <string name="app_settings_run">Выполнить приложение</string>
-    <string name="app_settings_dropbox">Dropbox</string>
-    <string name="app_settings_opds">OPDS</string>
-    <string name="app_settings_ftp">FTP</string>
-    <string name="app_settings_sys_settings">Системные настройки</string>
-    <string name="app_settings_up_dir">Переход в родительскую папку</string>
-    <string name="app_settings_up_scrool">Прокрутка списка на экран вверх</string>
-    <string name="app_settings_down_scrool">Прокрутка списка на экран вниз</string>
-
     <!-- Settings / Advanced / Launcher Features -->
-    <string name="pref_i_homeMode_title">Режим работы при вызове кнопкой Home</string>
-    <string name="pref_i_homeMode_on">Запускаться как рабочий стол</string>
-    <string name="pref_i_homeMode_off">Запускаться как обычное приложение</string>
-    <string name="pref_i_libraryMode_title">Режим работы при вызове кнопкой Library</string>
-    <string name="pref_i_libraryMode_on">Запускаться как рабочий стол</string>
-    <string name="pref_i_libraryMode_off">Запускаться как обычное приложение</string>
-    <string name="pref_i_shopMode_title">Режим работы при вызове кнопкой Shop</string>
-    <string name="pref_i_shopMode_on">Запускаться как рабочий стол</string>
-    <string name="pref_i_shopMode_off">Запускаться как обычное приложение</string>
     <string name="pref_i_returnToMain_title">После запуска приложения</string>
     <string name="pref_i_returnToMain_on">Вернуться на главную страницу</string>
     <string name="pref_i_returnToMain_off">Остаться на странице с приложениями</string>
     <string name="pref_i_filterSelf_title">Убрать себя из списка приложений</string>
     <string name="pref_i_filterSelf_on">Не показывать себя в списке приложений</string>
     <string name="pref_i_filterSelf_off">Показывать все приложения, включая себя</string>
-    <string name="pref_i_dateUS_title">Формат отображения даты/времени</string>
-    <string name="pref_i_dateUS_on">"Американский" (mm/dd/yyyy)</string>
-    <string name="pref_i_dateUS_off">"Европейский" (dd.mm.yyyy)</string>
     <string name="pref_i_blockExit_title">Выход из программы</string>
     <string name="pref_i_blockExit_on">Выход из программы разрешен</string>
     <string name="pref_i_blockExit_off">Выход из программы блокирован</string>
@@ -599,6 +527,26 @@
     <string name="pref_i_editorMaxSize_sum">Размер редактируемого файла не может быть больше
         чем… (байт)</string>
 
+    <!-- Settings / Advanced / List Size Columns -->
+    <string name="pref_i_columnsDirsFiles_title">Список папок и файлов (по умолчанию)</string>
+    <string name="pref_i_columnsHomeList_title">Список Начальных папок</string>
+    <string name="pref_i_columnsLRU_title">Список Недавно открытых</string>
+    <string name="pref_i_columnsFAV_title">Список Избранного</string>
+    <string name="pref_i_columnsSearch_title">Список результатов поиска</string>
+    <string name="pref_i_columnsAppAll_title">Все приложения</string>
+    <string name="pref_i_columnsAppFav_title">Избранные приложения</string>
+    <string name="pref_i_columnsOPDSSize_title">Columns in OPDS List</string>
+    <string name="pref_i_columnsAlgIntensity_title">Алгоритм определения числа колонок</string>
+    <string name="arr_output_columns_intensity_names_1">Агрессивный (больше колонок)</string>
+    <string name="arr_output_columns_intensity_names_2">Умереный</string>
+    <string name="arr_output_columns_intensity_names_3">Вялый (меньше колонок)</string>
+    <string name="arr_output_columns_names_1">Автоматическое число колонок</string>
+    <string name="arr_output_columns_names_2">1 колонка</string>
+    <string name="arr_output_columns_names_3">2 колонки</string>
+    <string name="arr_output_columns_names_4">3 колонки</string>
+    <string name="arr_output_columns_names_5">4 колонки</string>
+    <string name="arr_output_columns_names_6">5 колонок</string>
+
     <!-- Settings / Advanced / List Size Constraints -->
     <string name="pref_i_lruSize_title">Недавно открытые</string>
     <string name="pref_i_lruSize_sum">Сохранять в списке "Недавно открытых" последние…
@@ -611,42 +559,26 @@
         последние… (приложений)</string>
     <string name="pref_i_appFavSize_title">Избранные приложения</string>
     <string name="pref_i_appFavSize_sum">Сохранять в списке "Избранных приложений"…(приложений)</string>
-    <string name="pref_i_opdsSize_title">Список OPDS каталогов</string>
-    <string name="pref_i_opdsSize_sum">Сохранять в списке \"Список OPDS каталогов\"…</string>
 
     <!-- Settings / Advanced / Dropbox Integration -->
-    <string name="pref_i_Local_folder_DropBox">Локальная папка</string>
-    <string name="pref_i_Local_folder_DropBox_info">Локальная папка для скачиваемых файлов</string>
-    <string name="pref_i_DropBox_folder">Папка Dropbox</string>
-    <string name="pref_i_DropBox_folder_info">Скачиваемая папка Dropbox</string>
-    <string name="pref_i_delLocFiles_title">Удаление локальных файлов</string>
-    <string name="pref_i_delLocFiles_on">Удалять отсутствующие на сервере файлы</string>
-    <string name="pref_i_delLocFiles_off">Оставлять отсутствующие на сервере файлы</string>
-    <string name="pref_i_delDBFiles_title">Удаление файлов на сервере.</string>
-    <string name="pref_i_delDBFiles_on">Удалять отсутствующие на устройстве файлы</string>
-    <string name="pref_i_delDBFiles_off">Оставлять отсутствующие на устройстве файлы</string>
-    <string name="pref_i_dropboxSetButton_title">Кнопка для запуска</string>
-    <string name="pref_i_showDropbox_title">Показывать Dropbox как корневую папку</string>
 
     <!-- Settings / Advanced / Open Publication Distribution System (OPDS) -->
     <string name="pref_i_Local_folder_OPDS">Локальная папка</string>
     <string name="pref_i_Local_folder_OPDS_info">Локальная папка для скачиваемых файлов</string>
     <string name="opds_file_load">Загрузка OPDS</string>
 
-    <!-- Settings / Advanced / FTP Client -->
-    <string name="pref_i_Local_folder_FTP">Папка FTP</string>
-    <string name="pref_i_Local_folder_FTP_info">Локальная папка для временных файлов</string>
-
     <!-- Settings / Advanced / Maintenance Tasks -->
     <string name="pref_i_saveSettings_title">Сохранить настройки на карту памяти</string>
     <string name="pref_i_loadSettings_title">Загрузить настройки с карты памяти</string>
     <string name="pref_i_cleanupDatabaseBooks_title">Очистить кэш тегов fb2/epub</string>
     <string name="pref_i_cleanupDatabaseOPDS_title">Очистить базу OPDS</string>
-    <string name="pref_i_cleanupDatabaseFTP_title">Очистить базу серверов FTP</string>
-    <string name="pref_i_cleanupDatabasePANELS_title">Очистить базу дополнительных панелей</string>
-    <string name="pref_i_deleteDatabaseAll_title">Удалить ВСЕ файлы баз</string>
-    <string name="pref_i_cleanupLRU_title">Очистить список \"Недавно открытые\"</string>
-    <string name="pref_i_cleanupFAV_title">Очистить список \"Избранное\"</string>
+    <string name="pref_i_cleanupDatabasePANELS_title">Очистить базу панелей</string>
+    <string name="pref_i_cleanupDatabaseColumns_title">Очистить базу числа колонок</string>
+    <string name="pref_i_cleanupDatabaseAppFavorites_title">Очистить базу \"Избранные приложения\"</string>
+    <string name="pref_i_cleanupDatabaseAppLast_title">Очистить базу \"Недавно запущенные приложения\"</string>
+    <string name="pref_i_cleanupDatabaseFavorites_title">Очистить базу \"Избранное\"</string>
+    <string name="pref_i_cleanupDatabaseLastRun_title">Очистить базу \"Недавно открытые\"</string>
+    <string name="pref_i_deleteDatabaseAll_title">Очистить ВСЕ базы</string>
     <string name="jv_prefs_rsr_ok_title">Выполнено!</string>
     <string name="jv_prefs_rsr_ok_text">Операция выполнена успешно</string>
     <string name="jv_prefs_rsr_okrst_text">Операция выполнена успешно\nПрограмма будет перезапущена с новыми настройками</string>
@@ -655,12 +587,16 @@
     <string name="jv_prefs_cleanup_database_title">Операции с базой данных</string>
     <string name="jv_prefs_cleanup_database_text">Вы действительно хотите очистить кэш?</string>
     <string name="jv_prefs_cleanup_databaseOPDS_text">Вы действительно хотите очистить список OPDS библиотек?</string>
-    <string name="jv_prefs_cleanup_databaseFTP_text">Вы действительно хотите очистить список серверов FTP?</string>
     <string name="jv_prefs_cleanup_databasePANELS_text">Вы действительно хотите удалить все дополнительные панели?</string>
+    <string name="jv_prefs_cleanup_databaseColumns_text">Вы действительно хотите очистить список числа колонок?</string>
+    <string name="jv_prefs_cleanup_databaseAppFavorites_text">Вы действительно хотите очистить список \"Избранные приложения\"?</string>
+    <string name="jv_prefs_cleanup_databaseAppLast_text">Вы действительно хотите очистить список \"Недавно запущенные приложения\"?</string>
+    <string name="jv_prefs_cleanup_databaseFavorites_text">Вы действительно хотите очистить список \"Избранное\"?</string>
+    <string name="jv_prefs_cleanup_databaseLastRun_text">Вы действительно хотите очистить список \"Недавно открытые\"?</string>
     <string name="jv_prefs_delete_databaseALL_text">Вы действительно удалить ВСЕ ФАЙЛЫ с базами данных?</string>
     <string name="jv_prefs_clear_lists_title">Операции со списками</string>
-    <string name="jv_prefs_clear_lru_text">Вы действительно хотите очистить список \"Недавно открытые\"?</string>
-    <string name="jv_prefs_clear_favorites_text">Вы действительно хотите очистить список \"Избранное\"?</string>
+    <string name="pref_i_backupDir_title">Папка бэкапа</string>
+    <string name="pref_i_backupDir_desc">Введите полный путь к папке бэкапа</string>
 
     <!-- Sort Order -->
     <string name="jv_relaunch_sort_header">Сортировать файлы по</string>
@@ -703,14 +639,6 @@
     <string name="jv_results_checkbox_opds">Использовать пароль</string>
     <string name="jv_relaunch_clean_opds">Удалить базу OPDS каталогов</string>
 
-    <!-- FTP Client -->
-    <string name="jv_relaunch_FTP_catalogs">Список серверов FTP</string>
-    <string name="jv_results_add_ftp">Добавить FTP</string>
-    <string name="jv_results_server_ftp">Имя сервера FTP(например: files.3dnews.ru):</string>
-    <string name="jv_results_path_ftp">Путь подключения (например: /pub):</string>
-    <string name="jv_results_port_ftp">Номер порта (например: 21)</string>
-    <string name="jv_relaunch_clean_ftp">Удалить базу FTP серверов</string>
-
     <!-- Dialogs & Toasts -->
     <string name="jv_relaunch_turning_wifi_on">WiFi ВКЛЮЧЕН</string>
     <string name="jv_relaunch_turning_wifi_off">WiFi выключен</string>
@@ -748,6 +676,7 @@
     <string name="jv_results_delete_ne_dir_text2">(потенциально опасное действие)\?</string>
     <string name="jv_relaunch_del_sel_file_title">Удаление выбранных файлов</string>
     <string name="jv_relaunch_del_sel_file_text1">Удалить следующие файлы:</string>
+    <string name="jv_relaunch_del_sel_file_text2">\?</string>
     <string name="jv_relaunch_error_title">Ошибка</string>
     <string name="jv_relaunch_paste_fail_text">Не удалось скопировать/переместить</string>
     <string name="jv_relaunch_rename_fail_text">Не удалось переименовать</string>
@@ -768,12 +697,10 @@
     <string name="jv_buttonsetL_title">Двойное нажатие</string>
     <string name="jv_buttonsetD_title">Долгое нажатие</string>
     <string name="jv_button_new_title">Назначение действий на кнопку</string>
+    <string name="jv_button_select_icon_title">Выбор иконки кнопки</string>
     <string name="jv_button_select_click">Выбрать</string>
 
     <!-- Changelog -->
-	<string name="model_warning">&lt;h2>Эта программа разработана для Nook Simple
-		Touch или Sony PRS-T1!&lt;/h2>&lt;br>&lt;center>&lt;b>Хотите
-		продолжить?&lt;/b>&lt;/center></string>
 	<string name="jv_relaunch_whats_new">Список изменений</string>
 	<string name="jv_rla_about_prev">&lt;h1&gt;&lt;center&gt;ReLaunch&lt;/center&gt;&lt;/h1&gt;&lt;center&gt;&lt;b&gt;Запуск
 		программ чтения книг и рабочий стол для Nook Simple
@@ -789,7 +716,7 @@
     <string name="pref_i_hideTitle_title">Заголовок программы</string>
     <string name="pref_i_hideTitle_on">Заголовок программы показывается</string>
     <string name="pref_i_hideTitle_off">Заголовок программы скрыт</string>
-
+    <string name="pref_i_columnsAppLRU_title">Недавно запущенные приложения</string>
 
 
 </resources>

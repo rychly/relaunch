@@ -3,78 +3,73 @@ package com.harasoft.relaunch;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.*;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Typeface;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.preference.PreferenceManager;
-import android.text.SpannableString;
-import android.text.style.StyleSpan;
 import android.util.TypedValue;
 import android.view.*;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.View.MeasureSpec;
 import android.view.View.OnTouchListener;
 import android.widget.*;
-import ebook.EBook;
+import com.harasoft.relaunch.LocalFile.LocalFile;
+import com.harasoft.relaunch.OPDS.OPDSActivity;
+import com.harasoft.relaunch.Preferences.PrefsActivity;
+import com.harasoft.relaunch.Preferences.TypesActivity;
+import com.harasoft.relaunch.Support.BookState;
+import com.harasoft.relaunch.Support.RunIntent;
+import com.harasoft.relaunch.Support.TypeResource;
+import com.harasoft.relaunch.Utils.*;
 
 import java.io.File;
 import java.util.*;
-import java.util.regex.Pattern;
 
 public class ResultsActivity extends Activity {
 	final String TAG = "Results";
-	final int CNTXT_MENU_RMFAV = 1;
-	final int CNTXT_MENU_RMFILE = 2;
-	final int CNTXT_MENU_CANCEL = 3;
-	final int CNTXT_MENU_MOVEUP = 4;
-	final int CNTXT_MENU_MOVEDOWN = 5;
-	final int CNTXT_MENU_MARK_FINISHED = 6;
-	final int CNTXT_MENU_MARK_READING = 7;
-	final int CNTXT_MENU_MARK_FORGET = 8;
-	final int CNTXT_MENU_RMDIR = 9;
-    final int CNTXT_MENU_OPEN_DIR = 10;
-    final int CNTXT_MENU_ADD_OPDS = 11;
-    final int CNTXT_MENU_EDIT_OPDS = 12;
-    final int CNTXT_MENU_DEL_OPDS = 13;
-    final int CNTXT_MENU_CLEAN_OPDS = 14;
-    final int CNTXT_MENU_RMLO = 15;
-    final int CNTXT_MENU_RM_HOMEDIR = 16;
-    final int CNTXT_MENU_ADD_HOMEDIR = 17;
-    final int CNTXT_MENU_ADD_FTP = 18;
-    final int CNTXT_MENU_EDIT_FTP = 19;
-    final int CNTXT_MENU_DEL_FTP = 20;
-    final int CNTXT_MENU_CLEAN_FTP = 21;
+    private final int CNTXT_MENU_RMFAV = 1;
+    private final int CNTXT_MENU_RMFILE = 2;
+    private final int CNTXT_MENU_CANCEL = 3;
+    private final int CNTXT_MENU_MOVEUP = 4;
+    private final int CNTXT_MENU_MOVEDOWN = 5;
+    private final int CNTXT_MENU_MARK_FINISHED = 6;
+    private final int CNTXT_MENU_MARK_READING = 7;
+    private final int CNTXT_MENU_MARK_FORGET = 8;
+    private final int CNTXT_MENU_RMDIR = 9;
+    private final int CNTXT_MENU_OPEN_DIR = 10;
+    // OPDS
+    private final int CNTXT_MENU_ADD_OPDS = 11;
+    private final int CNTXT_MENU_EDIT_OPDS = 12;
+    private final int CNTXT_MENU_DEL_OPDS = 13;
+    private final int CNTXT_MENU_CLEAN_OPDS = 14;
+    // Last openings
+    private final int CNTXT_MENU_RMLO = 15;
+    // Home Dir
+    private final int CNTXT_MENU_RM_HOMEDIR = 16;
+    private final int CNTXT_MENU_ADD_HOMEDIR = 17;
+    private final int CNTXT_MENU_EDIT_HOMEDIR = 18;
+
 	ReLaunchApp app;
-	String listName;
-    static String listNameSecond;
-	String title;
-	Boolean rereadOnStart = true;
-	static SharedPreferences prefs;
-	FLSimpleAdapter adapter;
-    Integer currentColsNum = 0;
-	List<HashMap<String, String>> itemsArray = new ArrayList<HashMap<String, String>>();
-	Integer currentPosition = -1;
-	boolean addSView = true;
-	//boolean oldHome;
-	Pattern purgeBracketsPattern;
-    MyDBHelper dbHelper;
-    public static SQLiteDatabase db;
-    int total;
+    private String listName;
+    private String listNameSecond;
+	private String title;
+    private SharedPreferences prefs;
+	private ResultAdapter resAdapter;
+    private Integer currentColsNum = 0;
+	private List<HashMap<String, String>> itemsArray = new ArrayList<>();
+    private Integer currentPosition = -1;
+    private boolean addSView = true;
+    private UtilOPDS utilOPDS;
+    private UtilFavorites utilFavorites;
+    private UtilLastOpen utilLastOpen;
+    private UtilHistory utilHistory;
+    private UtilIcons utilIcons;
+    private UtilHomeDirs utilHomeDirs;
+    private int total;
 
-    // переменные из настроек===============================================
-    static boolean hideKnownExts = false;
-    static int firstLineFontSizePx = 20;
-    static int secondLineFontSizePx = 16;
-    static boolean showNew = false;
-    static boolean hideKnownDirs = false;
-    static int firstLineIconSizePx = 48;
-    static boolean filterResults = false;
-    static boolean showBookTitles = false;
 
-    static LayoutInflater vi;
-    GridView gv;
+    private LayoutInflater vi;
+    private GridView gv;
 
     static class ViewHolder {
 		TextView tv1;
@@ -83,129 +78,100 @@ public class ResultsActivity extends Activity {
 		ImageView iv;
 	}
 
-	class FLSimpleAdapter extends ArrayAdapter<HashMap<String, String>> {
-		FLSimpleAdapter(Context context, int resource,
-				List<HashMap<String, String>> data) {
-			super(context, resource, data);
-		}
+    class ResultAdapter extends ArrayAdapter<HashMap<String, String>> {
+        private int firstLineFontSizePx;
+        private int secondLineFontSizePx;
+        ResultAdapter(Context context, int resource, List<HashMap<String, String>> data) {
+            super(context, resource, data);
+            firstLineFontSizePx = Integer.parseInt(prefs.getString("firstLineFontSizePx", "20"));
+            secondLineFontSizePx = Integer.parseInt(prefs.getString("secondLineFontSizePx", "16"));
+        }
 
-		@Override
-		public int getCount() {
-			return itemsArray.size();
-		}
+        @Override
+        public int getCount() {
+            return itemsArray.size();
+        }
 
-		@Override
-		public View getView(int position, View convertView, ViewGroup parent) {
-			ViewHolder holder;
-			View v = convertView;
-            HashMap<String, String> item = itemsArray.get(position);
-			if (v == null) {
-				v = vi.inflate(R.layout.results_item,  parent, false);
-                if (v == null) {
-                    return null;
-                }
-				holder = new ViewHolder();
-                holder.tv1 = (TextView) v.findViewById(R.id.res_dname);
-                holder.tv2 = (TextView) v.findViewById(R.id.res_fname);
-				holder.tvHolder = (LinearLayout) v.findViewById(R.id.res_holder);
-				holder.iv = (ImageView) v.findViewById(R.id.res_icon);
-				v.setTag(holder);
-			} else{
-				holder = (ViewHolder) v.getTag();
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            // если позиция за пределами массива выходим
+            if (position >= itemsArray.size()) {
+                return null;
             }
 
-			TextView tv1 = holder.tv1;
-			TextView tv2 = holder.tv2;
+            ViewHolder holder;
+            View v = convertView;
+            // если ещё не создавалась
+            if (v == null) {
+                v = vi.inflate(R.layout.item_results,  parent, false);
+                if (v == null) { // ошибка при создании
+                    return null;
+                }
+                holder = new ViewHolder();
+                holder.tv1 = (TextView) v.findViewById(R.id.res_fname);
+                holder.tv2 = (TextView) v.findViewById(R.id.res_dname);
+                holder.tvHolder = (LinearLayout) v.findViewById(R.id.res_holder);
+                holder.iv = (ImageView) v.findViewById(R.id.res_icon);
+                v.setTag(holder);
+            } else{
+                holder = (ViewHolder) v.getTag();
+            }
+
+            TextView tv1 = holder.tv1;
+            TextView tv2 = holder.tv2;
             LinearLayout tvHolder = holder.tvHolder;
             ImageView iv = holder.iv;
 
-            tv2.setTextSize(TypedValue.COMPLEX_UNIT_PX, firstLineFontSizePx);
-            tv1.setTextSize(TypedValue.COMPLEX_UNIT_PX, secondLineFontSizePx);
+            tv1.setTextSize(TypedValue.COMPLEX_UNIT_PX, firstLineFontSizePx);
+            tv2.setTextSize(TypedValue.COMPLEX_UNIT_PX, secondLineFontSizePx);
 
-			if (position >= itemsArray.size()) {
-				v.setVisibility(View.INVISIBLE);
-				tv1.setVisibility(View.INVISIBLE);
-				tv2.setVisibility(View.INVISIBLE);
-				iv.setVisibility(View.INVISIBLE);
-				return v;
-			}
 
-			if (item != null) {
-				String fname = item.get("fname");
-				String sname = item.get("sname");
-				String dname = item.get("dname");
-				String sdname = dname;
-				String fullName = dname + "/" + fname;
-				boolean setBold = false;
 
-				// setup icon
-                if (firstLineIconSizePx == 0) { // если отключены картинки
-                    iv.setVisibility(View.GONE); // скрываем поле с ними
-                }else {
-                    if (listName.equals("opdslist")) {
-                        iv.setImageDrawable(getResources().getDrawable(R.drawable.ci_opds_catalog));
-                    }else if (listName.equals("ftplist")) {
-                        iv.setImageDrawable(getResources().getDrawable(R.drawable.ci_ftp_catalog));
-                    }else {
-                        String temp_nameIcon = item.get("nameIcon");
-                        for (ReLaunch.imageIcon anArrIcon : ReLaunch.arrIcon) {
-                            if (anArrIcon.nameIcon.equals(temp_nameIcon)) {
-                                iv.setImageBitmap(anArrIcon.icon);
-                                break;
-                            }
-                        }
-                    }
-                }
+            HashMap<String, String> item = itemsArray.get(position);
+            if (item != null) {
+                // первая строка в выводе
+                String firstLine = item.get("firstLine");
+                tv1.setText(firstLine);
+                // вторая строка в выводе
+                String secondLine = item.get("secondLine");
+                tv2.setText(secondLine);
 
-				// special cases in dname & fname
-				// dname empty - in root dir
-				// fname empty with dname empty - root dir as is
-				if (dname.equals("")) {
-					sdname = "/";
-					if (fname.equals("")) {
-						sname = "/";
-						sdname = "";
-					}
-				}
 
-                if (showNew) {
-                    int color_txt;
-                    if (app.history.containsKey(fullName)) {
-                        int baseHistory = app.history.get(fullName);
-                        if (baseHistory == app.READING) {
-                            color_txt = getResources().getColor(R.color.file_reading_fg);
-                            tvHolder.setBackgroundColor(getResources() .getColor(R.color.file_reading_bg));
-                        } else if (baseHistory == app.FINISHED) {
-                            color_txt = getResources().getColor(R.color.file_finished_fg);
-                            tvHolder.setBackgroundColor(getResources().getColor(R.color.file_finished_bg));
-                        } else {
-                            color_txt = getResources().getColor(R.color.file_unknown_fg);
-                            tvHolder.setBackgroundColor(getResources().getColor(R.color.file_unknown_bg));
-                        }
-                    } else {
+                int color_txt;
+                tv2.setTypeface(null, Typeface.NORMAL);
+                switch (item.get("color")){
+                    case "reading":
+                        color_txt = getResources().getColor(R.color.file_reading_fg);
+                        tvHolder.setBackgroundColor(getResources() .getColor(R.color.file_reading_bg));
+                        break;
+                    case "finished":
+                        color_txt = getResources().getColor(R.color.file_finished_fg);
+                        tvHolder.setBackgroundColor(getResources().getColor(R.color.file_finished_bg));
+                        break;
+                    case "new":
                         color_txt = getResources().getColor(R.color.file_new_fg);
                         tvHolder.setBackgroundColor(getResources().getColor(R.color.file_new_bg));
-                        if (getResources().getBoolean(R.bool.show_new_as_bold))
-                            setBold = true;
-                    }
-                    tv1.setTextColor(color_txt);
-                    tv2.setTextColor(color_txt);
+                        tv1.setTypeface(null, Typeface.BOLD);
+                        break;
+                    default:
+                        color_txt = getResources().getColor(R.color.normal_fg);
+                        tvHolder.setBackgroundColor(getResources().getColor(R.color.normal_bg));
+                        tv1.setTypeface(null, Typeface.BOLD);
+                }
+                tv1.setTextColor(color_txt);
+                tv2.setTextColor(color_txt);
 
-                    SpannableString s = new SpannableString(sname);
-                    s.setSpan(new StyleSpan(setBold ? Typeface.BOLD : Typeface.NORMAL), 0, sname.length(), 0);
-                    tv1.setText(sdname);
-                    tv2.setText(s);
+
+                // setup icon
+                String name_icon = item.get("nameIcon");
+                if (name_icon.equals("")) { // если отключены картинки
+                    iv.setVisibility(View.GONE); // скрываем поле с ними
                 }else {
-                    tvHolder.setBackgroundColor(getResources().getColor(R.color.normal_bg));
-                    int color_txt = getResources().getColor(R.color.normal_fg);
-                    tv1.setTextColor(color_txt);
-                    tv2.setTextColor(color_txt);
-                    tv1.setText(sdname);
-                    tv2.setText(sname);
+                    iv.setImageBitmap(utilIcons.getIconFile(name_icon));
                 }
 
-			}
-			// fixes on rows height in grid
+            }
+            // fixes on rows height in grid
             // если у грида не одна колонка, то выравниваем ячейки по высоте в одной строке
             if (currentColsNum > 1) {
                 GridView pgv = (GridView) parent;
@@ -227,123 +193,69 @@ public class ResultsActivity extends Activity {
                     v.setMinimumHeight(recalc_height);
                 }
             }
-			return v;
-		}
-	}
+            return v;
+        }
+    }
 
 	private void redrawList() {
-        EinkScreen.PrepareController(null, false);
-		if (filterResults) {
-			List<HashMap<String, String>> newItemsArray = new ArrayList<HashMap<String, String>>();
-
-			for (HashMap<String, String> item : itemsArray) {
-				if (app.filterFile(item.get("dname"), item.get("fname")) || item.get("type").equals("dir"))
-					newItemsArray.add(item);
-			}
-			itemsArray = newItemsArray;
-		}
 		gv.setNumColumns(currentColsNum);
-		adapter.notifyDataSetChanged();
+
+		resAdapter.notifyDataSetChanged();
+
 		if (currentPosition != -1)
 			gv.setSelection(currentPosition);
 	}
 
 	private void createItemsArray() {
-		itemsArray = new ArrayList<HashMap<String, String>>();
-        // вычищаем иконки из массива. оставляем только стандартные
+		itemsArray = new ArrayList<>();
+        TextView rt = (TextView) findViewById(R.id.result_title);
+        switch (listName) {
+            case "opdslist": {
+                itemsArray = utilOPDS.getListOPDS();
+                setIconsForArray(itemsArray);
+                setColorsForArray(itemsArray);
 
-        if(listName.equals("ftplist")){
-            dbFTP();
-        }else if(listName.equals("opdslist")){
-            dbOPDS();
-        }else {
-
-            Button rt = (Button) findViewById(R.id.results_title);
-            if (total == -1){
-                rt.setText(title + " (" + app.getList(listName).size() + ")");
-            }else{
-                rt.setText(title + " (" + app.getList(listName).size() + "/"+ total + ")");
+                rt.setText(title + " (" + itemsArray.size() + ")");
+                break;
             }
-            for (String[] n : app.getList(listName)) {
-                if (!filterResults || (filterResults && app.filterFile(n[0], n[1])) || (n[1].equals(app.DIR_TAG))) {
-                    HashMap<String, String> item = new HashMap<String, String>();
-                    item.put("dname", n[0]);
-                    item.put("fname", n[1]);
+            case "homeList": {
+                itemsArray = utilHomeDirs.getArrayHomeDir();
+                setIconsForArray(itemsArray);
+                setColorsForArray(itemsArray);
 
-                    if (n[1].equals(app.DIR_TAG)) {
-                        item.put("type", "dir");
-                        int ind = n[0].lastIndexOf('/');
-                        if (ind == -1) {
-                            item.put("fname", "");
-                            item.put("sname", "");
-                        } else {
-                            String sname = n[0].substring(ind + 1);
-                            item.put("fname", sname);
-                            // clean start prefixes, if need
-                            if (hideKnownDirs && !listName.equals("homeList")) {
-                                for (int i = 0, j = ReLaunch.startDir.length; i < j; i++) {
-                                    if (sname.startsWith(ReLaunch.startDir[i])) {
-                                        sname = "~" + sname.substring(ReLaunch.startDir[i].length());
-                                    }
-                                }
-                            }
-                            item.put("sname", sname);
-                            item.put("dname", n[0].substring(0, ind));
-                        }
+                rt.setText(title + " (" + itemsArray.size() + ")");
+                break;
+            }
+            case "favorites": {
+                itemsArray = utilFavorites.getArrayFavorites();
+                setIconsForArray(itemsArray);
+                setColorsForArray(itemsArray);
 
-                        // получение иконки=========
-                        if (firstLineIconSizePx != 0) {
-                            item.put("nameIcon", "dir_ok");
-                        }
-                        //=====================
-                    } else {
-                        item.put("type", "file");
-                        String fname = n[1];
-                        if (showBookTitles) {
-                            item.put("sname", getEbookName(n[0], n[1]));
-                        } else {
-                            if (hideKnownExts) {// clean extension, if needed
-                                for (int i = 0, j = ReLaunch.exts.size(); i < j; i++) {
-                                    if (fname.endsWith(ReLaunch.exts.get(i))) {
-                                        fname = fname.substring(0, fname.length() - ReLaunch.exts.get(i).length());
-                                        //break;
-                                    }
-                                }
-                            }
-                            item.put("sname", fname);
-                        }
+                rt.setText(title + " (" + itemsArray.size() + ")");
+                break;
+            }
+            case "lastOpened": {
+                itemsArray = utilLastOpen.getArrayLastOpen();
+                setIconsForArray(itemsArray);
+                setColorsForArray(itemsArray);
 
-                        // получение иконки==============================
-                        if (firstLineIconSizePx != 0) {
-                            String nameIcon;
+                rt.setText(title + " (" + itemsArray.size() + ")");
+                break;
+            }
+            case "searchResults": {
+                itemsArray = SearchActivity.getSearch_results();
+                setIconsForArray(itemsArray);
+                setColorsForArray(itemsArray);
 
-                            if (n[1].endsWith(".apk")){ // если удалось
-                                nameIcon = "install";
-                            } else {  // иначе
-                                String rdrName = app.readerName(n[1]); // в поле реадера читаем обработчик
-
-                                if (rdrName.startsWith("Intent:")) { // если ответ начинается с ...
-                                    nameIcon = "icon";
-                                } else if (rdrName.equals("Nope")) { // если не известен
-                                    File fil = new File(n[1]); // получаем файл
-                                    if (fil.length() > app.viewerMax * 1024) {  // больше определенного размера
-                                        nameIcon = "file_notok";
-                                    } else {  // иначе
-                                        nameIcon = "file_ok";
-                                    }
-                                } else {
-                                        nameIcon = rdrName;
-                                }
-                            }
-                            item.put("nameIcon", nameIcon); // тип - файл
-                        }
-                        //=============================================
-                    }
-                    itemsArray.add(item);
+                if (total == -1) {
+                    rt.setText(title + " (" + itemsArray.size() + ")");
+                } else {
+                    rt.setText(title + " (" + itemsArray.size() + "/" + total + ")");
                 }
             }
         }
-        adapter.notifyDataSetChanged();
+
+        resAdapter.notifyDataSetChanged();
 	}
 
 	@Override
@@ -351,32 +263,16 @@ public class ResultsActivity extends Activity {
 		super.onCreate(savedInstanceState);
 
 		prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
-        hideKnownExts = prefs.getBoolean("hideKnownExts", false);
-        firstLineFontSizePx = Integer.parseInt(prefs.getString("firstLineFontSizePx", "20"));
-        secondLineFontSizePx = Integer.parseInt(prefs.getString("secondLineFontSizePx", "16"));
-        showNew = prefs.getBoolean("showNew", true);
-        hideKnownDirs = prefs.getBoolean("hideKnownDirs", false);
-        firstLineIconSizePx = Integer.parseInt(prefs.getString("firstLineIconSizePx", "48"));
-        filterResults = prefs.getBoolean("filterResults", false);
-        showBookTitles = prefs.getBoolean("showBookTitles", false);
+
 
 		app = ((ReLaunchApp) getApplicationContext());
         if(app == null ) {
+            setResult(Activity.RESULT_CANCELED);
             finish();
         }
-        EinkScreen.setEinkController(prefs);
-        app.setFullScreenIfNecessary(this);
-        setContentView(R.layout.results_layout);
+        app.setOptionsWindowActivity(this);
+        setContentView(R.layout.layout_results);
         vi = (LayoutInflater) getApplicationContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-
-
-		if (app.dataBase == null){
-			app.dataBase = new BooksBase(this);
-        }
-		if (!BooksBase.db.isOpen()){
-			app.dataBase = new BooksBase(this);
-        }
-		purgeBracketsPattern = Pattern.compile("\\[[\\s\\.\\-_]*\\]");
 
 		// Recreate readers list
 		final Intent data = getIntent();
@@ -385,132 +281,62 @@ public class ResultsActivity extends Activity {
 			finish();
 		}
 		listName = data.getExtras().getString("list");
-		title = data.getExtras().getString("title");
-		rereadOnStart = data.getExtras().getBoolean("rereadOnStart");
-		total = data.getExtras().getInt("total", -1);
 
-		(findViewById(R.id.results_btn)).setOnClickListener(new View.OnClickListener() {
-					public void onClick(View v) {
-						finish();
-					}
-				});
+        utilIcons = new UtilIcons(getBaseContext());
+        utilHomeDirs = new UtilHomeDirs(getBaseContext());
+
+        ImageView result_exit = (ImageView) findViewById(R.id.result_btn_exit);
+        result_exit.setImageBitmap(utilIcons.getIcon("EXIT"));
+        result_exit.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                setResult(Activity.RESULT_CANCELED);
+                finish();
+            }
+        });
+
 
 		// set results icon
-		ImageView results_icon = (ImageView) findViewById(R.id.results_icon);
-		if (listName.equals("homeList")) {
-            listNameSecond = "columnsHomeList";
-			results_icon.setImageDrawable(getResources().getDrawable(R.drawable.ci_home));
-		}
-		if (listName.equals("favorites")) {
-            listNameSecond = "columnsFAV";
-			results_icon.setImageDrawable(getResources().getDrawable(R.drawable.ci_fav));
-		}
-		if (listName.equals("lastOpened")) {
-            listNameSecond = "columnsLRU";
-			results_icon.setImageDrawable(getResources().getDrawable(R.drawable.ci_lre));
-		}
-		if (listName.equals("searchResults")) {
-            listNameSecond = "columnsSearch";
-			results_icon.setImageDrawable(getResources().getDrawable(R.drawable.ci_search));
-		}
-        if (listName.equals("opdslist")) {
-            listNameSecond = "columnsOpdsList";
-            results_icon.setImageDrawable(getResources().getDrawable(R.drawable.ci_books));
-            dbHelper = new MyDBHelper(this, "OPDS");
-            db = dbHelper.getReadableDatabase();
-            Cursor c;
-            if(db != null) {
-                c = db.query("OPDS", null, null, null, null, null, null);
-                if(c.getCount()== 0){
-                    addDbOPDS("Либрусек", "http://lib.rus.ec/opds", "false", null, null);
-                }
-                c.close();
-                db.close();
-            }
-        }
-        if (listName.equals("ftplist")) {
-            listNameSecond = "columnsFtpList";
-            results_icon.setImageDrawable(getResources().getDrawable(R.drawable.ci_home));
-            dbHelper = new MyDBHelper(this, "FTP");
-            db = dbHelper.getReadableDatabase();
-            Cursor c;
-            if(db != null) {
-                c = db.query("FTP", null, null, null, null, null, null);
-                if(c.getCount()== 0){
-                    addDbFTP("files.3dnews.ru", 21, "/pub", null, null);
-                }
-                c.close();
-                db.close();
-            }
-        }
+		ImageView results_icon = (ImageView) findViewById(R.id.result_icon);
+		switch (listName){
+            case ("homeList"):
+                listNameSecond = "columnsHomeList";
+                title = getResources().getString(R.string.jv_relaunch_home);
+                results_icon.setImageBitmap(utilIcons.getIcon("HOMESCREEN"));
+                break;
+            case ("favorites"):
+                utilFavorites = new UtilFavorites(getBaseContext());
+                listNameSecond = "columnsFAV";
+                title = getResources().getString(R.string.jv_relaunch_fav);
+                results_icon.setImageBitmap(utilIcons.getIcon("FAVDOCSCREEN"));
+                break;
+            case ("lastOpened"):
+                utilLastOpen = new UtilLastOpen(getBaseContext());
+                listNameSecond = "columnsLRU";
+                title = getResources().getString(R.string.jv_relaunch_lru);
+                results_icon.setImageBitmap(utilIcons.getIcon("LRUSCREEN"));
+                break;
+            case ("searchResults"):
+                listNameSecond = "columnsSearch";
+                title = getResources().getString(R.string.jv_search_results);
 
-		// may be "dead end" of code now(?) now UP functionality in this
-		// screens?
-		// so force to DISABLED
-		final Button up = (Button) findViewById(R.id.goup_btn);
-		up.setEnabled(false);
-		// end of (possible) "dead end" code
-		final ImageButton adv = (ImageButton) findViewById(R.id.advanced_btn);
-		if (adv != null) {
-			class advSimpleOnGestureListener extends SimpleOnGestureListener {
-				@Override
-				public boolean onSingleTapConfirmed(MotionEvent e) {
-					Intent i = new Intent(ResultsActivity.this, Advanced.class);
-					startActivity(i);
-					return true;
-				}
-			}
+                total = data.getExtras().getInt("total", -1);
 
-			advSimpleOnGestureListener adv_gl = new advSimpleOnGestureListener();
-			final GestureDetector adv_gd = new GestureDetector(adv_gl);
-			adv.setOnTouchListener(new OnTouchListener() {
-				public boolean onTouch(View v, MotionEvent event) {
-					adv_gd.onTouchEvent(event);
-					return false;
-				}
-			});
-		}
+                results_icon.setImageBitmap(utilIcons.getIcon("SEARCH"));
+                break;
+            case ("opdslist"):
+                utilOPDS = new UtilOPDS(getBaseContext());
+                listNameSecond = "columnsOpdsList";
+                title = getResources().getString(R.string.jv_relaunch_OPDS_catalogs);
+                results_icon.setImageBitmap(utilIcons.getIcon("OPDS"));
+        }
+        utilHistory = new UtilHistory(getBaseContext());
 
 		currentPosition = -1;
-		gv = (GridView) findViewById(R.id.results_list);
+		gv = (GridView) findViewById(R.id.result_list);
 		gv.setHorizontalSpacing(0);
-		Button rt = (Button) findViewById(R.id.results_title);
-		rt.setOnClickListener(new View.OnClickListener() {
-			public void onClick(View v) {
-				final String[] columns = getResources().getStringArray(R.array.output_columns_names);
-				final CharSequence[] columnsmode = new CharSequence[columns.length];
-                System.arraycopy(columns, 0, columnsmode, 0, columns.length);
-				int checked = Integer.valueOf(prefs.getString(listNameSecond, "-1"));
-                if (checked == -1){
-                    checked = 0;
-                }
-				// get checked
-				AlertDialog.Builder builder = new AlertDialog.Builder(ResultsActivity.this);
-				// "Select application"
-				builder.setTitle(getResources().getString(R.string.jv_relaunch_select_columns));
-				builder.setSingleChoiceItems(columnsmode, checked, new DialogInterface.OnClickListener() {
-							public void onClick(DialogInterface dialog, int i) {
-                                SharedPreferences.Editor editor = prefs.edit();
-								if (i == 0) {
-                                    editor.putString(listNameSecond, "-1");
-								} else {
-                                    editor.putString(listNameSecond, String.valueOf(i));
-								}
-                                currentColsNum = i;
-                                editor.commit();
-								redrawList();
-								dialog.dismiss();
-							}
-						});
-                AlertDialog alert = builder.create();
-                alert.show();
 
-			}
-		});
-
-		//createItemsArray();
-		adapter = new FLSimpleAdapter(this, R.layout.results_item, itemsArray);
-		gv.setAdapter(adapter);
+        resAdapter = new ResultAdapter(this, R.layout.item_results, itemsArray);
+        gv.setAdapter(resAdapter);
 		registerForContextMenu(gv);
 		if (prefs.getBoolean("customScroll", app.customScrollDef)) {
 			if (addSView) {
@@ -521,7 +347,7 @@ public class ResultsActivity extends Activity {
 					scrollW = 25;
 				}
 
-				LinearLayout ll = (LinearLayout) findViewById(R.id.results_fl);
+				LinearLayout ll = (LinearLayout) findViewById(R.id.result_fl);
 				final SView sv = new SView(getBaseContext());
 				LinearLayout.LayoutParams pars = new LinearLayout.LayoutParams(
 						scrollW, ViewGroup.LayoutParams.FILL_PARENT, 1f);
@@ -560,11 +386,11 @@ public class ResultsActivity extends Activity {
         class GlSimpleOnGestureListener extends SimpleOnGestureListener {
             Context context;
 
-            public GlSimpleOnGestureListener(Context context) {
+            private GlSimpleOnGestureListener(Context context) {
                 super();
                 this.context = context;
             }
-            public int findViewByXY(MotionEvent e) {
+            private int findViewByXY(MotionEvent e) {
                 int location[] = new int[2];
                 float x = e.getRawX();
                 float y = e.getRawY();
@@ -595,43 +421,111 @@ public class ResultsActivity extends Activity {
                 }
 
                 HashMap<String, String> item = itemsArray.get(position);
-                String fullName = item.get("dname") + "/" + item.get("fname");
+
+                // получаем данные по файлу
+                String file_path = item.get("secondLine");
+                String file_name = item.get("firstLine");
+                String file_full_name;
+                // формируем полный путь к файлу
+                if (file_path.equals("/")) {
+                    file_full_name = "/" + file_name;
+                }else {
+                    file_full_name = file_path + "/" + file_name;
+                }
 
                 currentPosition = gv.getFirstVisiblePosition();
-                if(listName.equals("ftplist")){
-                    Intent intent = new Intent(ResultsActivity.this, ReLaunch.class);
-                    intent.putExtra("ftplist", "list");
-                    intent.putExtra("id", position + 1);
-                    intent.putExtra("path", "FTP| " + item.get("dname"));
-                    startActivity(intent);
-                }else if(listName.equals("opdslist")){
-                    Intent intent = new Intent(ResultsActivity.this, OPDSActivity.class);
-                    intent.putExtra("opdscat", item.get("dname"));
-                    intent.putExtra("login", item.get("login"));
-                    intent.putExtra("password", item.get("password"));
-                    startActivity(intent);
-                }else if (item.get("type").equals("dir")) {
-                    Intent intent = new Intent(ResultsActivity.this,ReLaunch.class);
-                    intent.putExtra("start_dir", fullName);
-                    //intent.putExtra("home", ReLaunch.useHome);
-                    //oldHome = ReLaunch.useHome;
-                    intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                    startActivityForResult(intent, ReLaunch.DIR_ACT);
-                    finish();
-                } else {
-                    String fileName = item.get("fname");
-                    if (!app.specialAction(ResultsActivity.this, fullName)) {
-                        if (app.readerName(fileName).equals("Nope"))
-                            app.defaultAction(ResultsActivity.this, fullName);
-                        else {
-                            // Launch reader
-                            app.LaunchReader(fullName);
-                        }
-                    }
-                    // close in needed
-                    if (prefs.getBoolean("returnFileToMain", false))
+                Intent intent;
+                switch (listName){
+                    case ("homeList"):
+                        intent = new Intent();
+                        intent.putExtra("id", item.get("id"));
+                        setResult(RESULT_OK, intent);
                         finish();
+                        break;
+                    case ("favorites"):
+                        // если это папка то возвращаемся в основное окно и делаем папку основной
+                        if (item.get("type").equals(String.valueOf(TypeResource.DIR))) {
+                            intent = new Intent();
+                            intent.putExtra("newDir", file_full_name);
+                            setResult(RESULT_OK, intent);
+                            finish();
+                        }else { // с файлами всё по старому
+                            RunIntent runIntent = new RunIntent(app.getBaseContext());
+                            if (file_name.endsWith(".apk")) {
+                                runIntent.installPackage(ResultsActivity.this, file_full_name);
+                            }else {
+                                if (app.readerName(file_name).equals("Nope")) {
+                                    runIntent.runInternalView(ResultsActivity.this, file_full_name);
+                                }else {
+                                    // Launch reader
+                                    runIntent.launchReader(file_full_name);
+                                }
+                            }
+                            // close in needed
+                            if (prefs.getBoolean("returnFileToMain", false)) {
+                                setResult(Activity.RESULT_CANCELED);
+                                finish();
+                            }
+                        }
+                        break;
+                    case ("searchResults"):
+                        // если это папка то возвращаемся в основное окно и делаем папку основной
+                        if (item.get("type").equals(String.valueOf(TypeResource.DIR))) {
+                            intent = new Intent(ResultsActivity.this,ReLaunch.class);
+                            intent.putExtra("file", false);
+                            intent.putExtra("newDir", file_full_name);
+                            setResult(RESULT_OK, intent);
+                            finish();
+                        }else { // с файлами всё по старому
+                            RunIntent runIntent = new RunIntent(app.getBaseContext());
+                            if (file_name.endsWith(".apk")) {
+                                runIntent.installPackage(ResultsActivity.this, file_full_name);
+                            }else {
+                                if (app.readerName(file_name).equals("Nope")) {
+                                    runIntent.runInternalView(ResultsActivity.this, file_full_name);
+                                }else {
+                                    // Launch reader
+                                    runIntent.launchReader(file_full_name);
+                                }
+                            }
+                            // close in needed
+                            if (prefs.getBoolean("returnFileToMain", false)) {
+                                intent = new Intent(ResultsActivity.this,ReLaunch.class);
+                                intent.putExtra("file", true);
+                                setResult(RESULT_OK, intent);
+                                finish();
+                            }
+                        }
+                        break;
+                    case ("lastOpened"):
+                        RunIntent runIntent = new RunIntent(app.getBaseContext());
+                        if (file_name.endsWith(".apk")) {
+                            runIntent.installPackage(ResultsActivity.this, file_full_name);
+                        }else {
+                            if (app.readerName(file_name).equals("Nope")) {
+                                runIntent.runInternalView(ResultsActivity.this, file_full_name);
+                            }else {
+                                // Launch reader
+                                runIntent.launchReader(file_full_name);
+                            }
+                        }
+                        // close in needed
+                        if (prefs.getBoolean("returnFileToMain", false)) {
+                            setResult(Activity.RESULT_CANCELED);
+                            finish();
+                        }
+                        break;
+                    case ("opdslist"):
+                        intent = new Intent(ResultsActivity.this, OPDSActivity.class);
+                        intent.putExtra("opds_id", item.get("id"));
+                        startActivity(intent);
+                        // close in needed
+                        if (prefs.getBoolean("returnFileToMain", false)) {
+                            setResult(Activity.RESULT_CANCELED);
+                            finish();
+                        }
                 }
+                createItemsArray();
                 return true;
             }
 
@@ -642,123 +536,149 @@ public class ResultsActivity extends Activity {
 
             @Override
             public void onLongPress(MotionEvent e) {
-                HashMap<String, String> i;
-                String dr;
-                String fn;
-                String fullName = "";
                 final int position = findViewByXY(e);
-
+                HashMap<String, String> item;
+                String file_full_name;
+                ArrayList<String> aList = new ArrayList<>(10);
                 if (position > -1) {
-                    i = itemsArray.get(position);
-                    dr = i.get("dname");
-                    fn = i.get("fname");
-                    fullName = dr + "/" + fn;
+                    item = itemsArray.get(position);
+                    // получаем данные по файлу
+                    String file_path = item.get("secondLine");
+                    String file_name = item.get("firstLine");
+                    int resource = Integer.parseInt(item.get("resource"));
+                    // формируем полный путь к файлу
+                    if (file_path.equals("/")) {
+                        file_full_name = "/" + file_name;
+                    }else {
+                        file_full_name = file_path + "/" + file_name;
+                    }
+
+                    switch (listName) {
+                        case "homeList":
+                            // "Remove from start dir"
+                            aList.add(getResources().getString(R.string.jv_results_home_list_remove));
+                            // "Add start dir"
+                            aList.add(getResources().getString(R.string.jv_results_edit_homedir));
+                            if (position > 0) {
+                                // "Move one position up"
+                                aList.add(getResources().getString(R.string.jv_results_move_up));
+                            }
+                            if (position < (itemsArray.size() - 1)) {
+                                // "Move one position down"
+                                aList.add(getResources().getString(R.string.jv_results_move_down));
+                            }
+                            break;
+                        case "opdslist":
+                            // "Add opds catalog"
+                            aList.add(getResources().getString(R.string.jv_results_add_opds));
+                            // "Remove from list"
+                            aList.add(getResources().getString(R.string.jv_relaunch_delete));
+                            // "Rename"
+                            aList.add(getResources().getString(R.string.jv_relaunch_edit));
+                            // Clean
+                            aList.add(getResources().getString(R.string.jv_relaunch_clean_opds));
+                            if (position > 0) {
+                                // "Move one position up"
+                                aList.add(getResources().getString(R.string.jv_results_move_up));
+                            }
+                            if (position < (itemsArray.size() - 1)) {
+                                // "Move one position down"
+                                aList.add(getResources().getString(R.string.jv_results_move_down));
+                            }
+                            break;
+                        case "favorites":
+                            if (position > 0) {
+                                // "Move one position up"
+                                aList.add(getResources().getString(R.string.jv_results_move_up));
+                            }
+                            if (position < (itemsArray.size() - 1)) {
+                                // "Move one position down"
+                                aList.add(getResources().getString(R.string.jv_results_move_down));
+                            }
+                            // "Remove from favorites"
+                            aList.add(getResources().getString(R.string.jv_results_remove));
+                            // "Delete file"
+                            if (prefs.getBoolean("useFileManagerFunctions", true)) {
+                                aList.add(getResources().getString(R.string.jv_results_delete_file));
+                            }
+                            // "Open dir"
+                            aList.add(getResources().getString(R.string.jv_open_dir));
+                            break;
+                        case "lastOpened":
+                            int book_state = utilHistory.getState(resource, file_full_name);
+                            switch (book_state) {
+                                case 0: // app.NONE
+                                    aList.add(getString(R.string.jv_relaunch_mark));
+                                    break;
+                                case 1: // app.READING
+                                    aList.add(getString(R.string.jv_relaunch_mark));
+                                    aList.add(getString(R.string.jv_relaunch_unmarkall));
+                                    break;
+                                case 2: // app.FINISHED
+                                    aList.add(getString(R.string.jv_relaunch_unmark));
+                                    aList.add(getString(R.string.jv_relaunch_unmarkall));
+                                    break;
+                            }
+                            // "Remove from last opened"
+                            aList.add(getResources().getString(R.string.jv_results_remove_last_opened));
+                            // "Delete file"
+                            if (prefs.getBoolean("useFileManagerFunctions", true)) {
+                                aList.add(getResources().getString(R.string.jv_results_delete_file));
+                            }
+                            // "Open dir"
+                            aList.add(getResources().getString(R.string.jv_open_dir));
+                            break;
+                        case "searchResults":
+                            int book_state1 = utilHistory.getState(resource, file_full_name);
+                            switch (book_state1) {
+                                case 0: // app.NONE
+                                    aList.add(getString(R.string.jv_relaunch_mark));
+                                    break;
+                                case 1: // app.READING
+                                    aList.add(getString(R.string.jv_relaunch_mark));
+                                    aList.add(getString(R.string.jv_relaunch_unmarkall));
+                                    break;
+                                case 2: // app.FINISHED
+                                    aList.add(getString(R.string.jv_relaunch_unmark));
+                                    aList.add(getString(R.string.jv_relaunch_unmarkall));
+                                    break;
+                            }
+                            // "Delete file"
+                            if (prefs.getBoolean("useFileManagerFunctions", true)) {
+                                aList.add(getResources().getString(R.string.jv_results_delete_file));
+                            }
+                            // "Open dir"
+                            aList.add(getResources().getString(R.string.jv_open_dir));
+                            break;
+                    }
+                    // "Cancel"
+                    aList.add(getResources().getString(R.string.app_cancel));
+                }else {
+                    switch (listName) {
+                        case "homeList":
+                            // "Add start dir"
+                            aList.add(getResources().getString(R.string.jv_results_add_homedir));
+                            // "Cancel"
+                            aList.add(getResources().getString(R.string.app_cancel));
+                            break;
+                        case "opdslist":
+                            // "Add opds catalog"
+                            aList.add(getResources().getString(R.string.jv_results_add_opds));
+                            // "Cancel"
+                            aList.add(getResources().getString(R.string.app_cancel));
+                            break;
+                        case "favorites":
+                            break;
+                        case "lastOpened":
+                            break;
+                        case "searchResults":
+                            break;
+                    }
                 }
 
-                ArrayList<String> aList = new ArrayList<String>(10);
-
-                if (listName.equals("homeList")) {
-                    if (position > -1) {
-                        // "Remove from start dir"
-                        aList.add(getResources().getString(R.string.jv_results_home_list_remove));
-                    }
-                    // "Add start dir"
-                    aList.add(getResources().getString(R.string.jv_results_add_homedir));
-                    if (position > 0)
-                        // "Move one position up"
-                        aList.add(getResources().getString(R.string.jv_results_move_up));
-                    if (position < (itemsArray.size() - 1) && position != -1)
-                        // "Move one position down"
-                        aList.add(getResources().getString(R.string.jv_results_move_down));
-                } else if (listName.equals("opdslist")) {
-                    // "Add opds catalog"
-                    aList.add(getResources().getString(R.string.jv_results_add_opds));
-                    if (position > -1) {
-                        // "Remove from list"
-                        aList.add(getResources().getString(R.string.jv_relaunch_delete));
-                        // "Rename"
-                        aList.add(getResources().getString(R.string.jv_relaunch_edit));
-                        // Clean
-                        aList.add(getResources().getString(R.string.jv_relaunch_clean_opds));
-                    }
-
-                } else if (listName.equals("favorites")) {
-                    if (position > 0)
-                        // "Move one position up"
-                        aList.add(getResources().getString(R.string.jv_results_move_up));
-                    if (position < (itemsArray.size() - 1))
-                        // "Move one position down"
-                        aList.add(getResources().getString(R.string.jv_results_move_down));
-                    if (position > -1) {
-                        // "Remove from favorites"
-                        aList.add(getResources().getString(R.string.jv_results_remove));
-                        // "Delete file"
-                        if (prefs.getBoolean("useFileManagerFunctions", true))
-                            aList.add(getResources().getString(R.string.jv_results_delete_file));
-                    }
-                } else if (listName.equals("lastOpened")) {
-                        if (app.history.containsKey(fullName)) {
-                            if (app.history.get(fullName) == app.READING)
-                                // "Mark as read"
-                                aList.add(getResources().getString(R.string.jv_results_mark));
-                            else if (app.history.get(fullName) == app.FINISHED)
-                                // "Remove \"read\" mark"
-                                aList.add(getResources().getString(R.string.jv_results_unmark));
-                            // "Forget all marks"
-                            aList.add(getResources().getString(R.string.jv_results_unmark_all));
-                        } else
-                            // "Mark as read"
-                            aList.add(getResources().getString(R.string.jv_results_mark));
-                        // "Remove from last opened"
-                        aList.add(getResources().getString(R.string.jv_results_remove_last_opened));
-                        // "Delete file"
-                        if (prefs.getBoolean("useFileManagerFunctions", true))
-                            aList.add(getResources().getString(R.string.jv_results_delete_file));
-
-                        // "Open dir"
-                        aList.add(getResources().getString(R.string.jv_open_dir));
-                } else if (listName.equals("searchResults")) {
-                        if (position > 0) {
-                            // "Move one position up"
-                            aList.add(getResources().getString(R.string.jv_results_move_up));
-                        }
-                        if (position < (itemsArray.size() - 1))
-                            // "Move one position down"
-                            aList.add(getResources().getString(R.string.jv_results_move_down));
-                        if (app.history.containsKey(fullName)) {
-                            if (app.history.get(fullName) == app.READING)
-                                // "Mark as read"
-                                aList.add(getResources().getString(R.string.jv_results_mark));
-                            else if (app.history.get(fullName) == app.FINISHED)
-                                // "Remove \"read\" mark"
-                                aList.add(getResources().getString(R.string.jv_results_unmark));
-                            // "Forget all marks"
-                            aList.add(getResources().getString(R.string.jv_results_unmark_all));
-                        } else
-                            // "Mark as read"
-                            aList.add(getResources().getString(R.string.jv_results_mark));
-                        // "Delete file"
-                        if (prefs.getBoolean("useFileManagerFunctions", true))
-                            aList.add(getResources().getString(R.string.jv_results_delete_file));
-                        aList.add(getResources().getString(R.string.jv_open_dir));
-                } else if (listName.equals("ftplist")) {
-                    // "Add opds catalog"
-                    aList.add(getResources().getString(R.string.jv_results_add_ftp));
-                    if (position > 0) {
-                        // "Remove from list"
-                        aList.add(getResources().getString(R.string.jv_relaunch_delete));
-                        // "Rename"
-                        aList.add(getResources().getString(R.string.jv_relaunch_edit));
-                        // "Rename"
-                        aList.add(getResources().getString(R.string.jv_relaunch_clean_ftp));
-                    }
-
-                }
-                // "Cancel"
-                aList.add(getResources().getString(R.string.app_cancel));
 
                 final String[] list = aList.toArray(new String[aList.size()]);
-                ListAdapter cmAdapter = new ArrayAdapter<String>(app, R.layout.cmenu_list_item, list);
+                ListAdapter cmAdapter = new ArrayAdapter<>(app, R.layout.item_relaunch_contexmenu, list);
                 final AlertDialog.Builder builder = new AlertDialog.Builder(context);
 
                 builder.setAdapter(cmAdapter, new DialogInterface.OnClickListener() {
@@ -792,20 +712,14 @@ public class ResultsActivity extends Activity {
                             onContextMenuSelected(CNTXT_MENU_DEL_OPDS, position);
                         else if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_clean_opds)))
                             onContextMenuSelected(CNTXT_MENU_CLEAN_OPDS, position);
-                        else if (s.equalsIgnoreCase(getString(R.string.jv_results_remove_last_opened)))
+                        else if (s.equalsIgnoreCase(getString(R.string.jv_results_remove_last_opened)) && listName.equals("lastOpened"))
                             onContextMenuSelected(CNTXT_MENU_RMLO, position);
-                        else if (s.equalsIgnoreCase(getString(R.string.jv_results_home_list_remove)))
+                        else if (s.equalsIgnoreCase(getString(R.string.jv_results_home_list_remove))&& listName.equals("homeList"))
                             onContextMenuSelected(CNTXT_MENU_RM_HOMEDIR, position);
                         else if (s.equalsIgnoreCase(getString(R.string.jv_results_add_homedir)))
                             onContextMenuSelected(CNTXT_MENU_ADD_HOMEDIR, position);
-                        else if (s.equalsIgnoreCase(getString(R.string.jv_results_add_ftp)))
-                            onContextMenuSelected(CNTXT_MENU_ADD_FTP, position);
-                        else if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_edit)))
-                            onContextMenuSelected(CNTXT_MENU_EDIT_FTP, position);
-                        else if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_delete)))
-                            onContextMenuSelected(CNTXT_MENU_DEL_FTP, position);
-                        else if (s.equalsIgnoreCase(getString(R.string.jv_relaunch_clean_ftp)))
-                            onContextMenuSelected(CNTXT_MENU_CLEAN_FTP, position);
+                        else if (s.equalsIgnoreCase(getString(R.string.jv_results_edit_homedir)))
+                            onContextMenuSelected(CNTXT_MENU_EDIT_HOMEDIR, position);
 
                     }
                 });
@@ -823,53 +737,49 @@ public class ResultsActivity extends Activity {
                 return false;
             }
         });
+        //-------------------------------------------------------------
+//кнопка на экран вверх
+		final ImageButton upScroll = (ImageButton) findViewById(R.id.result_btn_scrollup);
+		upScroll.setImageBitmap(utilIcons.getIcon("UPENABLE"));
+        final ImageButton downScroll = (ImageButton) findViewById(R.id.result_btn_scrolldown);
+        downScroll.setImageBitmap(utilIcons.getIcon("DOWNENABLE"));
 
-		final Button upScroll = (Button) findViewById(R.id.upscroll_btn);
-		if (!ReLaunch.disableScrollJump) {
-			upScroll.setText(app.scrollStep + "%");
-		} else {
-			upScroll.setText(getResources().getString(R.string.jv_relaunch_prev));
-		}
 		class upScrlSimpleOnGestureListener extends SimpleOnGestureListener {
 			@Override
 			public boolean onSingleTapConfirmed(MotionEvent e) {
-                app.TapUpScrool(gv, itemsArray.size());
-				return true;
-			}
+                int first = gv.getFirstVisiblePosition();
+                int last = gv.getLastVisiblePosition();
+                int visible = last - first + 1;
+                first -= visible;
+                if (first < 0) {
+                    first = 0;
+                }
+                if (N2DeviceInfo.EINK_NOOK) {
+                    MotionEvent ev;
+                    ev = MotionEvent.obtain(SystemClock.uptimeMillis(),
+                            SystemClock.uptimeMillis(),
+                            MotionEvent.ACTION_DOWN, 200, 100, 0);
+                    gv.dispatchTouchEvent(ev);
+                    ev = MotionEvent.obtain(SystemClock.uptimeMillis(),
+                            SystemClock.uptimeMillis() + 100,
+                            MotionEvent.ACTION_MOVE, 200, 200, 0);
+                    gv.dispatchTouchEvent(ev);
+                    SystemClock.sleep(100);
+                    ev = MotionEvent.obtain(SystemClock.uptimeMillis(),
+                            SystemClock.uptimeMillis(),
+                            MotionEvent.ACTION_UP, 200, 200, 0);
+                    gv.dispatchTouchEvent(ev);
+                } else {
+                    final int finfirst = first;
+                    gv.clearFocus();
+                    gv.post(new Runnable() {
 
-			@Override
-			public boolean onDoubleTap(MotionEvent e) {
-				if (!ReLaunch.disableScrollJump) {
-					int first = gv.getFirstVisiblePosition();
-					int total = itemsArray.size();
-					first -= (total * app.scrollStep) / 100;
-					if (first < 0)
-						first = 0;
-					gv.setSelection(first);
-					// some hack workaround against not scrolling in some cases
-					if (total > 0) {
-						gv.requestFocusFromTouch();
-						gv.setSelection(first);
-					}
-				}
+                        public void run() {
+                            gv.setSelection(finfirst);
+                        }
+                    });
+                }
 				return true;
-			}
-
-			@Override
-			public void onLongPress(MotionEvent e) {
-				if (upScroll.hasWindowFocus()) {
-					if (!ReLaunch.disableScrollJump) {
-						int first = 0;// = gv.getFirstVisiblePosition();
-						int total = itemsArray.size();
-						gv.setSelection(first);
-						// some hack workaround against not scrolling in some
-						// cases
-						if (total > 0) {
-							gv.requestFocusFromTouch();
-							gv.setSelection(first);
-						}
-					}
-				}
 			}
 		}
 
@@ -881,62 +791,45 @@ public class ResultsActivity extends Activity {
 				return false;
 			}
 		});
+// кнопка на экран вниз
 
-		final Button downScroll = (Button) findViewById(R.id.downscroll_btn);
-		if (!ReLaunch.disableScrollJump) {
-			downScroll.setText(app.scrollStep + "%");
-		} else {
-			downScroll.setText(getResources().getString(
-					R.string.jv_relaunch_next));
-		}
+
 		class dnScrlSimpleOnGestureListener extends SimpleOnGestureListener {
 			@Override
 			public boolean onSingleTapConfirmed(MotionEvent e) {
-                app.TapDownScrool(gv, itemsArray.size());
-				return true;
-			}
-
-			@Override
-			public boolean onDoubleTap(MotionEvent e) {
-				if (!ReLaunch.disableScrollJump) {
-					int first = gv.getFirstVisiblePosition();
-					int total = itemsArray.size();
-					int last = gv.getLastVisiblePosition();
-					if (total == last + 1)
-						return true;
-					int target = first + (total * app.scrollStep) / 100;
-					if (target <= last)
-						target = last + 1; // Special for NOOK, otherwise it
-											// won't redraw the listview
-					if (target > (total - 1))
-						target = total - 1;
-                    //RepeatedDownScroll ds = new RepeatedDownScroll();
-                    //ds.doIt(first, target, 0);
-                    app.RepeatedDownScroll(gv, first, target, 0);
-				}
-				return true;
-			}
-
-			@Override
-			public void onLongPress(MotionEvent e) {
-				if (downScroll.hasWindowFocus()) {
-					if (!ReLaunch.disableScrollJump) {
-						int first = gv.getFirstVisiblePosition();
-						int total = itemsArray.size();
-						int last = gv.getLastVisiblePosition();
-						if (total == last + 1)
-							return;
-						int target = total - 1;
-						if (target <= last)
-							target = last + 1; // Special for NOOK, otherwise it
-												// won't redraw the listview
-						if (target > (total - 1))
-							target = total - 1;
-                        //RepeatedDownScroll ds = new RepeatedDownScroll();
-                        //ds.doIt(first, target, 0);
-                        app.RepeatedDownScroll(gv, first, target, 0);
-					}
-				}
+                int total = gv.getCount();
+                int last = gv.getLastVisiblePosition();
+                int target = last + 1;
+                if (target > (total - 1)){
+                    target = total - 1;
+                }
+                if (N2DeviceInfo.EINK_NOOK) {
+                    MotionEvent ev;
+                    ev = MotionEvent.obtain(SystemClock.uptimeMillis(),
+                            SystemClock.uptimeMillis(),
+                            MotionEvent.ACTION_DOWN, 200, 200, 0);
+                    gv.dispatchTouchEvent(ev);
+                    ev = MotionEvent.obtain(SystemClock.uptimeMillis(),
+                            SystemClock.uptimeMillis() + 100,
+                            MotionEvent.ACTION_MOVE, 200, 100, 0);
+                    gv.dispatchTouchEvent(ev);
+                    SystemClock.sleep(100);
+                    ev = MotionEvent.obtain(SystemClock.uptimeMillis(),
+                            SystemClock.uptimeMillis(),
+                            MotionEvent.ACTION_UP, 200, 100, 0);
+                    gv.dispatchTouchEvent(ev);
+                } else {
+                    if (total != last + 1) {
+                        final int ftarget = target;
+                        gv.clearFocus();
+                        gv.post(new Runnable() {
+                            public void run() {
+                                gv.setSelection(ftarget);
+                            }
+                        });
+                    }
+                }
+                return true;
 			}
 		}
 
@@ -948,34 +841,22 @@ public class ResultsActivity extends Activity {
 				return false;
 			}
 		});
+	//---------------------------------------------------------------------
         int colsNum = Integer.valueOf(prefs.getString(listNameSecond, "-1"));
         // override auto (not working fine in adnroid)
         if (colsNum == 0) {
-            colsNum = app.getAutoColsNum(itemsArray, "fname", ReLaunch.columnsAlgIntensity);
+            colsNum = (new UtilColumns(getApplicationContext())).getAutoColsNum(itemsArray, "fname");
         }
         currentColsNum = colsNum;
         gv.setNumColumns(currentColsNum);
-        createItemsArray();
-		ScreenOrientation.set(this, prefs);
+        EinkScreen.PrepareController(null, false);
+        //ScreenOrientation.set(this, prefs);
 	}
 	@Override
 	protected void onStart() {
-		if (rereadOnStart)
-		    redrawList();
+        createItemsArray();
 		super.onStart();
 	}
-    @Override
-    protected void onStop() {
-        if (listName.equals("opdslist") || listName.equals("ftplist")) {
-            dbHelper.close();
-        }
-        super.onStop();
-    }
-    @Override
-    public void onLowMemory() {
-        super.onLowMemory();
-        dbHelper.close();
-    }
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getMenuInflater();
@@ -985,19 +866,19 @@ public class ResultsActivity extends Activity {
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		switch (item.getItemId()) {
-		case R.id.mime_types:
-			Intent intent1 = new Intent(ResultsActivity.this, TypesActivity.class);
-			startActivityForResult(intent1, ReLaunch.TYPES_ACT);
-			return true;
-		case R.id.about:
-			app.About(this);
-			return true;
-		case R.id.setting:
-			Intent intent3 = new Intent(ResultsActivity.this, PrefsActivity.class);
-			startActivity(intent3);
-			return true;
-		default:
-			return true;
+            case R.id.mime_types:
+                Intent intent1 = new Intent(ResultsActivity.this, TypesActivity.class);
+                startActivityForResult(intent1, ReLaunch.TYPES_ACT);
+                return true;
+            case R.id.about:
+                app.About(this);
+                return true;
+            case R.id.setting:
+                Intent intent3 = new Intent(ResultsActivity.this, PrefsActivity.class);
+                startActivity(intent3);
+                return true;
+            default:
+                return true;
 		}
 	}
 	@Override
@@ -1008,7 +889,6 @@ public class ResultsActivity extends Activity {
 				return;
 
 			String newTypes = ReLaunch.createReadersString(app.getReaders());
-
 			SharedPreferences.Editor editor = prefs.edit();
 			editor.putString("types", newTypes);
 			editor.commit();
@@ -1022,106 +902,85 @@ public class ResultsActivity extends Activity {
 		}
 	}
 
-    public boolean onContextMenuSelected(int item, final int pos) {
+    private void onContextMenuSelected(int item, final int pos) {
         if (item == CNTXT_MENU_CANCEL) {
-            return true;
+            return;
         }
-        HashMap<String, String> i = null;
-        String dname = "";
-        String fname = "";
+
+        HashMap<String, String> item_Array;
         String fullName = "";
+        String file_name = "";
+        String file_path = "";
+        int resource = 0;
+        int type = 0;
 
         if (pos > -1) {
-            i = itemsArray.get(pos);
-            dname = i.get("dname");
-            fname = i.get("fname");
-            fullName = dname + "/" + fname;
+            item_Array = itemsArray.get(pos);
+            resource = Integer.parseInt(item_Array.get("resource"));
+            type = Integer.parseInt(item_Array.get("type"));
+            file_path = item_Array.get("secondLine");
+            file_name = item_Array.get("firstLine");
+            fullName = file_path + "/" + file_name;
         }
-
         switch (item) {
             case CNTXT_MENU_MARK_READING:
-                app.history.put(fullName, app.READING);
-                app.saveList("history");
+                utilHistory.addToHistory(resource, fullName, BookState.READING);
                 redrawList();
                 break;
             case CNTXT_MENU_MARK_FINISHED:
-                app.history.put(fullName, app.FINISHED);
-                app.saveList("history");
+                utilHistory.addToHistory(resource, fullName, BookState.FINISHED);
                 redrawList();
                 break;
             case CNTXT_MENU_MARK_FORGET:
-                app.history.remove(fullName);
-                app.saveList("history");
+                utilHistory.delFromHistory(resource, fullName);
                 redrawList();
                 break;
             case CNTXT_MENU_RMFAV:
-                if (i != null && i.get("type").equals("dir")) {
-                    app.removeFromList("favorites", fullName, app.DIR_TAG);
-                } else {
-                    app.removeFromList("favorites", dname, fname);
-                }
-                app.saveList("favorites");
+                utilFavorites.delFav(file_path, file_name, type, resource);
                 itemsArray.remove(pos);
                 redrawList();
                 break;
             case CNTXT_MENU_MOVEUP:
                 if (pos > 0) {
-                    List<String[]> f = app.getList(listName);
                     HashMap<String, String> it = itemsArray.get(pos);
-                    String[] fit = f.get(pos);
 
                     itemsArray.remove(pos);
-                    f.remove(pos);
                     itemsArray.add(pos - 1, it);
-                    f.add(pos - 1, fit);
-                    app.setList(listName, f);
-
-                    if(listName.equals("homeList") ){
-                        StringBuilder new_StartDir = new StringBuilder();
-                        for (String[] anItemsArray : f) {
-                            if (new_StartDir.length() > 0) {
-                                new_StartDir.append(",");
-                            }
-                            new_StartDir.append(anItemsArray[0]);
-                        }
-
-                        app.setStartDir(new_StartDir.toString());
-                        ReLaunch.startDir = new_StartDir.toString().split(",");
+                    switch (listName){
+                        case "homeList":
+                            utilHomeDirs.setListHomeDir(itemsArray);
+                            break;
+                        case "favorites":
+                            utilFavorites.setListAppFav(itemsArray);
+                            break;
+                        case "opdslist":
+                            utilOPDS.setListOPDS(itemsArray);
+                            break;
                     }
-
-
-
                     redrawList();
                 }
                 break;
             case CNTXT_MENU_MOVEDOWN:
                 if (pos < (itemsArray.size() - 1)) {
-                    List<String[]> f = app.getList(listName);
                     HashMap<String, String> it = itemsArray.get(pos);
-                    String[] fit = f.get(pos);
 
                     int size = itemsArray.size();
                     itemsArray.remove(pos);
-                    f.remove(pos);
                     if (pos + 1 >= size - 1) {
                         itemsArray.add(it);
-                        f.add(fit);
                     } else {
                         itemsArray.add(pos + 1, it);
-                        f.add(pos + 1, fit);
                     }
-                    app.setList(listName, f);
-                    if(listName.equals("homeList") ){
-                        StringBuilder new_StartDir = new StringBuilder();
-                        for (String[] anItemsArray : f) {
-                            if (new_StartDir.length() > 0) {
-                                new_StartDir.append(",");
-                            }
-                            new_StartDir.append(anItemsArray[0]);
-                        }
-
-                        app.setStartDir(new_StartDir.toString());
-                        ReLaunch.startDir = new_StartDir.toString().split(",");
+                    switch (listName){
+                        case "homeList":
+                            utilHomeDirs.setListHomeDir(itemsArray);
+                            break;
+                        case "favorites":
+                            utilFavorites.setListAppFav(itemsArray);
+                            break;
+                        case "opdslist":
+                            utilOPDS.setListOPDS(itemsArray);
+                            break;
                     }
                     redrawList();
                 }
@@ -1136,21 +995,24 @@ public class ResultsActivity extends Activity {
                     builder.setMessage(getResources().getString(
                             R.string.jv_results_delete_file_text1)
                             + " \""
-                            + fname
+                            + file_name
                             + "\" "
                             + getResources().getString(
                             R.string.jv_results_delete_file_text2));
                     // "Yes"
-                    final String finalDname = dname;
-                    final String finalFname = fname;
+                    final String finalDname = file_path;
+                    final String finalFname = file_name;
+                    final int finalResource2 = resource;
+                    final String finalFullName = fullName;
                     builder.setPositiveButton(
                             getResources().getString(R.string.app_yes),
                             new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog,
                                                     int whichButton) {
                                     dialog.dismiss();
-                                    if(app.fileRemove(new File(finalDname + "/" + finalFname))) {
-                                        app.fileRemoveAllList(finalDname, finalFname);
+                                    if((new LocalFile(app)).fileRemove(new File(finalFullName))){
+                                    //if(app.fileRemove(new File(finalDname + "/" + finalFname))) {
+                                        utilHistory.delFromHistory(finalResource2, finalDname + "/" + finalFname);
                                         itemsArray.remove(pos);
                                         redrawList();
                                     }
@@ -1167,8 +1029,8 @@ public class ResultsActivity extends Activity {
                                 }
                             });
                     builder.show();
-                } else if (app.fileRemove(new File(dname + "/" + fname))) {
-                    app.fileRemoveAllList(dname, fname);
+                } else if ((new LocalFile(app)).fileRemove(new File(fullName))) {
+                    utilHistory.delFromHistory(resource, fullName);
                     itemsArray.remove(pos);
                     redrawList();
                 }
@@ -1187,21 +1049,23 @@ public class ResultsActivity extends Activity {
                         builder.setMessage(getResources().getString(
                                 R.string.jv_results_delete_em_dir_text1)
                                 + " \""
-                                + fname
+                                + file_name
                                 + "\" "
                                 + getResources().getString(
                                 R.string.jv_results_delete_em_dir_text2));
                         // "Yes"
-                        final String finalDname1 = dname;
-                        final String finalFname1 = fname;
+                        final String finalDname1 = file_path;
+                        final String finalFname1 = file_name;
+                        final int finalResource1 = resource;
+                        final String finalFullName1 = fullName;
                         builder.setPositiveButton(
                                 getResources().getString(R.string.app_yes),
                                 new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog,
                                                         int whichButton) {
                                         dialog.dismiss();
-                                        if(app.fileRemove(new File(finalDname1 + "/" + finalFname1))) {
-                                            app.fileRemoveAllList(finalDname1, finalFname1);
+                                        if((new LocalFile(app)).fileRemove(new File(finalFullName1))) {
+                                            utilHistory.delFromHistory(finalResource1, finalDname1 + "/" + finalFname1);
                                             itemsArray.remove(pos);
                                             redrawList();
                                         }
@@ -1217,8 +1081,8 @@ public class ResultsActivity extends Activity {
                                     }
                                 });
                         builder.show();
-                    } else if (app.fileRemove(new File(dname + "/" + fname))) {
-                        app.fileRemoveAllList(dname, fname);
+                    } else if ((new LocalFile(app)).fileRemove(new File(fullName))) {
+                        utilHistory.delFromHistory(resource, fullName);
                         itemsArray.remove(pos);
                         redrawList();
                     }
@@ -1233,21 +1097,23 @@ public class ResultsActivity extends Activity {
                         builder.setMessage(getResources().getString(
                                 R.string.jv_results_delete_ne_dir_text1)
                                 + " \""
-                                + fname
+                                + file_name
                                 + "\" "
                                 + getResources().getString(
                                 R.string.jv_results_delete_ne_dir_text2));
                         // "Yes"
-                        final String finalDname2 = dname;
-                        final String finalFname2 = fname;
+                        final String finalDname2 = file_path;
+                        final String finalFname2 = file_name;
+                        final int finalResource = resource;
+                        final String finalFullName2 = fullName;
                         builder.setPositiveButton(
                                 getResources().getString(R.string.app_yes),
                                 new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog,
                                                         int whichButton) {
                                         dialog.dismiss();
-                                        if(app.fileRemove(new File(finalDname2 + "/" + finalFname2))) {
-                                            app.fileRemoveAllList(finalDname2, finalFname2);
+                                        if((new LocalFile(app)).fileRemove(new File(finalFullName2))) {
+                                            utilHistory.delFromHistory(finalResource, finalDname2 + "/" + finalFname2);
                                             itemsArray.remove(pos);
                                             redrawList();
                                         }
@@ -1263,19 +1129,21 @@ public class ResultsActivity extends Activity {
                                     }
                                 });
                         builder.show();
-                    } else if (app.fileRemove(new File(dname + "/" + fname))) {
-                        app.fileRemoveAllList(dname, fname);
+                    } else if ((new LocalFile(app)).fileRemove(new File(fullName))) {
+                        utilHistory.delFromHistory(resource, fullName);
                         itemsArray.remove(pos);
                         redrawList();
                     }
                 }
                 break;
             case CNTXT_MENU_OPEN_DIR:
-                Intent intent = new Intent(ResultsActivity.this,ReLaunch.class);
-                intent.putExtra("start_dir", dname);
-                //intent.putExtra("home", ReLaunch.useHome);
-                //oldHome = ReLaunch.useHome;
-                startActivityForResult(intent, ReLaunch.DIR_ACT);
+                Intent intent = new Intent();
+                if (listName.equals("searchResults")) {
+                    intent.putExtra("file", false);
+                }
+                intent.putExtra("newDir", file_path);
+                setResult(RESULT_OK, intent);
+                finish();
                 break;
             case CNTXT_MENU_ADD_OPDS:
             case CNTXT_MENU_EDIT_OPDS:
@@ -1286,7 +1154,7 @@ public class ResultsActivity extends Activity {
                 }else {
                     builderOPDS.setTitle(getResources().getString(R.string.jv_results_edit_opds));
                 }
-                View llOPDS = getLayoutInflater().inflate(R.layout.ll_opds_dialog, null);
+                View llOPDS = getLayoutInflater().inflate(R.layout.dialog_layout_opds, null);
                 if (llOPDS != null) {
                     builderOPDS.setView(llOPDS);
                     final EditText inputName = (EditText) llOPDS.findViewById(R.id.et_name_server); // Имя. Уникальное
@@ -1321,7 +1189,7 @@ public class ResultsActivity extends Activity {
                     }
 
                     if (menuidOPDS == CNTXT_MENU_EDIT_OPDS) {
-                        HashMap<String, String> temp_item = getdbOPDS(pos);
+                        HashMap<String, String> temp_item = utilOPDS.getdbOPDS(pos);
                         inputName.setText(temp_item.get("SERVER"));
                         inputAddress.setText(temp_item.get("PATH"));
                         if (temp_item.get("EN_PASS").equals("true")) {
@@ -1356,31 +1224,28 @@ public class ResultsActivity extends Activity {
 
 
                     // "Yes"
-                    final String finalFname3 = fname;
+                    final String finalFname3 = file_path;
                     builderOPDS.setPositiveButton(getResources().getString(R.string.app_yes),
                             new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int whichButton) {
+                                    InfoConnectOPDS infoConnectOPDS = new InfoConnectOPDS();
+                                    infoConnectOPDS.setTitle(String.valueOf(inputName.getText()));
+                                    infoConnectOPDS.setLink(String.valueOf(inputAddress.getText()));
+                                    infoConnectOPDS.setEnable_pass(cbLogin.isChecked()? "true": "false");
+                                    infoConnectOPDS.setLogin(String.valueOf(inputLogin.getText()));
+                                    infoConnectOPDS.setPassword(String.valueOf(inputPassword.getText()));
+                                    infoConnectOPDS.setEnable_proxy("false");
+                                    infoConnectOPDS.setProxy_type("");
+                                    infoConnectOPDS.setProxy_name("");
+                                    infoConnectOPDS.setProxy_port("");
                                     // добавление в базу данных
-                                    String temp_en_login;
-                                    if (cbLogin.isChecked()){
-                                        temp_en_login = "true";
-                                    }else{
-                                        temp_en_login = "false";
-                                    }
+
 
                                     if (menuidOPDS == CNTXT_MENU_ADD_OPDS) {
-                                        addDbOPDS(String.valueOf(inputName.getText()),
-                                                String.valueOf(inputAddress.getText()),
-                                                temp_en_login,
-                                                String.valueOf(inputLogin.getText()),
-                                                String.valueOf(inputPassword.getText()));
+                                        utilOPDS.addDbOPDS(infoConnectOPDS);
                                     }else{
                                         // обновление базы
-                                        updateDbOPDS(finalFname3, String.valueOf(inputName.getText()),
-                                                String.valueOf(inputAddress.getText()),
-                                                temp_en_login,
-                                                String.valueOf(inputLogin.getText()),
-                                                String.valueOf(inputPassword.getText()));
+                                        utilOPDS.updateDbOPDS(finalFname3, infoConnectOPDS);
                                     }
                                     createItemsArray();
                                 }
@@ -1399,199 +1264,33 @@ public class ResultsActivity extends Activity {
                 break;
             case CNTXT_MENU_DEL_OPDS:
                 // удаление из базы
-                delDbOPDS(fname);
+                utilOPDS.delDbOPDS(file_name);
                 createItemsArray();
                 break;
             case CNTXT_MENU_CLEAN_OPDS:
                 // очистка базы
-                db = dbHelper.getReadableDatabase();
-                if(db != null) {
-                    dbHelper.resetDb(db);
-                    createItemsArray();
-                    db.close();
-                }
+                utilOPDS.resetDb();
+                createItemsArray();
                 break;
             case CNTXT_MENU_RMLO:
-                app.removeFromList("lastOpened", dname, fname);
-                app.saveList("lastOpened");
+                utilLastOpen.delLastOpen(file_path, file_name, type, resource);
                 itemsArray.remove(pos);
                 redrawList();
                 break;
             case CNTXT_MENU_RM_HOMEDIR:
-                app.removeFromList("homeList", dname, fname);
-                app.saveList("homeList");
+                utilHomeDirs.delHomeDir(file_path, file_name, resource);
                 itemsArray.remove(pos);
-
-                StringBuilder new_StartDir = new StringBuilder();
-                for (HashMap<String, String> anItemsArray : itemsArray) {
-                    if (new_StartDir.length() > 0) {
-                        new_StartDir.append(",");
-                    }
-                    new_StartDir.append(anItemsArray.get("dname"));
-                    new_StartDir.append("/");
-                    new_StartDir.append(anItemsArray.get("fname"));
-                }
-
-                app.setStartDir(new_StartDir.toString());
-                ReLaunch.startDir = new_StartDir.toString().split(",");
                 redrawList();
                 break;
             case CNTXT_MENU_ADD_HOMEDIR:
-                AlertDialog.Builder builder3 = new AlertDialog.Builder(this);
-                builder3.setTitle(getResources().getString(R.string.jv_results_add_homedir));
-
-                // Поле ввода пути новой стартовой папки
-                final EditText inputName3 = new EditText(this); // Имя. Уникальное
-                // Заголовок поля ввода
-                TextView tPath3 = new TextView(this);
-
-                if (N2DeviceInfo.EINK_NOOK) {
-                    tPath3.setTextColor(getResources().getColor(R.color.file_unknown_fg));
-                }
-                // Заполняем заголовки
-                tPath3.setText(getResources().getString(R.string.jv_results_addres_homedir));
-                inputName3.setText("/");
-
-
-                // начинаем заполнять форму
-                LinearLayout ll3=new LinearLayout(this);
-                ll3.setOrientation(LinearLayout.VERTICAL);// вертивальное расположение элементов
-                // Добавляем элементы
-                ll3.addView(tPath3);
-                ll3.addView(inputName3);
-
-                // отрисовываем
-                builder3.setView(ll3);
-
-                // "Yes"
-                builder3.setPositiveButton(getResources().getString(R.string.app_yes),
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int whichButton) {
-                                // обновление базы
-                                String fullPath = String.valueOf(inputName3.getText());
-
-                                List<String[]> homeList = app.getList(listName);
-                                String[] homeEl = new String[2];
-                                homeEl[0] = fullPath;
-                                homeEl[1] = app.DIR_TAG;
-                                homeList.add(homeEl);
-                                app.setList("homeList", homeList);
-                                StringBuilder new_StartDir = new StringBuilder();
-                                for (String[] anItemsArray : homeList) {
-                                    if (new_StartDir.length() > 0) {
-                                        new_StartDir.append(",");
-                                    }
-                                    new_StartDir.append(anItemsArray[0]);
-                                }
-
-                                app.setStartDir(new_StartDir.toString());
-                                ReLaunch.startDir = new_StartDir.toString().split(",");
-                                createItemsArray();
-                            }
-                        });
-                // "No"
-                builder3.setNegativeButton(
-                        getResources().getString(R.string.app_no),
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog,
-                                                int whichButton) {
-                                dialog.dismiss();
-                            }
-                        });
-                builder3.show();
+                String title = getResources().getString(R.string.jv_results_add_homedir);
+                homeDialog(title, pos);
                 break;
-            case CNTXT_MENU_ADD_FTP:
-            case CNTXT_MENU_EDIT_FTP:
-                final int menuid = item;
-                AlertDialog.Builder builderFTP1 = new AlertDialog.Builder(this);
-                builderFTP1.setTitle(getResources().getString(R.string.jv_results_add_ftp));
-                View linearlayout = getLayoutInflater().inflate(R.layout.ll_ftp_server_dialog, null);
-                if (linearlayout != null) {
-                    builderFTP1.setView(linearlayout);
-
-                    final EditText addServerFTP = (EditText) linearlayout.findViewById(R.id.et_serverNameFtp);
-                    final EditText addPortFTP = (EditText) linearlayout.findViewById(R.id.et_portFtp);
-                    final EditText addPathFTP = (EditText) linearlayout.findViewById(R.id.et_pathFtp);
-                    final EditText addLoginFTP = (EditText) linearlayout.findViewById(R.id.et_loginFtp);
-                    final EditText addPassFTP = (EditText) linearlayout.findViewById(R.id.et_passFtp);
-
-                    if (N2DeviceInfo.EINK_NOOK) {
-                        TextView tvtemt = (TextView) linearlayout.findViewById(R.id.tv_serverNameFtp);
-                        tvtemt.setTextColor(getResources().getColor(R.color.backgorund_task_fg));
-                        tvtemt = (TextView) linearlayout.findViewById(R.id.tv_portFtp);
-                        tvtemt.setTextColor(getResources().getColor(R.color.backgorund_task_fg));
-                        tvtemt = (TextView) linearlayout.findViewById(R.id.tv_pathFtp);
-                        tvtemt.setTextColor(getResources().getColor(R.color.backgorund_task_fg));
-                        tvtemt = (TextView) linearlayout.findViewById(R.id.tv_loginFtp);
-                        tvtemt.setTextColor(getResources().getColor(R.color.backgorund_task_fg));
-                        tvtemt = (TextView) linearlayout.findViewById(R.id.tv_passFtp);
-                        tvtemt.setTextColor(getResources().getColor(R.color.backgorund_task_fg));
-                    }
-
-                    if (menuid == CNTXT_MENU_ADD_FTP) {
-                        addPortFTP.setText("21");
-                        addPathFTP.setText("/");
-                        addLoginFTP.setText("anonymous");
-                        addPassFTP.setText("anonymous");
-                    }else{
-                        HashMap<String, String> temp_item = getdbFTP(pos);
-                        addServerFTP.setText(temp_item.get("SERVER"));
-                        addPortFTP.setText(temp_item.get("PORT"));
-                        addPathFTP.setText(temp_item.get("PATH"));
-                        addLoginFTP.setText(temp_item.get("LOGIN"));
-                        addPassFTP.setText(temp_item.get("PASSWORD"));
-                    }
-
-                    // "Yes"
-                    builderFTP1.setPositiveButton(getResources().getString(R.string.app_yes),
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int whichButton) {
-                                    // добавление в базу данных
-                                    if (menuid == CNTXT_MENU_ADD_FTP) {
-                                        addDbFTP(String.valueOf(addServerFTP.getText()),
-                                                Integer.valueOf(String.valueOf(addPortFTP.getText())),
-                                                String.valueOf(addPathFTP.getText()),
-                                                String.valueOf(addLoginFTP.getText()),
-                                                String.valueOf(addPassFTP.getText()));
-                                    }else{
-                                        // обновление базы
-                                        updateDbFTP(pos + 1, String.valueOf(addServerFTP.getText()),
-                                                Integer.valueOf(String.valueOf(addPortFTP.getText())),
-                                                String.valueOf(addPathFTP.getText()),
-                                                String.valueOf(addLoginFTP.getText()),
-                                                String.valueOf(addPassFTP.getText()));
-                                    }
-                                    createItemsArray();
-                                }
-                            });
-                    // "No"
-                }
-                builderFTP1.setNegativeButton(
-                        getResources().getString(R.string.app_no),
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog,
-                                                int whichButton) {
-                                dialog.dismiss();
-                            }
-                        });
-                builderFTP1.show();
-                break;
-            case CNTXT_MENU_DEL_FTP:
-                // удаление из базы
-                delDbFTP(pos);
-                createItemsArray();
-                break;
-            case CNTXT_MENU_CLEAN_FTP:
-                // очистка базы
-                db = dbHelper.getReadableDatabase();
-                if(db != null) {
-                    dbHelper.resetDb(db);
-                    createItemsArray();
-                    db.close();
-                }
+            case CNTXT_MENU_EDIT_HOMEDIR:
+                String title1 = getResources().getString(R.string.jv_results_edit_homedir);
+                homeDialog(title1, pos);
                 break;
         }
-        return true;
     }
 
 	@Override
@@ -1601,290 +1300,118 @@ public class ResultsActivity extends Activity {
 		app.generalOnResume(TAG);
 	}
 
-	private String getEbookName(String dir, String file) {
-		EBook eBook;
-		if ((!file.endsWith("fb2")) && (!file.endsWith("fb2.zip")) &&(!file.endsWith("epub")))
-			return file;
-        eBook = app.dataBase.getBookByFileName(dir + "/" + file);
-		if (eBook.isOk) {
-			String output = prefs.getString("bookTitleFormat", "[%a. ]%t");
-			if (eBook.authors.size() > 0) {
-				String author = "";
-				if (eBook.authors.get(0).firstName != null)
-					author += eBook.authors.get(0).firstName;
-				if (eBook.authors.get(0).lastName != null)
-					author += " " + eBook.authors.get(0).lastName;
-					output = output.replace("%a", author);
-			}
-			if (eBook.title != null)
-				output = output.replace("%t", eBook.title);
-			if (eBook.sequenceName != null)
-				output = output.replace("%s", eBook.sequenceName);
-			else
-				output = output.replace("%s", "");
-			if (eBook.sequenceNumber != null)
-				output = output.replace("%n", eBook.sequenceNumber);
-			else
-				output = output.replace("%n", "");
-			output = purgeBracketsPattern.matcher(output).replaceAll("");
-			output = output.replace("[", "");
-			output = output.replace("]", "");
-			return output;
-		} else
-			return file;
-	}
-    // =====  OPDS
-    private void dbOPDS(){
-        db = dbHelper.getReadableDatabase();
-        if(db == null){
-            return;
+	// =======================================================
+    // получение номера иконки из массива
+	private void setIconsForArray(List<HashMap<String, String>> itemsArray) {
+        for (HashMap<String, String> item : itemsArray) {
+            item.put("nameIcon", utilIcons.getNameIcon(item, listName));
         }
-        // делаем запрос данных из таблицы , получаем Cursor
-        Cursor c = db.query("OPDS", null, null, null, null, null, null);
-        Button rt = (Button) findViewById(R.id.results_title);
-        if (total == -1){
-            rt.setText(title + " (" + c.getCount() + ")");
-        }else{
-            rt.setText(title + " (" + c.getCount() + "/"+ total + ")");
-        }
-        // ставим позицию курсора на первую строку выборки
-        // если в выборке нет строк, вернется false
-        if (c.moveToFirst()) {
-            // определяем номера столбцов по имени в выборке
-            int titleColIndex = c.getColumnIndex("TITLE");
-            int ureColIndex = c.getColumnIndex("URE");
-
-            do {
-                HashMap<String, String> item = new HashMap<String, String>();
-                item.put("dname", c.getString(ureColIndex));
-                item.put("fname", c.getString(titleColIndex));
-                item.put("sname", c.getString(titleColIndex));
-                item.put("nameIcon", "ci_opds_catalog"); // тип - файл
-                itemsArray.add(item);
-                // переход на следующую строку
-                // а если следующей нет (текущая - последняя), то false - выходим из цикла
-            } while (c.moveToNext());
-        }
-        c.close();
-        db.close();
     }
-    private void addDbOPDS(String titleColIndex, String ureColIndex, String en_passColIndex, String loginColIndex, String passwordColIndex){
-        // создаем объект для данных
-        ContentValues cv = new ContentValues();
 
-        // подключаемся к БД
-        db = dbHelper.getWritableDatabase();
-        if(db == null){
-            return;
+    //========================================================
+    // формирование цвета
+    private void setColorsForArray(List<HashMap<String, String>> itemsArray) {
+        switch (listName) {
+            case "homeList":
+            case "opdslist":
+                for (HashMap<String, String> item: itemsArray) {
+                    item.put("color", "new");
+                }
+                break;
+            case "favorites":
+            case "lastOpened":
+            case "searchResults":
+                for (HashMap<String, String> item: itemsArray) {
+                    item.put("color", getColors(item));
+                }
+                break;
         }
-        cv.put("TITLE", titleColIndex);
-        cv.put("URE", ureColIndex);
-        cv.put("EN_PASS", en_passColIndex);
-        if(en_passColIndex.equals("true")){
-            cv.put("LOGIN", loginColIndex);
-            cv.put("PASSWORD", passwordColIndex);
-        }else{
-            cv.put("LOGIN", " ");
-            cv.put("PASSWORD", " ");
-        }
-
-        // вставляем запись и получаем ее ID
-        db.insert("OPDS", null, cv);
-
-        db.close();
     }
-    private void updateDbOPDS(String oldtitleColIndex, String titleColIndex, String ureColIndex, String en_passColIndex, String loginColIndex, String passwordColIndex){
-        // создаем объект для данных
-        ContentValues cv = new ContentValues();
-
-        // подключаемся к БД
-        db = dbHelper.getWritableDatabase();
-        if(db == null){
-            return;
+    private String getColors(HashMap<String, String> item) {
+        if (item.get("type").equals(String.valueOf(TypeResource.FILE))) {
+            String file_full_name = item.get("secondLine") + "/" + item.get("firstLine");
+            int resource = Integer.parseInt(item.get("resource"));
+            switch (utilHistory.getState(resource, file_full_name)){
+                case 0: // app.NONE
+                    return "new";
+                case 1: // app.READING
+                    return "reading";
+                case 2: // app.FINISHED
+                    return "finished";
+                default:
+                    return "new";
+            }
         }
-        cv.put("TITLE", titleColIndex);
-        cv.put("URE", ureColIndex);
-        cv.put("EN_PASS", String.valueOf(en_passColIndex));
-        if(en_passColIndex.equals("true")){
-            cv.put("LOGIN", loginColIndex);
-            cv.put("PASSWORD", passwordColIndex);
-        }else{
-            cv.put("LOGIN", "");
-            cv.put("PASSWORD", "");
-        }
-
-        // вставляем запись и получаем ее ID
-        db.update("OPDS", cv, "TITLE = ?", new String[]{oldtitleColIndex});
-
-        db.close();
+        return "new";
     }
-    private void delDbOPDS(String titleColIndex){
-        // подключаемся к БД
-        db = dbHelper.getWritableDatabase();
-        if(db == null){
-            return;
+    // ========================================================
+    // Диалог для домашних папок
+    private void homeDialog(String title, final int position){
+        final String file_full_name;
+        if (position > -1) {
+            HashMap<String, String> item_Array = itemsArray.get(position);
+            if (item_Array.get("secondLine").equals("/")){
+                file_full_name = "/" + item_Array.get("firstLine");
+            }else {
+                file_full_name = item_Array.get("secondLine") + "/" + item_Array.get("firstLine");
+            }
+        }else {
+            file_full_name = "/";
         }
-        db.delete("OPDS", "TITLE = ?" ,new String[]{titleColIndex});
-        db.close();
-    }
-    private HashMap<String, String> getdbOPDS(int id){
-        db = dbHelper.getReadableDatabase();
-        if(db == null){
-            return null;
-        }
-        HashMap<String, String> item = new HashMap<String, String>();
-        // делаем запрос данных из таблицы , получаем Cursor
-        Cursor c = db.query("OPDS", null, null, null, null, null, null);
-        if (c.moveToPosition(id)) {
-            // определяем номера столбцов по имени в выборке
-            int titleColIndex = c.getColumnIndex("TITLE");
-            int ureColIndex = c.getColumnIndex("URE");
-            int enpassColIndex = c.getColumnIndex("EN_PASS");
-            int loginColIndex = c.getColumnIndex("LOGIN");
-            int passColIndex = c.getColumnIndex("PASSWORD");
-            int enproxyColIndex = c.getColumnIndex("EN_PROXY");
-            int typeproxyColIndex = c.getColumnIndex("TYPE_PROXY");
-            int proxynameColIndex = c.getColumnIndex("PROXY_NAME");
-            int proxyportColIndex = c.getColumnIndex("PROXY_PORT");
+        AlertDialog.Builder builder3 = new AlertDialog.Builder(this);
+        builder3.setTitle(title);
 
-            item.put("PATH", c.getString(ureColIndex));
-            item.put("SERVER", c.getString(titleColIndex));
-            item.put("EN_PASS", c.getString(enpassColIndex));
-            item.put("LOGIN", c.getString(loginColIndex));
-            item.put("PASSWORD", c.getString(passColIndex));
-            item.put("EN_PROXY", c.getString(enproxyColIndex));
-            item.put("TYPE_PROXY", c.getString(typeproxyColIndex));
-            item.put("PROXY_NAME", c.getString(proxynameColIndex));
-            item.put("PROXY_PORT", String.valueOf(c.getInt(proxyportColIndex)));
-        }
-        c.close();
-        db.close();
-        return item;
-    }
-    // =====  FTP
-    private void addDbFTP(String serverColIndex, int port, String pathColIndex, String loginColIndex, String passwordColIndex){
-        // создаем объект для данных
-        ContentValues cv = new ContentValues();
+        // Поле ввода пути новой стартовой папки
+        final EditText inputName3 = new EditText(this); // Имя. Уникальное
+        // Заголовок поля ввода
+        TextView tPath3 = new TextView(this);
 
-        // подключаемся к БД
-        db = dbHelper.getWritableDatabase();
-        if(db == null){
-            return;
+        if (N2DeviceInfo.EINK_NOOK) {
+            tPath3.setTextColor(getResources().getColor(R.color.file_unknown_fg));
         }
-        cv.put("SERVER", serverColIndex);
-        cv.put("PORT", port);
-        cv.put("PATH", pathColIndex);
-        if(loginColIndex == null){
-            cv.put("LOGIN", "anonymous");
-            cv.put("PASSWORD", "anonymous");
-        }else{
-            cv.put("LOGIN", loginColIndex);
-            cv.put("PASSWORD", passwordColIndex);
-        }
+        // Заполняем заголовки
+        tPath3.setText(getResources().getString(R.string.jv_results_addres_homedir));
+        inputName3.setText(file_full_name);
 
-        // вставляем запись и получаем ее ID
-        db.insert("FTP", null, cv);
 
-        db.close();
-    }
-    private void dbFTP(){
-        db = dbHelper.getReadableDatabase();
-        if(db == null){
-            return;
-        }
-        // делаем запрос данных из таблицы , получаем Cursor
-        Cursor c = db.query("FTP", null, null, null, null, null, null);
-        Button rt = (Button) findViewById(R.id.results_title);
-        if (total == -1){
-            rt.setText(title + " (" + c.getCount() + ")");
-        }else{
-            rt.setText(title + " (" + c.getCount() + "/"+ total + ")");
-        }
-        // ставим позицию курсора на первую строку выборки
-        // если в выборке нет строк, вернется false
-        if (c.moveToFirst()) {
-            // определяем номера столбцов по имени в выборке
-            int titleColIndex = c.getColumnIndex("SERVER");
-            int ureColIndex = c.getColumnIndex("PATH");
-            int portColIndex = c.getColumnIndex("PORT");
-            int loginColIndex = c.getColumnIndex("LOGIN");
-            int passColIndex = c.getColumnIndex("PASSWORD");
+        // начинаем заполнять форму
+        LinearLayout ll3 = new LinearLayout(this);
+        ll3.setOrientation(LinearLayout.VERTICAL);// вертивальное расположение элементов
+        // Добавляем элементы
+        ll3.addView(tPath3);
+        ll3.addView(inputName3);
 
-            do {
-                HashMap<String, String> item = new HashMap<String, String>();
-                item.put("dname", c.getString(ureColIndex));
-                item.put("fname", c.getString(titleColIndex));
-                item.put("sname", c.getString(titleColIndex));
-                item.put("port", c.getString(portColIndex));
-                item.put("login", c.getString(loginColIndex));
-                item.put("password", c.getString(passColIndex));
-                item.put("nameIcon", "ci_ftp_catalog"); // тип - файл
-                itemsArray.add(item);
-                // переход на следующую строку
-                // а если следующей нет (текущая - последняя), то false - выходим из цикла
-            } while (c.moveToNext());
-        }
-        c.close();
-        db.close();
-    }
-    private void delDbFTP(int IDFtp){
-        // подключаемся к БД
-        db = dbHelper.getWritableDatabase();
-        if(db == null){
-            return;
-        }
-        db.delete("FTP", "ID = ?" ,new String[]{String.valueOf(IDFtp)});
-        db.close();
-    }
-    private void updateDbFTP(int id, String serverColIndex, int port, String pathColIndex, String loginColIndex, String passwordColIndex){
-        // создаем объект для данных
-        ContentValues cv = new ContentValues();
+        // отрисовываем
+        builder3.setView(ll3);
 
-        // подключаемся к БД
-        db = dbHelper.getWritableDatabase();
-        if(db == null){
-            return;
-        }
-        cv.put("SERVER", serverColIndex);
-        cv.put("PORT", port);
-        cv.put("PATH", pathColIndex);
-        if(loginColIndex != null && loginColIndex.length() >0){
-            cv.put("LOGIN", loginColIndex);
-            cv.put("PASSWORD", passwordColIndex);
-        }else{
-            cv.put("LOGIN", "anonymous");
-            cv.put("PASSWORD", "anonymous");
-        }
+        // "Yes"
+        builder3.setPositiveButton(getResources().getString(R.string.app_yes),
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        // обновление базы
+                        String fullPath = String.valueOf(inputName3.getText());
+                        if (position > -1) {
 
-        // вставляем запись и получаем ее ID
-        db.update("FTP", cv, "ID = ?", new String[]{String.valueOf(id)});
-
-        db.close();
-    }
-    private HashMap<String, String> getdbFTP(int id){
-        db = dbHelper.getReadableDatabase();
-        if(db == null){
-            return null;
-        }
-        HashMap<String, String> item = new HashMap<String, String>();
-        // делаем запрос данных из таблицы , получаем Cursor
-        Cursor c = db.query("FTP", null, null, null, null, null, null);
-        if (c.moveToPosition(id)) {
-            // определяем номера столбцов по имени в выборке
-            int titleColIndex = c.getColumnIndex("SERVER");
-            int ureColIndex = c.getColumnIndex("PATH");
-            int portColIndex = c.getColumnIndex("PORT");
-            int loginColIndex = c.getColumnIndex("LOGIN");
-            int passColIndex = c.getColumnIndex("PASSWORD");
-
-            item.put("PATH", c.getString(ureColIndex));
-            item.put("SERVER", c.getString(titleColIndex));
-            item.put("PORT", c.getString(portColIndex));
-            item.put("LOGIN", c.getString(loginColIndex));
-            item.put("PASSWORD", c.getString(passColIndex));
-        }
-        c.close();
-        db.close();
-        return item;
+                            utilHomeDirs.delHomeDir(itemsArray.get(position).get("secondLine"),
+                                    itemsArray.get(position).get("firstLine"),
+                                    Integer.parseInt(itemsArray.get(position).get("resource")));
+                            itemsArray.remove(position);
+                        }
+                        if (!utilHomeDirs.isHomeDir(0, fullPath)) {
+                            utilHomeDirs.addHomeDir(fullPath, 0);
+                        }
+                        createItemsArray();
+                    }
+                });
+        // "No"
+        builder3.setNegativeButton(
+                getResources().getString(R.string.app_no),
+                new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog,
+                                        int whichButton) {
+                        dialog.dismiss();
+                    }
+                });
+        builder3.show();
     }
 }

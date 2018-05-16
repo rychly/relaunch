@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="fill_parent"
+              android:layout_height="fill_parent"
+              android:background="@color/normal_bg"
+              android:orientation="vertical"
+              android:padding="8dp" >
+
+    <LinearLayout
+            android:id="@+id/linearLayout1"
+            android:layout_width="fill_parent"
+            android:layout_height="56dp" >
+
+        <ImageView
+                android:id="@+id/result_icon"
+                android:layout_width="wrap_content"
+                android:layout_height="fill_parent"
+                android:background="@color/normal_bg_gray"
+                android:contentDescription="@string/iv_act_icon" />
+
+        <TextView
+                android:id="@+id/result_title"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                android:background="@color/normal_bg_gray"
+                android:focusable="false"
+                android:gravity="left|center_vertical"
+                android:paddingLeft="8dp"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="@color/normal_fg"
+                android:textStyle="bold" />
+
+        <ImageButton
+                android:id="@+id/result_btn_exit"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_marginLeft="4dp"
+                android:layout_marginRight="1dp"
+                android:layout_weight="2.8"
+                android:background="@drawable/main_button"
+                android:minWidth="96dp"
+                android:contentDescription="@string/bt_exit" />
+    </LinearLayout>
+
+    <LinearLayout
+            android:id="@+id/result_fl"
+            android:layout_width="wrap_content"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:layout_marginTop="8dp"
+            android:baselineAligned="false">
+
+        <GridView
+                android:id="@+id/result_list"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                android:duplicateParentState="true"
+                android:numColumns="3"
+                android:smoothScrollbar="false"
+                android:stretchMode="columnWidth" >
+        </GridView>
+    </LinearLayout>
+    <LinearLayout
+            android:id="@+id/LLbuttons"
+            android:layout_width="fill_parent"
+            android:layout_height="56dp"
+            android:layout_marginTop="8dp">
+
+        <ImageButton
+                android:id="@+id/result_btn_scrollup"
+                android:enabled="false"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                android:background="@drawable/main_button"/>
+
+        <ImageButton
+                android:id="@+id/result_btn_scrolldown"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_marginLeft="4dp"
+                android:layout_weight="1"
+                android:background="@drawable/main_button"/>
+    </LinearLayout>
+</LinearLayout>

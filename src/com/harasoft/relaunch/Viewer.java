@@ -11,24 +11,24 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import com.harasoft.relaunch.Utils.UtilIcons;
 
 public class Viewer extends Activity {
 	final String TAG = "Viewer";
 
-	final int EDITOR_ACT = 1;
+	private final int EDITOR_ACT = 1;
 
 	ReLaunchApp app;
-	ImageButton backBtn;
-	Button editBtn;
-	EditText editTxt;
-	String textBuffer;
-	String fileName;
+	private EditText editTxt;
+	private String textBuffer;
+	private String fileName;
 	SharedPreferences prefs;
 
 	private boolean rereadFile(String fname, EditText editTxt) {
@@ -71,9 +71,9 @@ public class Viewer extends Activity {
         if(app == null ) {
             finish();
         }
-        app.setFullScreenIfNecessary(this);
-		setContentView(R.layout.viewer_layout);
-
+		app.setOptionsWindowActivity(this);
+		setContentView(R.layout.layout_viewer);
+		UtilIcons utilIcons = new UtilIcons(getBaseContext());
 		// Read parameters
 		final Intent data = getIntent();
 		if (data.getExtras() == null)
@@ -125,7 +125,8 @@ public class Viewer extends Activity {
 			builder.show();
 		} else {
 			// Set edit button
-			editBtn = (Button) findViewById(R.id.viewedit_btn);
+			Button editBtn = (Button) findViewById(R.id.viewedit_btn);
+			editBtn.setCompoundDrawablesWithIntrinsicBounds( new BitmapDrawable(getResources(), utilIcons.getIcon("EDIT")), null, null, null);
 			editBtn.setOnClickListener(new View.OnClickListener() {
 				public void onClick(View v) {
 					if (fileSize > app.editorMax*1024) {
@@ -176,7 +177,8 @@ public class Viewer extends Activity {
 			});
 
 			// Set back button
-			backBtn = (ImageButton) findViewById(R.id.view_btn);
+			ImageButton backBtn = (ImageButton) findViewById(R.id.view_btn);
+			backBtn.setImageBitmap(utilIcons.getIcon("EXIT"));
 			backBtn.setOnClickListener(new View.OnClickListener() {
 				public void onClick(View v) {
 					finish();
@@ -190,7 +192,6 @@ public class Viewer extends Activity {
 			editTxt = (EditText) findViewById(R.id.view_txt);
 			rereadFile(fname, editTxt);
 		}
-		ScreenOrientation.set(this, prefs);
 	}
 
 	@Override

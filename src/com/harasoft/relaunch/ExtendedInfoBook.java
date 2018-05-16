@@ -19,6 +19,7 @@ import android.text.style.UnderlineSpan;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
+import com.harasoft.relaunch.Utils.UtilIcons;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
@@ -32,11 +33,9 @@ import java.util.zip.ZipInputStream;
 
 public class ExtendedInfoBook extends Activity {
     ReLaunchApp app;
-    ImageButton backBtn;
-    TextView viewTxt;
-    String fileName;
-    XmlPullParser xpp;
-    BufferedReader fileRead;
+    private TextView viewTxt;
+    private String fileName;
+    private BufferedReader fileRead;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,8 +43,9 @@ public class ExtendedInfoBook extends Activity {
         if(app == null){
             finish();
         }
-        app.setFullScreenIfNecessary(this);
-        setContentView(R.layout.viewer_layout);
+        app.setOptionsWindowActivity(this);
+        setContentView(R.layout.layout_viewer);
+        UtilIcons utilIcons = new UtilIcons(getBaseContext());
         // убираем не нужные нам кнопку редактирования и область редактирования
         // кнопка
         ViewGroup layout = (ViewGroup) ( findViewById(R.id.viewedit_btn)).getParent();
@@ -55,10 +55,6 @@ public class ExtendedInfoBook extends Activity {
         layout = (ViewGroup) (findViewById(R.id.view_txt)).getParent();
         if(null!=layout)
             layout.removeView((findViewById(R.id.view_txt)));
-        // klwjhre
-        layout = (ViewGroup) (findViewById(R.id.textViewExtInfo)).getParent();
-        if(null!=layout)
-            layout.removeView((findViewById(R.id.textViewExtInfo)));
         //================================================================================
         LinearLayout ll = (LinearLayout)findViewById(R.id.linLayForAdd);
 
@@ -85,7 +81,8 @@ public class ExtendedInfoBook extends Activity {
         ((EditText) findViewById(R.id.view_title)).setText(fileName);
 
         // Set back button
-        backBtn = (ImageButton) findViewById(R.id.view_btn);
+        ImageButton backBtn = (ImageButton) findViewById(R.id.view_btn);
+        backBtn.setImageBitmap(utilIcons.getIcon("EXIT"));
         backBtn.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 // удаляем файлы если они остались
@@ -108,7 +105,7 @@ public class ExtendedInfoBook extends Activity {
     }
     private void selectFileInArh(String nameZipFile) {
         ZipFile zipFile = null;
-        ArrayList<String> listFiles = new ArrayList<String>();
+        ArrayList<String> listFiles = new ArrayList<>();
 
         try {
             // open a zip file for reading
@@ -265,7 +262,7 @@ public class ExtendedInfoBook extends Activity {
         }
         return  r;
     }
-    public void getHeaderBook(){
+    private void getHeaderBook(){
         String fileBookName;
         String date_book;
         //================================================================================
@@ -276,7 +273,7 @@ public class ExtendedInfoBook extends Activity {
 
             XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
             factory.setNamespaceAware(true);
-            xpp = factory.newPullParser();
+            XmlPullParser xpp = factory.newPullParser();
             xpp.setInput(fileRead);
             //=================================================
             eventType = xpp.getEventType();

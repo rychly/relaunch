@@ -4,13 +4,11 @@
         <item>Системный</item>
         <item>English</item>
         <item>Русский</item>
-        <item>Español</item>
 	</string-array> 
 	<string-array name="entryvalues_lang">
 		<item>default</item> 
-		<item>en</item>
+		<item>en_US</item>
 		<item>ru</item>
-		<item>es</item>
 	</string-array>
 
 </resources>

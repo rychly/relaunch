@@ -10,14 +10,14 @@ import android.view.View;
 
 public class SView extends View {
 	final String TAG = "SView";
-	int lpad;
-	int scrollW;
+	private int lpad;
+	private int scrollW;
 
 	SharedPreferences prefs;
 	ReLaunchApp app;
-	Paint busyPaint;
-	Paint freePaint;
-	Paint outlinePaint;
+	private Paint busyPaint;
+	private Paint freePaint;
+	private Paint outlinePaint;
 
 	public int total;
 	public int first;
